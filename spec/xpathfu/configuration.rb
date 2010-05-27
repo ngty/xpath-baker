@@ -62,4 +62,38 @@ describe "XPathFu Configuration" do
 
   end
 
+  describe '> merging with a settings hash' do
+
+    before do
+      @orig_settings = {
+        :normalize_space => 'aa',
+        :include_inner_text => 'bb',
+        :match_ordering => 'cc',
+        :case_sensitive => 'dd'
+      }
+      @orig_settings.each {|setting, val| XPathFu::Configuration.send(:"#{setting}=", val) }
+      @should_have_equal_settings = lambda do |configuration, expected_hash|
+        expected_hash.each {|setting, val| configuration.send(setting).should == val }
+      end
+    end
+
+    should 'duplicate a copy of itself' do
+      configuration = XPathFu::Configuration.merge({})
+      @should_have_equal_settings[configuration, @orig_settings]
+      configuration.object_id.should.not.equal XPathFu::Configuration
+    end
+
+    should 'have hash overrides its settings' do
+      configuration = XPathFu::Configuration.merge(settings_hash = {:normalize_space => 'ee'})
+      @should_have_equal_settings[configuration, @orig_settings.merge(settings_hash)]
+    end
+
+    should 'raise XPathFu::ConfigSettingNotSupportedError if unsupported setting is specified' do
+      lambda { XPathFu::Configuration.merge(:hello => 'ee') }.
+        should.raise(XPathFu::ConfigSettingNotSupportedError).
+        message.should.equal('Config setting :hello is not supported !!')
+    end
+
+  end
+
 end
