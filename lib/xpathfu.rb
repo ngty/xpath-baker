@@ -1,6 +1,7 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'xpathfu/version'
 require 'xpathfu/errors'
+require 'xpathfu/configuration'
 
 module XPathFu
   class << self
@@ -11,6 +12,10 @@ module XPathFu
       else
         const_set(:MODE, mode)
       end
+    end
+
+    def configure(&blk)
+      yield(Configuration)
     end
 
   end
