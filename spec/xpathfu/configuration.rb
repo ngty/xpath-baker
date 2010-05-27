@@ -1,8 +1,8 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
-describe "XPathFu" do
+describe "XPathFu Configuration" do
 
-  describe '> default configuration' do
+  describe '> default' do
 
     should 'have :match_casing as true' do
       XPathFu.configure {|config| config.match_casing.should.be.true }
