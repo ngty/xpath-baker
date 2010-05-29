@@ -10,7 +10,7 @@ begin
     gem.email = "ngty77@gmail.com"
     gem.homepage = "http://github.com/ngty/xpathfu"
     gem.authors = ["NgTzeYang"]
-    gem.add_dependency "nokogiri", "= 1.4.1"
+    gem.add_development_dependency "nokogiri", ">= 1.4.1"
     gem.add_development_dependency "bacon", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
