@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
-describe "XPathFu Configuration" do
+describe "XPathFu::Configuration" do
 
   describe '> default' do
 
