@@ -1,5 +1,7 @@
 module XPathFu
 
+  class ConfigSettingNotSupportedError < Exception ; end
+
   settings = {
     :case_sensitive => true,
     :match_ordering => true,
