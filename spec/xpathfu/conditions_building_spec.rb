@@ -20,7 +20,7 @@ describe "XPathFu::ConditionsBuilding" do
     should 'convert if confg.case_sensitive is false' do
       @set_config[false]
       XPathFu.c('anything').should.equal \
-        %\translate("#{('A'..'Z').to_a*''}","#{('a'..'z').to_a*''}",anything)\
+        %\translate(anything,"#{('A'..'Z').to_a*''}","#{('a'..'z').to_a*''}")\
     end
 
     should 'not convert confg.case_sensitive is true' do

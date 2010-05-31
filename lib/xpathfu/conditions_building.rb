@@ -8,7 +8,7 @@ module XPathFu
 
       def c(str)
         config.case_sensitive ? str :
-          %\translate("#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}",#{str})\
+          %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
       end
 
       def q(str)
