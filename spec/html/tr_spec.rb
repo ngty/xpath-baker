@@ -45,6 +45,13 @@ describe "XPathFu::HTML <tr/> support" do
 
   {'default' => nil, 'custom valid' => '//table/'}.each do |mode, scope|
 
+    describe "> #{mode} scoping for {:cells => {}}" do
+      extend HtmlTrSpecHelpers
+      should "return scoped path wo conditions" do
+        XPathFu.tr(*scoped_args(scope, [{:cells => {}}])).should.equal ((scope || '//')+'tr')
+      end
+    end
+
     describe "> #{mode} scoping for {:cells => {th1 => td1, ...}}" do
       before do
         @scope = scope
@@ -172,6 +179,13 @@ describe "XPathFu::HTML <tr/> support" do
   end
 
   {'default' => nil, 'custom valid' => '//table/'}.each do |mode, scope|
+
+    describe "> #{mode} scoping for {:cells => []}" do
+      extend HtmlTrSpecHelpers
+      should "return scoped path wo conditions" do
+        XPathFu.tr(*scoped_args(scope, [{:cells => []}])).should.equal ((scope || '//')+'tr')
+      end
+    end
 
     describe "> #{mode} scoping for {:cells => [td1, td2, ...]}" do
       before do
