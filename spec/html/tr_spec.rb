@@ -270,5 +270,19 @@ describe "XPathFu::HTML <tr/> support" do
     end
   end
 
+  describe '> {:cells => ...} match attr' do
+    should 'not raise XPathFu::InvalidArgumentError for hash value' do
+      lambda { XPathFu.tr(:cells => {}) }.should.not.raise(XPathFu::InvalidArgumentError)
+    end
+    should 'not raise XPathFu::InvalidArgumentError for array value' do
+      lambda { XPathFu.tr(:cells => []) }.should.not.raise(XPathFu::InvalidArgumentError)
+    end
+    should 'raise XPathFu::InvalidArgumentError for other value' do
+      lambda { XPathFu.tr(:cells => '') }.
+        should.raise(XPathFu::InvalidArgumentError).
+        message.should.equal('Match attribute :cells must be a Hash or Array.')
+    end
+  end
+
 end
 

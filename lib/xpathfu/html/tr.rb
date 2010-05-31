@@ -21,8 +21,7 @@ module XPathFu
           conditions = cells.map {|val| %\[#{c(n(t))}=#{c(q(val))}]\ }.join('/following-sibling::td')
           conditions.empty? ? '' : %\.//td#{conditions}\
         else
-          raise In
-
+          raise InvalidArgumentError.new('Match attribute :cells must be a Hash or Array.')
         end
       end
 
