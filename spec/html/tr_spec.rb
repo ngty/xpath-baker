@@ -67,7 +67,7 @@ describe "XPathFu::HTML <tr/> support" do
     end
   end
 
-  shared 'scoping for {:cells => {header1 => col1, ...}}' do
+  shared 'scoping for {:cells => {th1 => td1, ...}}' do
     extend HtmlTrSpecHelpers
     should "return scoped path w matching chars casing, full inner-text & with space normalized" do
       cells = {'#' => '2', 'Full Name' => 'John Tan', 'Gender' => 'Male'}
@@ -76,7 +76,7 @@ describe "XPathFu::HTML <tr/> support" do
     end
   end
 
-  shared 'matching for {:cells => {header1 => col1, ...}}' do
+  shared 'matching for {:cells => {th1 => td1, ...}}' do
     extend HtmlTrSpecHelpers
     should "return path that matches nodes w matching chars casing & full inner-text & space normalized" do
       cells = {'#' => '2', 'Full Name' => 'John Tan', 'Gender' => 'Male'}
@@ -98,43 +98,43 @@ describe "XPathFu::HTML <tr/> support" do
 
   {'default' => nil, 'custom valid' => '//table/'}.each do |mode, scope|
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}}" do
       before do
         @scope = scope
         @args = lambda {|cells| scoped_args(scope, [{:cells => cells}]) }
       end
-      behaves_like "scoping for {:cells => {header1 => col1, ...}}"
-      behaves_like "matching for {:cells => {header1 => col1, ...}}"
+      behaves_like "scoping for {:cells => {th1 => td1, ...}}"
+      behaves_like "matching for {:cells => {th1 => td1, ...}}"
     end
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}} & {:case_sensitive => true}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}} & {:case_sensitive => true}" do
       before do
         @scope = scope
         @args = lambda {|cells| scoped_args(@scope, [{:cells => cells}, {:case_sensitive => true}]) }
       end
-      behaves_like "scoping for {:cells => {header1 => col1, ...}}"
-      behaves_like "matching for {:cells => {header1 => col1, ...}}"
+      behaves_like "scoping for {:cells => {th1 => td1, ...}}"
+      behaves_like "matching for {:cells => {th1 => td1, ...}}"
     end
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}} & {:include_inner_text => true}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}} & {:include_inner_text => true}" do
       before do
         @scope = scope
         @args = lambda {|cells| scoped_args(@scope, [{:cells => cells}, {:include_inner_text => true}]) }
       end
-      behaves_like "scoping for {:cells => {header1 => col1, ...}}"
-      behaves_like "matching for {:cells => {header1 => col1, ...}}"
+      behaves_like "scoping for {:cells => {th1 => td1, ...}}"
+      behaves_like "matching for {:cells => {th1 => td1, ...}}"
     end
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}} & {:normalize_space => true}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}} & {:normalize_space => true}" do
       before do
         @scope = scope
         @args = lambda {|cells| scoped_args(@scope, [{:cells => cells}, {:normalize_space => true}]) }
       end
-      behaves_like "scoping for {:cells => {header1 => col1, ...}}"
-      behaves_like "matching for {:cells => {header1 => col1, ...}}"
+      behaves_like "scoping for {:cells => {th1 => td1, ...}}"
+      behaves_like "matching for {:cells => {th1 => td1, ...}}"
     end
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}} & {:case_sensitive => false}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}} & {:case_sensitive => false}" do
       extend HtmlTrSpecHelpers
       before do
         @scope, @cells = scope, {'#' => '2', 'full name' => 'john tan', 'gender' => 'male'}
@@ -149,7 +149,7 @@ describe "XPathFu::HTML <tr/> support" do
       end
     end
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}} & {:normalize_space => false}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}} & {:normalize_space => false}" do
       extend HtmlTrSpecHelpers
       before do
         @scope, @cells = scope, {'#' => '2 ', 'Full Name' => 'John Tan', 'Gender' => 'Male'}
@@ -164,7 +164,7 @@ describe "XPathFu::HTML <tr/> support" do
       end
     end
 
-    describe "> #{mode} scoping for {:cells => {header1 => col1, ...}} & {:include_inner_text => false}" do
+    describe "> #{mode} scoping for {:cells => {th1 => td1, ...}} & {:include_inner_text => false}" do
       extend HtmlTrSpecHelpers
       before do
         @scope, @cells = scope, {'#' => '2', 'Full' => 'John', 'Gender' => 'Male'}
@@ -181,7 +181,7 @@ describe "XPathFu::HTML <tr/> support" do
 
   end
 
-  describe "> custom invalid scoping for {:cells => {header1 => col1, ...}" do
+  describe "> custom invalid scoping for {:cells => {th1 => td1, ...}" do
     extend HtmlTrSpecHelpers
     before { @args = lambda {|cells| ['//xable/', {:cells => cells}] } }
     should "return path prefixed '//xable/'" do
