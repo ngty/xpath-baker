@@ -103,6 +103,51 @@ describe "XPathFu::ArgumentsParsing" do
 
   end
 
+  describe '> with :scope' do
+
+    before do
+      @scope = '//aa/bb/'
+      @parse_args = lambda { XPathFu.parse_args(@scope) }
+    end
+
+    should 'set config as default' do
+      @parse_args[]
+      XPathFu.config.case_sensitive.should.equal true
+    end
+
+    should "set scope as specified" do
+      @parse_args[]
+      XPathFu.scope.should.equal @scope
+    end
+
+    should 'return match attrs' do
+      @parse_args[].should.equal({})
+    end
+
+  end
+
+  describe '> with no args' do
+
+    before do
+      @parse_args = lambda { XPathFu.parse_args }
+    end
+
+    should 'set config as default' do
+      @parse_args[]
+      XPathFu.config.case_sensitive.should.equal true
+    end
+
+    should "set scope as specified" do
+      @parse_args[]
+      XPathFu.scope.should.equal '//'
+    end
+
+    should 'return match attrs' do
+      @parse_args[].should.equal({})
+    end
+
+  end
+
   describe '> with invalid args' do
 
     before do
@@ -110,17 +155,25 @@ describe "XPathFu::ArgumentsParsing" do
         'Expecting one of the following argument(s) group:, ' +
         '(1) scope_str, match_attrs_hash & :config_hash, ' +
         '(2) match_attrs_hash & :config_hash, ' +
-        '(3) match_attrs_hash'
+        '(3) match_attrs_hash, ' +
+        '(4) scope_str, ' +
+        '(5) (no args)'
     end
 
-    should 'raise XPathFu::InvalidArgumentError with no arg specified' do
-      lambda { XPathFu.parse_args }.
+    should 'raise XPathFu::InvalidArgumentError when :match_attrs_hash is specified but not a Hash' do
+      lambda { XPathFu.parse_args('//aa/bb/', [], {}) }.
         should.raise(XPathFu::InvalidArgumentError).
         message.should.equal @message
     end
 
-    should 'raise XPathFu::InvalidArgumentError with no match attrs hash specified' do
-      lambda { XPathFu.parse_args('//aa/bb/') }.
+    should 'raise XPathFu::InvalidArgumentError when :config_hash is specified but not a Hash' do
+      lambda { XPathFu.parse_args('//aa/bb/', {}, []) }.
+        should.raise(XPathFu::InvalidArgumentError).
+        message.should.equal @message
+    end
+
+    should 'raise XPathFu::InvalidArgumentError when more than 3 args are specified' do
+      lambda { XPathFu.parse_args('//aa/bb/', {}, {}, nil) }.
         should.raise(XPathFu::InvalidArgumentError).
         message.should.equal @message
     end
