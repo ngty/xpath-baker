@@ -18,6 +18,24 @@ module XPathFu
       yield(Configuration)
     end
 
+    def befriends(someone)
+      unless (@friends ||= []).include?(someone)
+        if someone.method_defined?(:xpf)
+          $stdout.puts %w{
+            WARNING: XPathFu wants to befriend %s by giving it a shortcut method xpf(),
+            but %s#xpf has already been defined. Neverthless, the rejected XPathFu
+            stays friendly & XPathFu's goodies can still be accessed via the more verbose
+            XPathFu.* (eg. XPathfu.tr).
+          }.join(' ') % ([someone]*2)
+        else
+          @friends << someone
+          someone.send(:define_method, :xpf) do |element, *args|
+            XPathFu.send(element, *args)
+          end
+        end
+      end
+    end
+
     protected
 
       def declare_mode_as(mode)
@@ -29,4 +47,8 @@ module XPathFu
       end
 
   end
+
 end
+
+# NOTE: This is not tested !!
+XPathFu.befriends(Object)
