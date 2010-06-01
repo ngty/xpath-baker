@@ -94,11 +94,11 @@ describe "XPathFu::HTML <tr/> support" do
         @scope, @cells = scope, {'#' => '2', 'full name' => 'john tan', 'gender' => 'male'}
         @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:case_sensitive => false}]) }
       end
-      should "return scoped path w matching chars (ignore casing), full inner-text & with space normalized" do
+      should "return scoped path ignoring chars casing" do
         XPathFu.tr(*@args[]).should.equal \
           case_insensitive_and_normalized_space_and_full_inner_text_xpath_for(@scope || '//', @cells)
       end
-      should "return path that matches nodes w matching chars (ignore casing)" do
+      should "return path that matches nodes" do
         contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
       end
     end
@@ -109,11 +109,11 @@ describe "XPathFu::HTML <tr/> support" do
         @scope, @cells = scope, {'#' => '2 ', 'Full Name' => 'John Tan', 'Gender' => 'Male'}
         @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:normalize_space => false}]) }
       end
-      should "return scoped path w matching chars casing, full inner-text & with space unnormalized" do
+      should "return scoped path not normalizing space" do
         XPathFu.tr(*@args[]).should.equal \
           case_sensitive_and_unnormalized_space_and_full_inner_text_xpath_for(@scope || '//', @cells)
       end
-      should "return path that matches nodes w space unnormalized" do
+      should "return path that matches nodes" do
         contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
       end
     end
@@ -124,11 +124,11 @@ describe "XPathFu::HTML <tr/> support" do
         @scope, @cells = scope, {'#' => '2', 'Full' => 'John', 'Gender' => 'Male'}
         @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:include_inner_text => false}]) }
       end
-      should "return scoped path w matching chars casing, direct text only & with space normalized" do
+      should "return scoped path that matches direct text only" do
         XPathFu.tr(*@args[]).should.equal \
           case_sensitive_and_normalized_space_and_direct_text_xpath_for(@scope || '//', @cells)
       end
-      should "return path that matches nodes w matching direct text only" do
+      should "return path that matches nodes" do
         contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
       end
     end
@@ -164,6 +164,10 @@ describe "XPathFu::HTML <tr/> support" do
       cells = ['2', 'John Tan', 'Male']
       contents_for(XPathFu.tr(*@args[cells])).should.equal ['2 John TanMale']
     end
+    should "return path that does not match nodes w ordered cells" do
+      cells = ['John Tan', 'Male', '2']
+      contents_for(XPathFu.tr(*@args[cells])).should.be.empty
+    end
     should "return path that does not match nodes w space already normalized" do
       cells = ['2 ', 'John Tan', 'Male']
       contents_for(XPathFu.tr(*@args[cells])).should.be.empty
@@ -196,6 +200,15 @@ describe "XPathFu::HTML <tr/> support" do
       behaves_like "matching for {:cells => [td1, td2, ...]}"
     end
 
+    describe "> #{mode} scoping for {:cells => [td1, td2, ...]} & {:match_ordering => true}" do
+      before do
+        @scope = scope
+        @args = lambda {|cells| scoped_args(@scope, [{:cells => cells}, {:match_ordering => true}]) }
+      end
+      behaves_like "scoping for {:cells => [td1, td2, ...]}"
+      behaves_like "matching for {:cells => [td1, td2, ...]}"
+    end
+
     describe "> #{mode} scoping for {:cells => [td1, td2, ...]} & {:case_sensitive => true}" do
       before do
         @scope = scope
@@ -223,17 +236,32 @@ describe "XPathFu::HTML <tr/> support" do
       behaves_like "matching for {:cells => [td1, td2, ...]}"
     end
 
+    describe "> #{mode} scoping for {:cells => [td1, td2, ...]} & {:match_ordering => false}" do
+      extend HtmlTrSpecHelpers
+      before do
+        @scope, @cells = scope, ['John Tan', 'Male', '2']
+        @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:match_ordering => false}]) }
+      end
+      should "return scoped path ignoring cell ordering" do
+        XPathFu.tr(*@args[]).should.equal \
+          '%str%s' % [@scope || '//', @cells.map {|val| %\[./td[normalize-space(.)="#{val}"]]\ }.join('')]
+      end
+      should "return path that matches nodes" do
+        contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
+      end
+    end
+
     describe "> #{mode} scoping for {:cells => [td1, td2, ...]} & {:case_sensitive => false}" do
       extend HtmlTrSpecHelpers
       before do
         @scope, @cells = scope, ['2', 'john tan', 'male']
         @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:case_sensitive => false}]) }
       end
-      should "return scoped path w matching chars (ignore casing), full inner-text & with space normalized" do
+      should "return scoped path ignoring chars casing" do
         XPathFu.tr(*@args[]).should.equal \
           case_insensitive_and_normalized_space_and_full_inner_text_xpath_for(@scope || '//', @cells)
       end
-      should "return path that matches nodes w matching chars (ignore casing)" do
+      should "return path that matches nodes" do
         contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
       end
     end
@@ -244,11 +272,11 @@ describe "XPathFu::HTML <tr/> support" do
         @scope, @cells = scope, ['2 ', 'John Tan', 'Male']
         @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:normalize_space => false}]) }
       end
-      should "return scoped path w matching chars casing, full inner-text & with space unnormalized" do
+      should "return scoped path not normalizing space" do
         XPathFu.tr(*@args[]).should.equal \
           case_sensitive_and_unnormalized_space_and_full_inner_text_xpath_for(@scope || '//', @cells)
       end
-      should "return path that matches nodes w space unnormalized" do
+      should "return path that matches nodes" do
         contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
       end
     end
@@ -259,11 +287,11 @@ describe "XPathFu::HTML <tr/> support" do
         @scope, @cells = scope, ['2', 'John', 'Male']
         @args = lambda { scoped_args(@scope, [{:cells => @cells}, {:include_inner_text => false}]) }
       end
-      should "return scoped path w matching chars casing, direct text only & with space normalized" do
+      should "return scoped path that matches direct text only" do
         XPathFu.tr(*@args[]).should.equal \
           case_sensitive_and_normalized_space_and_direct_text_xpath_for(@scope || '//', @cells)
       end
-      should "return path that matches nodes w matching direct text only" do
+      should "return path that matches nodes" do
         contents_for(XPathFu.tr(*@args[])).should.equal ['2 John TanMale']
       end
     end

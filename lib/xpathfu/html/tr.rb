@@ -22,13 +22,18 @@ module XPathFu
       def tr_cells_hash_conditions(cells)
         cells.empty? ? nil : cells.map do |field, val|
           th = %\./ancestor::table[1]//th[#{c(n(t))}=#{c(q(field))}][1]\
-          %\.//td[count(#{th}/preceding-sibling::th)+1][#{th}][#{c(n(t))}=#{c(q(val))}]\
+          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}][#{c(n(t))}=#{c(q(val))}]\
         end.join('][')
       end
 
       def tr_cells_array_conditions(cells)
-        cells.empty? ? nil :
-          './/td' + cells.map {|val| %\[#{c(n(t))}=#{c(q(val))}]\ }.join('/following-sibling::td')
+        cells.empty? ? nil : (
+            if config.match_ordering
+              './td' + cells.map {|val| %\[#{c(n(t))}=#{c(q(val))}]\ }.join('/following-sibling::td')
+            else
+              cells.map {|val| %\./td[#{c(n(t))}=#{c(q(val))}]\ }.join('][')
+            end
+        )
       end
 
     end

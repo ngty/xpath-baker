@@ -21,10 +21,10 @@ module HtmlTrSpecHelpers
       if cells.is_a?(Hash)
         cells.map do |field, val|
           th = %\./ancestor::table[1]//th[normalize-space(.)="#{field}"][1]\
-          %\.//td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
+          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
         end.join('][')
       else
-        './/td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
+        './td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
       end
     )
   end
@@ -35,10 +35,10 @@ module HtmlTrSpecHelpers
       if cells.is_a?(Hash)
         cells.map do |field, val|
           th = %\./ancestor::table[1]//th[.="#{field}"][1]\
-          %\.//td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
+          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
         end.join('][')
       else
-        './/td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
+        './td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
       end
     )
   end
@@ -49,10 +49,10 @@ module HtmlTrSpecHelpers
       if cells.is_a?(Hash)
         cells.map do |field, val|
           th = %\./ancestor::table[1]//th[normalize-space(text())="#{field}"][1]\
-          %\.//td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
+          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
         end.join('][')
       else
-        './/td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
+        './td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
       end
     )
   end
@@ -65,10 +65,10 @@ module HtmlTrSpecHelpers
       if cells.is_a?(Hash)
         cells.map do |field, val|
           th = %\./ancestor::table[1]//th[#{translate['normalize-space(.)']}=#{translate[%\"#{field}"\]}][1]\
-          %\.//td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
+          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}]#{content_cond[val]}\
         end.join('][')
       else
-        './/td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
+        './td' + cells.map {|val| content_cond[val] }.join('/following-sibling::td')
       end
     )
   end
