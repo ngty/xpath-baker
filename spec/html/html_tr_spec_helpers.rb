@@ -5,14 +5,36 @@ module HtmlTrSpecHelpers
       <html>
         <body>
           <table>
-            <tr><th>#</th><th>Full <br/>Name</th><th>Gender</th></tr>
-            <tr><td> 1</td><td>Jane <br/>Lee</td><td>Female</td></tr>
-            <tr><td>2 </td><td>John <br/>Tan</td><td>Male</td></tr>
-            <tr><td> 3 </td><td>Jim <br/>Ma</td><td>Male</td></tr>
+            <tr id="Andriod " class="pink" ><th>#</th><th>Full <br/>Name</th><th>Gender</th></tr>
+            <tr id="Bonobo " class="purple" ><td> 1</td><td>Jane <br/>Lee</td><td>Female</td></tr>
+            <tr id="Conky " class="red" ><td>2 </td><td>John <br/>Tan</td><td>Male</td></tr>
+            <tr id="Dialyzer " class="yellow" ><td> 3 </td><td>Jim <br/>Ma</td><td>Male</td></tr>
           </table>
         </body>
       </html>
     \)).xpath(path).map(&:text)
+  end
+
+  def case_sensitive_and_unnormalized_space_xpath_for(scope, attrs)
+    "#{scope}tr[%s]" % (
+      attrs.map {|attr, val| %\@#{attr}="#{val}"\ }.join('][')
+    )
+  end
+
+  def case_sensitive_and_normalized_space_xpath_for(scope, attrs)
+    "#{scope}tr[%s]" % (
+      attrs.map {|attr, val| %\normalize-space(@#{attr})="#{val}"\ }.join('][')
+    )
+  end
+
+  def case_insensitive_and_normalized_space_xpath_for(scope, attrs)
+    upper_chars, lower_chars = ['A'..'Z', 'a'..'z'].map {|r| r.to_a.join('') }
+    translate = lambda {|s| %\translate(#{s},"#{upper_chars}","#{lower_chars}")\ }
+    "#{scope}tr[%s]" % (
+      attrs.map do |attr, val|
+        %\#{translate["normalize-space(@#{attr})"]}=#{translate[%\"#{val}"\]}\
+      end.join('][')
+    )
   end
 
   def case_sensitive_and_normalized_space_and_full_inner_text_xpath_for(scope, cells)

@@ -6,7 +6,8 @@ module XPathFu
         build(:tr, *args) do |match_attrs|
           [
             tr_cells_conditions(match_attrs.delete(:cells)),
-          ].compact
+            generic_attrs_conditions(match_attrs)
+          ]
         end
       end
 

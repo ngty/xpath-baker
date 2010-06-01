@@ -7,8 +7,12 @@ module XPathFu
       UPPERCASE_CHARS = ('A'..'Z').to_a * ''
 
       def build(element, *args, &blk)
-        conditions = yield(parse_args(*args))
+        conditions = yield(parse_args(*args)).flatten.compact
         "#{scope}#{element}%s" % (conditions.empty? ? '' : "[#{conditions.join('][')}]")
+      end
+
+      def generic_attrs_conditions(attrs)
+        attrs.map {|name, val| '%s=%s' % [c(n("@#{name}")), c(q(val))] }
       end
 
       def c(str)
