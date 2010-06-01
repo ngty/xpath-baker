@@ -48,7 +48,7 @@ describe "XPathFu::HTML <tr/> support" do
     describe "> #{mode} scoping for {:cells => {}}" do
       extend HtmlTrSpecHelpers
       should "return scoped path wo conditions" do
-        XPathFu.tr(*scoped_args(scope, [{:cells => {}}])).should.equal ((scope || '//')+'tr')
+        XPathFu.tr(*scoped_args(scope, [{:cells => {}}])).should.equal((scope || '//')+'tr')
       end
     end
 
@@ -183,7 +183,7 @@ describe "XPathFu::HTML <tr/> support" do
     describe "> #{mode} scoping for {:cells => []}" do
       extend HtmlTrSpecHelpers
       should "return scoped path wo conditions" do
-        XPathFu.tr(*scoped_args(scope, [{:cells => []}])).should.equal ((scope || '//')+'tr')
+        XPathFu.tr(*scoped_args(scope, [{:cells => []}])).should.equal((scope || '//')+'tr')
       end
     end
 
@@ -295,6 +295,15 @@ describe "XPathFu::HTML <tr/> support" do
       lambda { XPathFu.tr(:cells => '') }.
         should.raise(XPathFu::InvalidArgumentError).
         message.should.equal('Match attribute :cells must be a Hash or Array.')
+    end
+  end
+
+  describe '> no match attrs specified' do
+    should "return '//tr' with no scoped specified" do
+      XPathFu.tr.should.equal '//tr'
+    end
+    should "return '//xable/tr' with scope '//xable/' specified" do
+      XPathFu.tr('//xable/').should.equal '//xable/tr'
     end
   end
 
