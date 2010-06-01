@@ -21,6 +21,7 @@ shared 'has generic :match_attrs_hash support' do
               <#{@element} id="anDriod " class=" gReen" >AG</#{@element}>
               <#{@element} id="BoNobo " class=" Red" >BR</#{@element}>
               <#{@element} id="Conky " class=" bluE" >CB</#{@element}>
+              <#{@element} id="dhcPcd" class="bluE" >DB</#{@element}>
             </body>
           </html>
         \).xpath(path).map(&:text)
@@ -124,6 +125,25 @@ shared 'has generic :match_attrs_hash support' do
       end
       should "return path that matches nodes" do
         expected = ['BR']
+        @contents[XPathFu.send(@element, *@args[])].should.equal expected
+        @contents[xpf(@element, *@args[])].should.equal expected
+      end
+    end
+
+    describe "> #{mode} scoping for {:attr1 => val1, ...} & {:position => 2}" do
+      behaves_like 'setting up for {:attr1 => val1, ...}'
+      before do
+        @scope, @attrs = scope, {:class => 'bluE'}
+        @args = lambda { [@scope, @attrs, {:position => 2}].compact }
+        @condition = lambda {|k, v| %\normalize-space(@#{k})="#{v}"\ }
+      end
+      should "return scoped path with specified position" do
+        expected = "#{@scope || '//'}#{@element}[%s][2]" % @attrs.map {|k,v| @condition[k,v] }.join('][')
+        XPathFu.send(@element, *@args[]).should.equal expected
+        xpf(@element, *@args[]).should.equal expected
+      end
+      should "return path that matches nodes" do
+        expected = ['DB']
         @contents[XPathFu.send(@element, *@args[])].should.equal expected
         @contents[xpf(@element, *@args[])].should.equal expected
       end

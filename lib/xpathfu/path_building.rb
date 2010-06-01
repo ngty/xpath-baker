@@ -8,7 +8,11 @@ module XPathFu
 
       def build(element, *args, &blk)
         conditions = yield(parse_args(*args)).flatten.compact
-        "#{scope}#{element}%s" % (conditions.empty? ? '' : "[#{conditions.join('][')}]")
+        [
+          scope, element,
+          conditions.empty? ? nil : "[#{conditions.join('][')}]",
+          (pos = config.position).to_i.zero? ? nil : "[#{pos}]"
+        ].compact.join
       end
 
       def generic_attrs_conditions(attrs)
