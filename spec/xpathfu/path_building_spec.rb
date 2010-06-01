@@ -5,7 +5,7 @@ class << XPathFu
   public :c, :q, :n, :t
 end
 
-describe "XPathFu::ConditionsBuilding" do
+describe "XPathFu::PathBuilding" do
 
   before do
     @config_klass = Struct.new(:case_sensitive, :normalize_space, :include_inner_text)
