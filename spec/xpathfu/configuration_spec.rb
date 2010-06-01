@@ -20,6 +20,10 @@ describe "XPathFu::Configuration" do
       XPathFu.configure {|config| config.normalize_space.should.be.true }
     end
 
+    should 'have :position as nil' do
+      XPathFu.configure {|config| config.position.should.be.nil }
+    end
+
   end
 
   describe '> configuring' do
@@ -60,6 +64,15 @@ describe "XPathFu::Configuration" do
       end
     end
 
+    should 'be able to change :position' do
+      XPathFu.configure do |config|
+        config.position = 10
+        config.position.should.equal 10
+        config.position = nil
+        config.position.should.be.nil
+      end
+    end
+
   end
 
   describe '> merging with a settings hash' do
@@ -69,7 +82,8 @@ describe "XPathFu::Configuration" do
         :normalize_space => 'aa',
         :include_inner_text => 'bb',
         :match_ordering => 'cc',
-        :case_sensitive => 'dd'
+        :case_sensitive => 'dd',
+        :position => 'ee'
       }
       @orig_settings.each {|setting, val| XPathFu::Configuration.send(:"#{setting}=", val) }
       @should_have_equal_settings = lambda do |configuration, expected_hash|

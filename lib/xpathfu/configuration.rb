@@ -6,7 +6,8 @@ module XPathFu
     :case_sensitive => true,
     :match_ordering => true,
     :include_inner_text => true,
-    :normalize_space => true
+    :normalize_space => true,
+    :position => nil
   }
 
   keys = settings.keys.map(&:to_s).sort.map(&:to_sym)
