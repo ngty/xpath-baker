@@ -15,28 +15,6 @@ module HtmlTrSpecHelpers
     \)).xpath(path).map(&:text)
   end
 
-  def case_sensitive_and_unnormalized_space_xpath_for(scope, attrs)
-    "#{scope}tr[%s]" % (
-      attrs.map {|attr, val| %\@#{attr}="#{val}"\ }.join('][')
-    )
-  end
-
-  def case_sensitive_and_normalized_space_xpath_for(scope, attrs)
-    "#{scope}tr[%s]" % (
-      attrs.map {|attr, val| %\normalize-space(@#{attr})="#{val}"\ }.join('][')
-    )
-  end
-
-  def case_insensitive_and_normalized_space_xpath_for(scope, attrs)
-    upper_chars, lower_chars = ['A'..'Z', 'a'..'z'].map {|r| r.to_a.join('') }
-    translate = lambda {|s| %\translate(#{s},"#{upper_chars}","#{lower_chars}")\ }
-    "#{scope}tr[%s]" % (
-      attrs.map do |attr, val|
-        %\#{translate["normalize-space(@#{attr})"]}=#{translate[%\"#{val}"\]}\
-      end.join('][')
-    )
-  end
-
   def case_sensitive_and_normalized_space_and_full_inner_text_xpath_for(scope, cells)
     content_cond = lambda {|val| %\[normalize-space(.)="#{val}"]\ }
     "#{scope}tr[%s]" % (
