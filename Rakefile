@@ -5,8 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "xpf"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Like it or not, xpf builds xpath for you}
+    gem.description = %Q{Writing xpath can be painful at times, XPF builds xpath for you}
     gem.email = "ngty77@gmail.com"
     gem.homepage = "http://github.com/ngty/xpf"
     gem.authors = ["NgTzeYang"]
