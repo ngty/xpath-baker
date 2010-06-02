@@ -4,11 +4,11 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "xpathfu"
+    gem.name = "xpf"
     gem.summary = %Q{TODO: one-line summary of your gem}
     gem.description = %Q{TODO: longer description of your gem}
     gem.email = "ngty77@gmail.com"
-    gem.homepage = "http://github.com/ngty/xpathfu"
+    gem.homepage = "http://github.com/ngty/xpf"
     gem.authors = ["NgTzeYang"]
     gem.add_development_dependency "nokogiri", ">= 1.4.1"
     gem.add_development_dependency "bacon", ">= 0"
@@ -73,7 +73,7 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "xpathfu #{version}"
+  rdoc.title = "xpf #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

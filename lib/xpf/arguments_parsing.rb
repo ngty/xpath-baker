@@ -1,4 +1,4 @@
-module XPathFu
+module XPF
 
   class InvalidArgumentError < Exception ; end
 

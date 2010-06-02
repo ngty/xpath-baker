@@ -1,11 +1,11 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
-class << XPathFu
+class << XPF
   attr_writer :config
   public :parse_args, :config, :scope
 end
 
-describe "XPathFu::ArgumentsParsing" do
+describe "XPF::ArgumentsParsing" do
 
   describe '> with :scope, :match_attrs & :config' do
 
@@ -13,17 +13,17 @@ describe "XPathFu::ArgumentsParsing" do
       @scope = '//aa/bb/'
       @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
       @config = {:case_sensitive => 'aa'}
-      @parse_args = lambda { XPathFu.parse_args(@scope, @match_attrs, @config) }
+      @parse_args = lambda { XPF.parse_args(@scope, @match_attrs, @config) }
     end
 
     should 'set config as specified' do
       @parse_args[]
-      XPathFu.config.case_sensitive.should.equal @config[:case_sensitive]
+      XPF.config.case_sensitive.should.equal @config[:case_sensitive]
     end
 
     should 'set scope as specified' do
       @parse_args[]
-      XPathFu.scope.should.equal @scope
+      XPF.scope.should.equal @scope
     end
 
     should 'return match attrs' do
@@ -37,17 +37,17 @@ describe "XPathFu::ArgumentsParsing" do
     before do
       @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
       @config = {:case_sensitive => 'aa'}
-      @parse_args = lambda { XPathFu.parse_args(@match_attrs, @config) }
+      @parse_args = lambda { XPF.parse_args(@match_attrs, @config) }
     end
 
     should 'set config as specified' do
       @parse_args[]
-      XPathFu.config.case_sensitive.should.equal @config[:case_sensitive]
+      XPF.config.case_sensitive.should.equal @config[:case_sensitive]
     end
 
     should "set scope as default '//'" do
       @parse_args[]
-      XPathFu.scope.should.equal '//'
+      XPF.scope.should.equal '//'
     end
 
     should 'return match attrs' do
@@ -61,17 +61,17 @@ describe "XPathFu::ArgumentsParsing" do
     before do
       @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
       @scope = '//aa/bb/'
-      @parse_args = lambda { XPathFu.parse_args(@scope, @match_attrs) }
+      @parse_args = lambda { XPF.parse_args(@scope, @match_attrs) }
     end
 
     should 'set config as default' do
       @parse_args[]
-      XPathFu.config.case_sensitive.should.equal true
+      XPF.config.case_sensitive.should.equal true
     end
 
     should "set scope as specified" do
       @parse_args[]
-      XPathFu.scope.should.equal @scope
+      XPF.scope.should.equal @scope
     end
 
     should 'return match attrs' do
@@ -84,17 +84,17 @@ describe "XPathFu::ArgumentsParsing" do
 
     before do
       @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
-      @parse_args = lambda { XPathFu.parse_args(@match_attrs) }
+      @parse_args = lambda { XPF.parse_args(@match_attrs) }
     end
 
     should 'set config as default' do
       @parse_args[]
-      XPathFu.config.case_sensitive.should.equal true
+      XPF.config.case_sensitive.should.equal true
     end
 
     should "set scope as default '//'" do
       @parse_args[]
-      XPathFu.scope.should.equal '//'
+      XPF.scope.should.equal '//'
     end
 
     should 'return match attrs' do
@@ -107,17 +107,17 @@ describe "XPathFu::ArgumentsParsing" do
 
     before do
       @scope = '//aa/bb/'
-      @parse_args = lambda { XPathFu.parse_args(@scope) }
+      @parse_args = lambda { XPF.parse_args(@scope) }
     end
 
     should 'set config as default' do
       @parse_args[]
-      XPathFu.config.case_sensitive.should.equal true
+      XPF.config.case_sensitive.should.equal true
     end
 
     should "set scope as specified" do
       @parse_args[]
-      XPathFu.scope.should.equal @scope
+      XPF.scope.should.equal @scope
     end
 
     should 'return match attrs' do
@@ -129,17 +129,17 @@ describe "XPathFu::ArgumentsParsing" do
   describe '> with no args' do
 
     before do
-      @parse_args = lambda { XPathFu.parse_args }
+      @parse_args = lambda { XPF.parse_args }
     end
 
     should 'set config as default' do
       @parse_args[]
-      XPathFu.config.case_sensitive.should.equal true
+      XPF.config.case_sensitive.should.equal true
     end
 
     should "set scope as specified" do
       @parse_args[]
-      XPathFu.scope.should.equal '//'
+      XPF.scope.should.equal '//'
     end
 
     should 'return match attrs' do
@@ -160,21 +160,21 @@ describe "XPathFu::ArgumentsParsing" do
         '(5) (no args)'
     end
 
-    should 'raise XPathFu::InvalidArgumentError when :match_attrs_hash is specified but not a Hash' do
-      lambda { XPathFu.parse_args('//aa/bb/', [], {}) }.
-        should.raise(XPathFu::InvalidArgumentError).
+    should 'raise XPF::InvalidArgumentError when :match_attrs_hash is specified but not a Hash' do
+      lambda { XPF.parse_args('//aa/bb/', [], {}) }.
+        should.raise(XPF::InvalidArgumentError).
         message.should.equal @message
     end
 
-    should 'raise XPathFu::InvalidArgumentError when :config_hash is specified but not a Hash' do
-      lambda { XPathFu.parse_args('//aa/bb/', {}, []) }.
-        should.raise(XPathFu::InvalidArgumentError).
+    should 'raise XPF::InvalidArgumentError when :config_hash is specified but not a Hash' do
+      lambda { XPF.parse_args('//aa/bb/', {}, []) }.
+        should.raise(XPF::InvalidArgumentError).
         message.should.equal @message
     end
 
-    should 'raise XPathFu::InvalidArgumentError when more than 3 args are specified' do
-      lambda { XPathFu.parse_args('//aa/bb/', {}, {}, nil) }.
-        should.raise(XPathFu::InvalidArgumentError).
+    should 'raise XPF::InvalidArgumentError when more than 3 args are specified' do
+      lambda { XPF.parse_args('//aa/bb/', {}, {}, nil) }.
+        should.raise(XPF::InvalidArgumentError).
         message.should.equal @message
     end
 

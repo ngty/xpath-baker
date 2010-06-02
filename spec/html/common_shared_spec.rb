@@ -2,12 +2,12 @@ shared 'has generic :match_attrs_hash support' do
 
   describe '> no match attrs specified' do
     should "return default scoped path when no scope is specified" do
-      XPathFu.send(@element).should.equal "//#{@element}"
+      XPF.send(@element).should.equal "//#{@element}"
       xpf(@element).should.equal "//#{@element}"
     end
     should "return custom scoped path when scope is specified" do
       scope = '/super/self::'
-      XPathFu.send(@element, scope).should.equal "#{scope}#{@element}"
+      XPF.send(@element, scope).should.equal "#{scope}#{@element}"
       xpf(@element, scope).should.equal "#{scope}#{@element}"
     end
   end
@@ -34,7 +34,7 @@ shared 'has generic :match_attrs_hash support' do
     should "return scoped path w attrs value matching chars casing & with space normalized" do
       attrs = {:id => 'super', :class => 'duper'}
       expected = "#{@scope || '//'}#{@element}[%s]" % attrs.map {|k,v| @condition[k,v] }.join('][')
-      XPathFu.send(@element, *@args[attrs]).should.equal expected
+      XPF.send(@element, *@args[attrs]).should.equal expected
       xpf(@element, *@args[attrs]).should.equal expected
     end
   end
@@ -42,17 +42,17 @@ shared 'has generic :match_attrs_hash support' do
   shared 'matching for {:attr1 => val1, ...}' do
     should "return path that matches nodes w attrs matching chars casing & with space normalized" do
       expected, attrs = ['BR'], {:id => 'BoNobo', :class => 'Red'}
-      @contents[XPathFu.send(@element, *@args[attrs])].should.equal expected
+      @contents[XPF.send(@element, *@args[attrs])].should.equal expected
       @contents[xpf(@element, *@args[attrs])].should.equal expected
     end
     should "return path that does not match nodes due to normalized space" do
       attrs = {:id => 'BoNobo ', :class => ' Red'}
-      @contents[XPathFu.send(@element, *@args[attrs])].should.be.empty
+      @contents[XPF.send(@element, *@args[attrs])].should.be.empty
       @contents[xpf(@element, *@args[attrs])].should.be.empty
     end
     should "return path that does not match nodes due to chars casing" do
       attrs = {:id => 'bonobo', :class => 'red'}
-      @contents[XPathFu.send(@element, *@args[attrs])].should.be.empty
+      @contents[XPF.send(@element, *@args[attrs])].should.be.empty
       @contents[xpf(@element, *@args[attrs])].should.be.empty
     end
   end
@@ -101,12 +101,12 @@ shared 'has generic :match_attrs_hash support' do
       end
       should "return scoped path ignoring chars casing" do
         expected = "#{@scope || '//'}#{@element}[%s]" % @attrs.map {|k,v| @condition[k,v] }.join('][')
-        XPathFu.send(@element, *@args[]).should.equal expected
+        XPF.send(@element, *@args[]).should.equal expected
         xpf(@element, *@args[]).should.equal expected
       end
       should "return path that matches nodes" do
         expected = ['BR']
-        @contents[XPathFu.send(@element, *@args[])].should.equal expected
+        @contents[XPF.send(@element, *@args[])].should.equal expected
         @contents[xpf(@element, *@args[])].should.equal expected
       end
     end
@@ -120,12 +120,12 @@ shared 'has generic :match_attrs_hash support' do
       end
       should "return scoped path not normalizing space" do
         expected = "#{@scope || '//'}#{@element}[%s]" % @attrs.map {|k,v| @condition[k,v] }.join('][')
-        XPathFu.send(@element, *@args[]).should.equal expected
+        XPF.send(@element, *@args[]).should.equal expected
         xpf(@element, *@args[]).should.equal expected
       end
       should "return path that matches nodes" do
         expected = ['BR']
-        @contents[XPathFu.send(@element, *@args[])].should.equal expected
+        @contents[XPF.send(@element, *@args[])].should.equal expected
         @contents[xpf(@element, *@args[])].should.equal expected
       end
     end
@@ -139,12 +139,12 @@ shared 'has generic :match_attrs_hash support' do
       end
       should "return scoped path with specified position" do
         expected = "#{@scope || '//'}#{@element}[%s][2]" % @attrs.map {|k,v| @condition[k,v] }.join('][')
-        XPathFu.send(@element, *@args[]).should.equal expected
+        XPF.send(@element, *@args[]).should.equal expected
         xpf(@element, *@args[]).should.equal expected
       end
       should "return path that matches nodes" do
         expected = ['DB']
-        @contents[XPathFu.send(@element, *@args[])].should.equal expected
+        @contents[XPF.send(@element, *@args[])].should.equal expected
         @contents[xpf(@element, *@args[])].should.equal expected
       end
     end

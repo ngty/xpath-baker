@@ -1,11 +1,11 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-require 'xpathfu/version'
-require 'xpathfu/configuration'
-require 'xpathfu/arguments_parsing'
-require 'xpathfu/path_building'
+require 'xpf/version'
+require 'xpf/configuration'
+require 'xpf/arguments_parsing'
+require 'xpf/path_building'
 
-module XPathFu
+module XPF
 
   class ModeAlreadyDeclaredError < Exception ; end
 
@@ -22,15 +22,15 @@ module XPathFu
       unless (@friends ||= []).include?(someone)
         if someone.method_defined?(:xpf)
           $stdout.puts %w{
-            WARNING: XPathFu wants to befriend %s by giving it a shortcut method xpf(),
-            but %s#xpf has already been defined. Neverthless, the rejected XPathFu
-            stays friendly & XPathFu's goodies can still be accessed via the more verbose
-            XPathFu.* (eg. XPathfu.tr).
+            WARNING: XPF wants to befriend %s by giving it a shortcut method xpf(),
+            but %s#xpf has already been defined. Neverthless, the rejected XPF
+            stays friendly & XPF's goodies can still be accessed via the more verbose
+            XPF.* (eg. XPathfu.tr).
           }.join(' ') % ([someone]*2)
         else
           @friends << someone
           someone.send(:define_method, :xpf) do |element, *args|
-            XPathFu.send(element, *args)
+            XPF.send(element, *args)
           end
         end
       end
@@ -51,4 +51,4 @@ module XPathFu
 end
 
 # NOTE: This is not tested !!
-XPathFu.befriends(Object)
+XPF.befriends(Object)

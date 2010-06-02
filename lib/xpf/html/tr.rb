@@ -1,4 +1,4 @@
-module XPathFu
+module XPF
   module HTML
     module Tr
 

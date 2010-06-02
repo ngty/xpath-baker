@@ -1,4 +1,4 @@
-module XPathFu
+module XPF
 
   class ConfigSettingNotSupportedError < Exception ; end
 

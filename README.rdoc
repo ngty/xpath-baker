@@ -1,4 +1,4 @@
-= xpathfu
+= xpf
 
 Description goes here.
 
