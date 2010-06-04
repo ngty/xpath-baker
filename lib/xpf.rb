@@ -13,10 +13,26 @@ module XPF
     include PathBuilding
     include ArgumentsParsing
 
+    ###
+    # Applies global custom configuration.
+    #
+    #   XPF.configure do |config|
+    #     # This will turn off case senstive matching, all xpath generated will
+    #     # ignore chars casing
+    #     config.case_sensitive = false
+    #   end
+    #
+    # For a full list of configurable settings, see XPF::Configuration.
+    #
     def configure(&blk)
       yield(Configuration)
     end
 
+    ###
+    # Befriending simply means adding the shortcut method xpf() to +someone+. If
+    # +someone+ already has that method, a warning will be issued & no addition
+    # is done. Currently, the only use case is to add xpf() to Object.
+    #
     def befriends(someone)
       unless (@friends ||= []).include?(someone)
         if someone.method_defined?(:xpf)
@@ -37,6 +53,10 @@ module XPF
 
     protected
 
+      ###
+      # This is to avoid XPF from running in multiple modes. Once mode has been declared
+      # redeclaring will raise XPF::ModeAlreadyDeclaredError.
+      #
       def declare_mode_as(mode)
         if const_defined?(:MODE)
           raise ModeAlreadyDeclaredError.new("Mode has already been declared as :#{MODE} !!")
