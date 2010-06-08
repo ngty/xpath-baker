@@ -129,7 +129,7 @@ module XPF
       end
 
       ###
-      # Creates & returns a Configuration, customized by +settings+ hash.
+      # Duplicates a copy of Configuration, further customized by +settings+ hash.
       #
       # Raises:
       # * ConfigSettingNotSupportedError if any of the setting is not supported
@@ -145,6 +145,15 @@ module XPF
           config.send(setter, val)
         end
         config
+      end
+
+      ###
+      # Returns configured settings as a hash.
+      #
+      def to_hash
+        DEFAULT_SETTINGS.keys.inject({}) do |memo, setting|
+          memo.merge(setting => send(setting))
+        end
       end
 
       private

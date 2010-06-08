@@ -95,39 +95,39 @@ describe "XPF::Configuration" do
     end
   end
 
-#  describe '> merging with a settings hash' do
-#
-#    before do
-#      @orig_settings = {
-#        :normalize_space => 'aa',
-#        :include_inner_text => 'bb',
-#        :match_ordering => 'cc',
-#        :case_sensitive => 'dd',
-#        :position => 'ee'
-#      }
-#      @orig_settings.each {|setting, val| XPF::Configuration.send(:"#{setting}=", val) }
-#      @should_have_equal_settings = lambda do |configuration, expected_hash|
-#        expected_hash.each {|setting, val| configuration.send(setting).should == val }
-#      end
-#    end
-#
-#    should 'duplicate a copy of itself' do
-#      configuration = XPF::Configuration.merge({})
-#      @should_have_equal_settings[configuration, @orig_settings]
-#      configuration.object_id.should.not.equal XPF::Configuration
-#    end
-#
-#    should 'have hash overrides its settings' do
-#      configuration = XPF::Configuration.merge(settings_hash = {:normalize_space => 'ee'})
-#      @should_have_equal_settings[configuration, @orig_settings.merge(settings_hash)]
-#    end
-#
-#    should 'raise XPF::ConfigSettingNotSupportedError if unsupported setting is specified' do
-#      lambda { XPF::Configuration.merge(:hello => 'ee') }.
-#        should.raise(XPF::ConfigSettingNotSupportedError).
-#        message.should.equal('Config setting :hello is not supported !!')
-#    end
-#
-#  end
+  describe '> converting to hash' do
+    should 'return configured settings as a hash' do
+      XPF::Configuration.to_hash.should.equal XPF::Configuration::DEFAULT_SETTINGS
+    end
+  end
+
+  describe '> getting a new configuration' do
+
+    should 'duplicate a copy of itself' do
+      configuration = XPF::Configuration.new({})
+      configuration.to_hash.should.equal XPF::Configuration.to_hash
+      configuration.object_id.should.not.equal XPF::Configuration
+    end
+
+    should 'have hash overrides its settings' do
+      orig_settings = XPF::Configuration.to_hash
+      normalize_space_val = !orig_settings[:normalize_space]
+      configuration = XPF::Configuration.new(:normalize_space => normalize_space_val)
+      configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
+    end
+
+    should 'raise XPF::ConfigSettingNotSupportedError if unsupported setting is specified' do
+      lambda { XPF::Configuration.new(:hello => 'ee') }.
+        should.raise(XPF::ConfigSettingNotSupportedError).
+        message.should.equal('Config setting :hello is not supported !!')
+    end
+
+    should 'raise XPF::InvalidConfigSettingValueError if setting is assigned invalid value' do
+      lambda { XPF::Configuration.new(:case_sensitive => 'ee') }.
+        should.raise(XPF::InvalidConfigSettingValueError).
+        message.should.equal('Config setting :case_sensitive must be boolean true/false !!')
+    end
+
+  end
 
 end
