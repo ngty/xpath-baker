@@ -7,6 +7,7 @@ require 'xpf/path_building'
 module XPF
 
   class ModeAlreadyDeclaredError < Exception ; end
+  class InvalidConfigModeError   < Exception ; end
 
   class << self
 
@@ -14,7 +15,9 @@ module XPF
     include ArgumentsParsing
 
     ###
-    # Applies global custom configuration.
+    # Do configuration, which can be:
+    #
+    # 1). Customize global configuration (see Configuration for all configurable settings):
     #
     #   XPF.configure do |config|
     #     # This will turn off case senstive matching, all xpath generated will
@@ -22,16 +25,32 @@ module XPF
     #     config.case_sensitive = false
     #   end
     #
-    # For a full list of configurable settings, see XPF::Configuration.
+    # 2). Reset configuration to default:
     #
-    def configure(&blk)
-      yield(Configuration)
+    #   XPF.configure(:reset)
+    #
+    def configure(mode = :update, &blk)
+      case mode
+      when :update then yield(Configuration)
+      when :reset then Configuration.reset
+      else raise InvalidConfigModeError.new("Config mode :#{mode} is not supported !!")
+      end
     end
 
     ###
     # Befriending simply means adding the shortcut method xpf() to +someone+. If
     # +someone+ already has that method, a warning will be issued & no addition
-    # is done. Currently, the only use case is to add xpf() to Object.
+    # is done.
+    #
+    # When xpf() is available, using XPF can be shortened to:
+    #
+    #   xpf(:tr, ...)
+    #
+    # Which has exactly the same effect as:
+    #
+    #   XPF.tr(...)
+    #
+    # Currently, the only use case is to add xpf() to Object.
     #
     def befriends(someone)
       unless (@friends ||= []).include?(someone)
