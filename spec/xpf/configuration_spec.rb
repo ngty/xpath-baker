@@ -69,6 +69,32 @@ describe "XPF::Configuration" do
     end
   end
 
+  describe '> configuring (with reset mode)' do
+    {
+      :case_sensitive     => [true, false],
+      :match_ordering     => [true, false],
+      :include_inner_text => [true, false],
+      :normalize_space    => [true, false],
+      :position           => [nil, 10],
+      :axis               => [:self, :following],
+    }.each do |setting, args|
+      default_val, custom_val = args
+      should "revert customized :#{setting} to default" do
+        XPF.configure {|config| config.send(:"#{setting}=", custom_val) }
+        XPF.configure(:reset)
+        XPF.configure {|config| config.send(:"#{setting}").should.equal default_val }
+      end
+    end
+  end
+
+  describe '> configuring (with invalid mode)' do
+    should 'raise XPF::InvalidConfigModeError' do
+      lambda { XPF.configure(:watever) }.
+        should.raise(XPF::InvalidConfigModeError).
+        message.should.equal('Config mode :watever is not supported !!')
+    end
+  end
+
 #  describe '> merging with a settings hash' do
 #
 #    before do
