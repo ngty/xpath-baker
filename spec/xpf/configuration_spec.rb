@@ -8,6 +8,7 @@ describe "XPF::Configuration" do
       :match_ordering     => [true, 'true'],
       :include_inner_text => [true, 'true'],
       :normalize_space    => [true, 'true'],
+      :scope              => ['//', '//'],
       :position           => [nil, 'nil'],
       :axis               => [:self, ':self']
     }.each do |setting, args|
@@ -24,6 +25,7 @@ describe "XPF::Configuration" do
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
       :normalize_space    => [true, false],
+      :scope              => ['/', '/watever'],
       :position           => [nil, 1, 10],
       :axis               => %w{
         ancestor ancestor_or_self child descendant descendant_or_self following
@@ -75,6 +77,7 @@ describe "XPF::Configuration" do
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
       :normalize_space    => [true, false],
+      :scope              => ['//', '/'],
       :position           => [nil, 10],
       :axis               => [:self, :following],
     }.each do |setting, args|
