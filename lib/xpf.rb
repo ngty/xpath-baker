@@ -70,7 +70,7 @@ module XPF
       # This is to avoid XPF from running in multiple modes. Once mode has been declared
       # redeclaring will raise XPF::ModeAlreadyDeclaredError.
       #
-      def declare_mode_as(mode)
+      def declare_mode_as(mode) #:nodoc:
         if const_defined?(:MODE)
           raise ModeAlreadyDeclaredError.new("Mode has already been declared as :#{MODE} !!")
         else
