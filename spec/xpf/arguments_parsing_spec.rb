@@ -1,81 +1,27 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 class << XPF
-  attr_writer :config
-  public :parse_args, :config, :scope
+  public :parse_args
 end
 
 describe "XPF::ArgumentsParsing" do
-
-  describe '> with :scope, :match_attrs & :config' do
-
-    before do
-      @scope = '//aa/bb/'
-      @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
-      @config = {:case_sensitive => 'aa'}
-      @parse_args = lambda { XPF.parse_args(@scope, @match_attrs, @config) }
-    end
-
-    should 'set config as specified' do
-      @parse_args[]
-      XPF.config.case_sensitive.should.equal @config[:case_sensitive]
-    end
-
-    should 'set scope as specified' do
-      @parse_args[]
-      XPF.scope.should.equal @scope
-    end
-
-    should 'return match attrs' do
-      @parse_args[].should.equal @match_attrs
-    end
-
-  end
 
   describe '> with :match_attrs & :config' do
 
     before do
       @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
-      @config = {:case_sensitive => 'aa'}
+      @config = {:scope => '//watever'}
       @parse_args = lambda { XPF.parse_args(@match_attrs, @config) }
     end
 
-    should 'set config as specified' do
-      @parse_args[]
-      XPF.config.case_sensitive.should.equal @config[:case_sensitive]
-    end
-
-    should "set scope as default '//'" do
-      @parse_args[]
-      XPF.scope.should.equal '//'
+    should 'return config as specified' do
+      _, config = @parse_args[]
+      config.scope.should.equal @config[:scope]
     end
 
     should 'return match attrs' do
-      @parse_args[].should.equal @match_attrs
-    end
-
-  end
-
-  describe '> with :scope & :match_attrs' do
-
-    before do
-      @match_attrs = {:attr1 => 'val1', :attr2 => 'val2'}
-      @scope = '//aa/bb/'
-      @parse_args = lambda { XPF.parse_args(@scope, @match_attrs) }
-    end
-
-    should 'set config as default' do
-      @parse_args[]
-      XPF.config.case_sensitive.should.equal true
-    end
-
-    should "set scope as specified" do
-      @parse_args[]
-      XPF.scope.should.equal @scope
-    end
-
-    should 'return match attrs' do
-      @parse_args[].should.equal @match_attrs
+      match_attrs, _ = @parse_args[]
+      match_attrs.should.equal @match_attrs
     end
 
   end
@@ -87,41 +33,14 @@ describe "XPF::ArgumentsParsing" do
       @parse_args = lambda { XPF.parse_args(@match_attrs) }
     end
 
-    should 'set config as default' do
-      @parse_args[]
-      XPF.config.case_sensitive.should.equal true
-    end
-
-    should "set scope as default '//'" do
-      @parse_args[]
-      XPF.scope.should.equal '//'
+    should 'return config as default' do
+      _, config = @parse_args[]
+      config.scope.should.equal XPF::Configuration.scope
     end
 
     should 'return match attrs' do
-      @parse_args[].should.equal @match_attrs
-    end
-
-  end
-
-  describe '> with :scope' do
-
-    before do
-      @scope = '//aa/bb/'
-      @parse_args = lambda { XPF.parse_args(@scope) }
-    end
-
-    should 'set config as default' do
-      @parse_args[]
-      XPF.config.case_sensitive.should.equal true
-    end
-
-    should "set scope as specified" do
-      @parse_args[]
-      XPF.scope.should.equal @scope
-    end
-
-    should 'return match attrs' do
-      @parse_args[].should.equal({})
+      match_attrs, _ = @parse_args[]
+      match_attrs.should.equal @match_attrs
     end
 
   end
@@ -132,18 +51,14 @@ describe "XPF::ArgumentsParsing" do
       @parse_args = lambda { XPF.parse_args }
     end
 
-    should 'set config as default' do
-      @parse_args[]
-      XPF.config.case_sensitive.should.equal true
-    end
-
-    should "set scope as specified" do
-      @parse_args[]
-      XPF.scope.should.equal '//'
+    should 'return config as default' do
+      _, config = @parse_args[]
+      config.scope.should.equal XPF::Configuration.scope
     end
 
     should 'return match attrs' do
-      @parse_args[].should.equal({})
+      match_attrs, _ = @parse_args[]
+      match_attrs.should.equal({})
     end
 
   end
@@ -153,27 +68,25 @@ describe "XPF::ArgumentsParsing" do
     before do
       @message =
         'Expecting one of the following argument(s) group:, ' +
-        '(1) scope_str, match_attrs_hash & :config_hash, ' +
-        '(2) match_attrs_hash & :config_hash, ' +
-        '(3) match_attrs_hash, ' +
-        '(4) scope_str, ' +
-        '(5) (no args)'
+        '(1) match_attrs_hash & :config_hash, ' +
+        '(2) match_attrs_hash, ' +
+        '(3) (no args)'
     end
 
     should 'raise XPF::InvalidArgumentError when :match_attrs_hash is specified but not a Hash' do
-      lambda { XPF.parse_args('//aa/bb/', [], {}) }.
+      lambda { XPF.parse_args([], {}) }.
         should.raise(XPF::InvalidArgumentError).
         message.should.equal @message
     end
 
     should 'raise XPF::InvalidArgumentError when :config_hash is specified but not a Hash' do
-      lambda { XPF.parse_args('//aa/bb/', {}, []) }.
+      lambda { XPF.parse_args({}, []) }.
         should.raise(XPF::InvalidArgumentError).
         message.should.equal @message
     end
 
-    should 'raise XPF::InvalidArgumentError when more than 3 args are specified' do
-      lambda { XPF.parse_args('//aa/bb/', {}, {}, nil) }.
+    should 'raise XPF::InvalidArgumentError when more than 2 args are specified' do
+      lambda { XPF.parse_args({}, {}, nil) }.
         should.raise(XPF::InvalidArgumentError).
         message.should.equal @message
     end
