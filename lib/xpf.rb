@@ -38,34 +38,28 @@ module XPF
     end
 
     ###
-    # Befriending simply means adding the shortcut method xpf() to +someone+. If
-    # +someone+ already has that method, a warning will be issued & no addition
-    # is done.
+    # Befriending simply means introducing the easier to type +someone.xpf+. If +someone+
+    # already has that method, a warning will be issued & no addition is done.
     #
-    # When xpf() is available, using XPF can be shortened to:
+    # Currently, the only use case is to add xpf() to Object, thus usage becomes:
     #
-    #   xpf(:tr, ...)
+    #   xpf.tr(...)
     #
     # Which has exactly the same effect as:
     #
     #   XPF.tr(...)
     #
-    # Currently, the only use case is to add xpf() to Object.
-    #
     def befriends(someone)
       unless (@friends ||= []).include?(someone)
         if someone.method_defined?(:xpf)
           $stdout.puts %w{
-            WARNING: XPF wants to befriend %s by giving it a shortcut method xpf(),
-            but %s#xpf has already been defined. Neverthless, the rejected XPF
-            stays friendly & XPF's goodies can still be accessed via the more verbose
-            XPF.* (eg. XPathfu.tr).
+            WARNING: XPF wants to befriend %s by giving it a shortcut method xpf(), but
+            %s#xpf has already been defined. Neverthless, the rejected XPF stays friendly
+            & XPF's goodies can still be accessed via the less easy to type XPF.*.
           }.join(' ') % ([someone]*2)
         else
           @friends << someone
-          someone.send(:define_method, :xpf) do |element, *args|
-            XPF.send(element, *args)
-          end
+          someone.send(:define_method, :xpf, lambda { XPF })
         end
       end
     end
@@ -86,7 +80,8 @@ module XPF
 
   end
 
+  # NOTE: This is not tested !!
+  XPF.befriends(Object)
+
 end
 
-# NOTE: This is not tested !!
-XPF.befriends(Object)
