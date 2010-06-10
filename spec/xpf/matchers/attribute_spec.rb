@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
 describe "XPF::Matchers::Attribute" do
 
-  describe '> generating condition' do
+  describe '> generating condition (with valid value)' do
 
     before do
       uc, lc = [('A'..'Z'), ('a'..'z')].map {|r| r.to_a.join('') }
@@ -35,6 +35,27 @@ describe "XPF::Matchers::Attribute" do
     should 'elegantly handle quoting of value with double quote (")' do
       @val = 'val-"x"'
       @condition_should_equal[{}, %|normalize-space(@#{@name})=concat("val-",'"',"x",'"',"")|]
+    end
+
+  end
+
+  describe '> generating condition (with invalid value NIL_VALUE)' do
+
+    before do
+      @name, @val = 'attr-x', XPF::Matchers::Matchable::NIL_VALUE
+      @default = %|normalize-space(@#{@name})|
+      @condition_should_equal = lambda do |config, expected|
+        XPF::Matchers::Attribute.new(@name, @val, XPF::Configuration.new(config)).
+          condition.should.equal(expected)
+      end
+    end
+
+    should 'have space normalized when config[:normalize_space] is true' do
+      @condition_should_equal[{:normalize_space => true}, @default]
+    end
+
+    should 'not have space normalized when config[:normalize_space] is false' do
+      @condition_should_equal[{:normalize_space => false}, %|@#{@name}|]
     end
 
   end

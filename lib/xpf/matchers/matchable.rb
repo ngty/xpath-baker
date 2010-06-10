@@ -4,6 +4,7 @@ module XPF
 
       LOWERCASE_CHARS = ('a'..'z').to_a * ''
       UPPERCASE_CHARS = ('A'..'Z').to_a * ''
+      NIL_VALUE = Struct.new('NIL_VALUE')
 
       def c(str)
         config.case_sensitive ? str :
@@ -22,6 +23,10 @@ module XPF
 
       def t
         config.include_inner_text ? '.' : 'text()'
+      end
+
+      def nil_value
+        NIL_VALUE
       end
 
     end

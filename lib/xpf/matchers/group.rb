@@ -19,8 +19,9 @@ module XPF
       private
 
         def convert_to_matchers(match_attrs, config)
-          match_attrs.map do |name, value|
-            name == :text ?  Text.new(value, config) : Attribute.new(name, value, config)
+          match_attrs.to_a.map do |args|
+            name, val = args.is_a?(Array) ? args : [args, nil_value]
+            name == :text ?  Text.new(val, config) : Attribute.new(name, val, config)
           end
         end
 

@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
 describe "XPF::Matchers::Text" do
 
-  describe '> generating condition' do
+  describe '> generating condition (with valid value)' do
 
     before do
       uc, lc = [('A'..'Z'), ('a'..'z')].map {|r| r.to_a.join('') }
@@ -43,6 +43,35 @@ describe "XPF::Matchers::Text" do
     should 'elegantly handle quoting of value with double quote (")' do
       @val = 'text-"x"'
       @condition_should_equal[{}, %|normalize-space(.)=concat("text-",'"',"x",'"',"")|]
+    end
+
+  end
+
+  describe '> generating condition (with invalid value NIL_VALUE)' do
+
+    before do
+      @val = XPF::Matchers::Matchable::NIL_VALUE
+      @default = %|normalize-space(.)|
+      @condition_should_equal = lambda do |config, expected|
+        XPF::Matchers::Text.new(@val, XPF::Configuration.new(config)).
+          condition.should.equal(expected)
+      end
+    end
+
+    should 'have space normalized when config[:normalize_space] is true' do
+      @condition_should_equal[{:normalize_space => true}, @default]
+    end
+
+    should 'not have space normalized when config[:normalize_space] is false' do
+      @condition_should_equal[{:normalize_space => false}, %|.|]
+    end
+
+    should 'include inner text when config[:include_inner_text] is true' do
+      @condition_should_equal[{:include_inner_text => true}, @default]
+    end
+
+    should 'not include inner text when config[:include_inner_text] is false' do
+      @condition_should_equal[{:include_inner_text => false}, %|normalize-space(text())|]
     end
 
   end
