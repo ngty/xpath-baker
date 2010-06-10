@@ -110,6 +110,7 @@ module XPF
   # </tr>
   # </table>
   #
+  # TODO: This part needs to be updated !!
   # 5). *axis* specifies the matched node-set w.r.t the current reference node:
   #
   # <table>
@@ -267,13 +268,19 @@ module XPF
         end
 
         def is_valid_axis!(setting, val)
-          axes = %w{
-            ancestor ancestor_or_self child descendant descendant_or_self following
-            following_sibling namespace parent preceding preceding_sibling self
-          }.map(&:to_sym)
-          msg = "Config setting :#{setting} must be any of :%s & :%s !!" %
-            [axes[0..-2].map(&:to_s).join(', :'), axes[-1]]
-          fail_unless(msg) { axes.include?(val) }
+          axes = ''
+          # TODO: This part needs to be updated !! Cos we wanna support:
+          # * :ancestor, :ancestor_or_self
+          # * 'ancestor', 'ancestor-or-self', ...
+          # * 'ancestor::*', 'ancestor-or-self::*'
+          #
+#          axes = %w{
+#            ancestor ancestor_or_self child descendant descendant_or_self following
+#            following_sibling namespace parent preceding preceding_sibling self
+#          }.map(&:to_sym)
+#          msg = "Config setting :#{setting} must be any of :%s & :%s !!" %
+#            [axes[0..-2].map(&:to_s).join(', :'), axes[-1]]
+#          fail_unless(msg) { axes.include?(val) }
         end
 
         def fail_unless(msg, error = InvalidConfigSettingValueError)
