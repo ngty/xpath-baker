@@ -12,8 +12,8 @@ module XPF
       end
 
       def condition
-        matchers.empty? ? nil :
-          './%s[%s]' % [config.axis, matchers.map(&:condition).join('][')]
+        (matchers.empty? ? './%s' : './%s[%s]') %
+          [config.axis, matchers.map(&:condition).join('][')]
       end
 
       private
