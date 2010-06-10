@@ -1,7 +1,5 @@
 module XPF
 
-  class InvalidAxisNodeError < Exception ; end
-
   module Matchers
 
     class Group < Matcher(:matchers, :config)
