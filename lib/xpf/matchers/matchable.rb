@@ -25,6 +25,10 @@ module XPF
         config.include_inner_text ? '.' : 'text()'
       end
 
+      def p(str)
+        (pos = config.position).nil? ? str : "#{str}[#{pos}]"
+      end
+
       def nil_value
         NIL_VALUE
       end

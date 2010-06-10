@@ -15,6 +15,10 @@ describe "XPF::Matchers::Group" do
       @condition_should_equal[{}, {:axis => 'attribute::x'}, './attribute::x']
     end
 
+    should 'return expr that reflect position if config[:position] is specified' do
+      @condition_should_equal[{}, {:axis => 'descendant::x', :position => 1}, './descendant::x[1]']
+    end
+
     should 'return expr that reflect text condition if match attrs is {:text => ..., ...}' do
       expected = './descendant::*[normalize-space(.)="text-x"]'
       @condition_should_equal[{:text => 'text-x'}, {:axis => 'descendant::*'}, expected]
