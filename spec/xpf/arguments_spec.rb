@@ -116,6 +116,7 @@ describe 'XPF::Arguments' do
     class << XPF::Arguments
       alias_method :orig_new_matcher, :new_matcher
       def new_matcher(match_attrs, config) ; [match_attrs, config] ; end
+      def new_config(config) ; config ; end
     end
     @parse = lambda {|args| XPF::Arguments.parse(*args) }
   end
@@ -132,12 +133,16 @@ describe 'XPF::Arguments' do
       @parsed_args = @parse[[]]
     end
 
+    should 'return config as default' do
+      @parsed_args.last.should.equal({})
+    end
+
     should 'return matcher w config as default' do
-      @parsed_args.map(&:last).should.equal([{}])
+      @parsed_args.first.map(&:last).should.equal([{}])
     end
 
     should 'return matcher w match attrs as empty' do
-      @parsed_args.map(&:first).should.equal([{}])
+      @parsed_args.first.map(&:first).should.equal([{}])
     end
 
   end
@@ -145,15 +150,20 @@ describe 'XPF::Arguments' do
   describe '> parsing (w only a config arg)' do
 
     before do
-      @parsed_args = @parse[[{:position => 9}]]
+      @config = {:position => 9}
+      @parsed_args = @parse[[@config]]
     end
 
-    should 'return matcher w config as default' do
-      @parse[[config = {:position => 9}]].map(&:last).should.equal([config])
+    should 'return config as specified' do
+      @parsed_args.last.should.equal(@config)
+    end
+
+    should 'return matcher w config as specified' do
+      @parsed_args.first.map(&:last).should.equal([@config])
     end
 
     should 'return matcher w match attrs as empty' do
-      @parse[[{:position => 9}]].map(&:first).should.equal([{}])
+      @parsed_args.first.map(&:first).should.equal([{}])
     end
 
   end
@@ -162,13 +172,18 @@ describe 'XPF::Arguments' do
     describe "> parsing valid args (#{mode} custom default config)" do
       xpf_valid_permutated_arguments.each do |type, args|
 
+        should "return config as specified ... \##{type}" do
+          @parse[args + (default_config.empty? ? [] : [default_config])].last.
+            should.equal(default_config)
+        end
+
         should "return matchers w configs as specified ... \##{type}" do
-          @parse[args + (default_config.empty? ? [] : [default_config])].map(&:last).should.
+          @parse[args + (default_config.empty? ? [] : [default_config])].first.map(&:last).should.
             equal(args.map{|arg| arg[1] || default_config })
         end
 
         should "return matchers w match attrs as specified ... \##{type}" do
-          @parse[args + (default_config.empty? ? [] : [default_config])].map(&:first).should.
+          @parse[args + (default_config.empty? ? [] : [default_config])].first.map(&:first).should.
             equal(args.map{|arg| arg[0].is_a?(Hash) ? arg[0] : (arg[0].is_a?(Array) ? arg[0] : arg) })
         end
 
