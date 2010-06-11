@@ -142,6 +142,22 @@ describe 'XPF::Arguments' do
 
   end
 
+  describe '> parsing (w only a config arg)' do
+
+    before do
+      @parsed_args = @parse[[{:position => 9}]]
+    end
+
+    should 'return matcher w config as default' do
+      @parse[[config = {:position => 9}]].map(&:last).should.equal([config])
+    end
+
+    should 'return matcher w match attrs as empty' do
+      @parse[[{:position => 9}]].map(&:first).should.equal([{}])
+    end
+
+  end
+
   {'w'  => {:position => 9}, 'wo' => {}}.each do |mode, default_config|
     describe "> parsing valid args (#{mode} custom default config)" do
       xpf_valid_permutated_arguments.each do |type, args|

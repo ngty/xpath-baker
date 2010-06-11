@@ -7,7 +7,7 @@ module XPF
         if args.empty?
           matchers([{}], {})
         elsif args.size == 1
-          matchers(args[0..0], {})
+          is_config?(args[0]) ? matchers([{}], args[0]) : matchers(args[0..0], {})
         elsif is_config?(config = args[-1])
           matchers(args[0..-2], config)
         elsif args.all?{|arg| is_match_attrs?(arg) }
