@@ -114,9 +114,15 @@ describe 'XPF::Arguments' do
 
   before do
     class << XPF::Arguments
+      alias_method :orig_new_config, :new_config
       alias_method :orig_new_matcher, :new_matcher
-      def new_matcher(match_attrs, config) ; [match_attrs, config] ; end
       def new_config(config) ; config ; end
+      def new_matcher(match_attrs, config)
+        def (matcher = [match_attrs, config]).condition
+          !self.first.empty? or nil
+        end
+        matcher
+      end
     end
     @parse = lambda {|args| XPF::Arguments.parse(*args) }
   end
@@ -124,6 +130,7 @@ describe 'XPF::Arguments' do
   after do
     class << XPF::Arguments
       alias_method :new_matcher, :orig_new_matcher
+      alias_method :new_config, :orig_new_config
     end
   end
 
@@ -137,12 +144,8 @@ describe 'XPF::Arguments' do
       @parsed_args.last.should.equal({})
     end
 
-    should 'return matcher w config as default' do
-      @parsed_args.first.map(&:last).should.equal([{}])
-    end
-
-    should 'return matcher w match attrs as empty' do
-      @parsed_args.first.map(&:first).should.equal([{}])
+    should 'return zero matcher' do
+      @parsed_args.first.should.be.empty
     end
 
   end
@@ -158,12 +161,8 @@ describe 'XPF::Arguments' do
       @parsed_args.last.should.equal(@config)
     end
 
-    should 'return matcher w config as specified' do
-      @parsed_args.first.map(&:last).should.equal([@config])
-    end
-
-    should 'return matcher w match attrs as empty' do
-      @parsed_args.first.map(&:first).should.equal([{}])
+    should 'return zero matcher' do
+      @parsed_args.first.should.be.empty
     end
 
   end

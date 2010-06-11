@@ -37,7 +37,7 @@ module XPF
             else
               raise_args_err(__LINE__)
             end
-          end
+          end.reject {|matcher| matcher.condition.nil? }
         end
 
         def new_matcher(*args)
