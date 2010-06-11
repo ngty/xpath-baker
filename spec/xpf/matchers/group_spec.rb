@@ -43,6 +43,11 @@ describe "XPF::Matchers::Group" do
       @condition_should_equal[[:attr], {:axis => 'descendant::*'}, expected]
     end
 
+    should "return expr that reflect expr as literal if match attrs is ['position()=99', ...]" do
+      expected = './descendant::*[position()=99]'
+      @condition_should_equal[['position()=99'], {:axis => 'descendant::*'}, expected]
+    end
+
   end
 
 end

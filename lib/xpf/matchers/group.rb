@@ -19,11 +19,24 @@ module XPF
       private
 
         def convert_to_matchers(match_attrs, config)
-          text_klass, attr_klass = [:text_matcher, :attr_matcher].map {|s| config.send(s) }
-          match_attrs.to_a.map do |args|
-            name, val = args.is_a?(Array) ? args : [args, nil_value]
-            name == :text ? text_klass.new(val, config) : attr_klass.new(name, val, config)
+          convert = match_attrs.is_a?(Hash) ? :convert_hash_to_matchers : :convert_array_to_matchers
+          send(convert, match_attrs, config)
+        end
+
+        def convert_hash_to_matchers(match_attrs, config)
+          match_attrs.map {|name, val| text_or_attr_matcher(name, val, config) }
+        end
+
+        def convert_array_to_matchers(match_attrs, config)
+          match_attrs.map do |name_or_val|
+            name_or_val.is_a?(String) ? config.literal_matcher.new(name_or_val, config) :
+              text_or_attr_matcher(name_or_val, nil_value, config)
           end
+        end
+
+        def text_or_attr_matcher(name, val, config)
+          name == :text ? config.text_matcher.new(val, config) :
+            config.attribute_matcher.new(name, val, config)
         end
 
     end
