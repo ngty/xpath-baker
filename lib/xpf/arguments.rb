@@ -1,17 +1,5 @@
 module XPF
 
-  ###
-  # Usage:
-  #
-  # * parse_args({:attr => val, :text => text})
-  # * parse_args({:attr => val, :text => text}, {CONFIG})
-  # * parse_args([{:attr => val, :text => text}, {CONFIG}])
-  # * parse_args([{:attr => val, :text => text}], [{:attr => val, :text => text}])
-  # * parse_args([{:attr => val, :text => text}], [{:attr => val, :text => text}, {CONFIG}])
-  # * parse_args([{:attr => val, :text => text}, {CONFIG}], [{:attr => val, :text => text}, {CONFIG}], ...)
-  #
-  #
-  #
   module Arguments
     class << self
 
@@ -64,8 +52,15 @@ module XPF
           [Hash, Array].any?{|klass| arg.is_a?(klass) }
         end
 
-        def raise_args_err(line)
-          raise InvalidArgumentError.new(line)
+        def raise_args_err(debug_line)
+          raise InvalidArgumentError.new(%W|
+            Expecting arguments to contain any permutations of the following fragments: \n
+            (1) [{:attr1 => ..., ...}, {CONFIG}] and/or \n
+            (2) [[:attr1, ...], {CONFIG}] and/or \n
+            (3) {:attr1 => ..., ...} and/or \n
+            (4) [:attr1, ...] and/or \n
+            (5) {CONFIG} (*must be last if present)
+          |.join(' ').squeeze(' '))
         end
 
     end
