@@ -10,8 +10,10 @@ module XPF
       end
 
       def condition
-        (matchers.empty? ? './%s' : './%s[%s]') %
-          [p(config.axis), matchers.map(&:condition).join('][')]
+        unless [matchers.empty?, config.axis.to_s =~ /^self/].all?
+          (matchers.empty? ? './%s' : './%s[%s]') %
+            [p(config.axis), matchers.map(&:condition).join('][')]
+        end
       end
 
       private
