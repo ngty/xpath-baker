@@ -1,14 +1,16 @@
 module XPF
+
+  class InvalidMatchAttrError < Exception ; end
+
   module Matchers
     class << self
-
       def Matcher(*attrs)
         klass, setters = Struct.new(*attrs), attrs.map {|attr| :"#{attr}=" }
         klass.send(:include, Matchable).send(:private, *setters)
       end
-
     end
   end
+
 end
 
 require 'xpf/matchers/matchable'
