@@ -125,6 +125,7 @@ describe 'XPF::Arguments' do
       end
     end
     @parse = lambda {|args| XPF::Arguments.parse(*args) }
+    @parse_w_config = lambda {|args, config| XPF::Arguments.parse_with_config(args, config) }
   end
 
   after do
@@ -209,6 +210,26 @@ describe 'XPF::Arguments' do
 
       end
     end
+  end
+
+  describe '> parsing with config' do
+
+    should 'parse with adding of config to args-specified config' do
+      config = {:position => 9}
+      @parse_w_config[[[:attr1]], config].first.map(&:last).should.equal([config])
+    end
+
+    should 'parse with args-specified config overriding that in config' do
+      args_config, config = {:position => 8}, {:position => 9}
+      @parse_w_config[[[:attr1], args_config], config].first.map(&:last).should.equal([args_config])
+    end
+
+    should 'not be affected by any previous parse' do
+      previous, current = {:position => 9}, {}
+      @parse_w_config[[[:attr1]], previous]
+      @parse_w_config[[[:attr1]], current].first.map(&:last).should.equal([current])
+    end
+
   end
 
 end

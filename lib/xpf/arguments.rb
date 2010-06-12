@@ -6,6 +6,7 @@ module XPF
     class << self
 
       def parse(*args)
+        # TODO: Hmm ... perhaps there can be a better way to write the following chunk ?!
         if args.empty?
           new_matchers_and_config([{}], {})
         elsif args.size == 1
@@ -20,9 +21,19 @@ module XPF
         end
       end
 
+      def parse_with_config(args, config)
+        begin
+          @config = config
+          parse(*args)
+        ensure
+          @config = nil
+        end
+      end
+
       private
 
         def new_matchers_and_config(match_args, config)
+          config = (@config || {}).merge(config)
           [new_matchers(match_args, config), new_config(config)]
         end
 
