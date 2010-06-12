@@ -15,6 +15,10 @@ describe "XPF::Matchers::Group" do
       @condition_should_equal[{}, {:axis => 'self::*'}, nil]
     end
 
+    should "return nil if match attrs is empty & :axis is :self" do
+      @condition_should_equal[{}, {:axis => :self}, nil]
+    end
+
     should "return axis expr if match attrs is empty & :axis is 'self::?' (with '?' not as '*')" do
       @condition_should_equal[{}, {:axis => 'self::x'}, './self::x']
     end
