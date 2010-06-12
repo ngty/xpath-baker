@@ -6,6 +6,22 @@ module XPF
       UPPERCASE_CHARS = ('A'..'Z').to_a * ''
       NIL_VALUE = Struct.new('NIL_VALUE')
 
+      def mv
+        c(q(value))
+      end
+
+      def mt
+        c(n(t))
+      end
+
+      def ma
+        c(n(a))
+      end
+
+      def a
+        "@#{name}"
+      end
+
       def c(str)
         config.case_sensitive ? str :
           %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
@@ -25,8 +41,15 @@ module XPF
         config.include_inner_text ? '.' : 'text()'
       end
 
-      def p(str)
-        (pos = config.position).nil? ? str : "#{str}[#{pos}]"
+      def f(conditions)
+        conditions = conditions.empty? ? nil : ('[%s]' % conditions.join(']['))
+        (axis = './%s' % config.axis) == './self::*' && conditions.nil? ? nil : (
+          case (pos = config.position.to_s)
+          when '' then '%s%s' % [axis, conditions]
+          when /^\^/ then '%s[%s]%s' % [axis, pos.sub(/^\^/,''), conditions]
+          else '%s%s[%s]' % [axis, conditions, pos.sub(/\$$/,'')]
+          end
+        )
       end
 
       def nil_value

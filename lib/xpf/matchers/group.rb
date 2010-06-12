@@ -10,13 +10,10 @@ module XPF
       end
 
       def condition
-        unless [matchers.empty?, config.axis.to_s =~ /^self/].all?
-          (matchers.empty? ? './%s' : './%s[%s]') %
-            [p(config.axis), matchers.map(&:condition).join('][')]
-        end
+        f(matchers.map(&:condition))
       end
 
-      private
+      protected
 
         def convert_to_matchers(match_attrs, config)
           convert = match_attrs.is_a?(Hash) ? :convert_hash_to_matchers : :convert_array_to_matchers

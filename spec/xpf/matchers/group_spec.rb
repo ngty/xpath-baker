@@ -11,16 +11,31 @@ describe "XPF::Matchers::Group" do
       end
     end
 
-    should "return nil if match attrs is empty & :axis is 'self::?'" do
-      @condition_should_equal[{}, {:axis => 'self::x'}, nil]
+    should "return nil if match attrs is empty & :axis is 'self::*'" do
+      @condition_should_equal[{}, {:axis => 'self::*'}, nil]
+    end
+
+    should "return axis expr if match attrs is empty & :axis is 'self::?' (with '?' not as '*')" do
+      @condition_should_equal[{}, {:axis => 'self::x'}, './self::x']
     end
 
     should 'return expr that reflect ONLY axis if specified match attrs is empty' do
       @condition_should_equal[{}, {:axis => 'attribute::x'}, './attribute::x']
     end
 
-    should 'return expr that reflect position if config[:position] is specified' do
-      @condition_should_equal[{}, {:axis => 'descendant::x', :position => 1}, './descendant::x[1]']
+    should "return expr that reflect prepending position if config[:position] is specified as '^2'" do
+      expected = './descendant::x[2][normalize-space(@attr1)]'
+      @condition_should_equal[[:attr1], {:axis => 'descendant::x', :position => '^2'}, expected]
+    end
+
+    should "return expr that reflect appending position if config[:position] is specified as '2'" do
+      expected = './descendant::x[normalize-space(@attr1)][2]'
+      @condition_should_equal[[:attr1], {:axis => 'descendant::x', :position => 2}, expected]
+    end
+
+    should "return expr that reflect appending position if config[:position] is specified as '2$'" do
+      expected = './descendant::x[normalize-space(@attr1)][2]'
+      @condition_should_equal[[:attr1], {:axis => 'descendant::x', :position => '2$'}, expected]
     end
 
     should 'return expr that reflect text condition if match attrs is {:text => ..., ...}' do
