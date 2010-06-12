@@ -18,6 +18,19 @@ module XPF
         c(n(a))
       end
 
+      def mc(conditions)
+        (config.axis == 'self::*' && conditions.empty?) ? nil :
+          p('./%s' % config.axis, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
+      end
+
+      def p(axis, conditions)
+        case (pos = config.position.to_s)
+        when '' then '%s%s' % [axis, conditions]
+        when /^\^/ then '%s[%s]%s' % [axis, pos.sub(/^\^/,''), conditions]
+        else '%s%s[%s]' % [axis, conditions, pos.sub(/\$$/,'')]
+        end
+      end
+
       def a
         "@#{name}"
       end
@@ -39,17 +52,6 @@ module XPF
 
       def t
         config.include_inner_text ? '.' : 'text()'
-      end
-
-      def f(conditions)
-        conditions = conditions.empty? ? nil : ('[%s]' % conditions.join(']['))
-        (axis = './%s' % config.axis) == './self::*' && conditions.nil? ? nil : (
-          case (pos = config.position.to_s)
-          when '' then '%s%s' % [axis, conditions]
-          when /^\^/ then '%s[%s]%s' % [axis, pos.sub(/^\^/,''), conditions]
-          else '%s%s[%s]' % [axis, conditions, pos.sub(/\$$/,'')]
-          end
-        )
       end
 
       def nil_value
