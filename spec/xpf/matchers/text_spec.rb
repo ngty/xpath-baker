@@ -28,7 +28,7 @@ describe "XPF::Matchers::Text" do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = ['normalize-space(.)', %|"#{@val}"|].map{|s| @translate[s] }.join('=')
+      expected = [translate_casing('normalize-space(.)'), %|"#{@val.downcase}"|].join('=')
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 

@@ -7,7 +7,7 @@ module XPF
       NIL_VALUE = Struct.new('NIL_VALUE')
 
       def mv
-        c(q(value))
+        config.case_sensitive? ? q(value) : q(value.to_s.downcase)
       end
 
       def mt

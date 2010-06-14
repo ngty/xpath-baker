@@ -24,7 +24,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = ["normalize-space(@#{@name})", %|"#{@val}"|].map{|s| translate_casing(s) }.join('=')
+      expected = [translate_casing("normalize-space(@#{@name})"), %|"#{@val.downcase}"|].join('=')
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
