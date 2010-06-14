@@ -19,7 +19,7 @@ module XPF
       end
 
       def mc(conditions)
-        (%w{self::* self}.include?(config.axis.to_s) && conditions.empty?) ? nil :
+        ('self::*' == config.axis && conditions.empty?) ? nil :
           p('./%s' % config.axis, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
       end
 
