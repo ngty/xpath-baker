@@ -15,7 +15,7 @@ module XPF
       end
 
       def ma
-        c(n(a))
+        c(n(a)).extend(Enhancements::String)
       end
 
       def mc(conditions)

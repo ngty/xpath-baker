@@ -5,15 +5,8 @@ module XPF
 
         def condition
           !("#{name}".downcase.to_sym == :class && value.is_a?(Array)) ? super : (
-            value.map do |val|
-              val = val.to_s.strip
-              val = val.downcase unless config.case_sensitive?
-              '(%s)' % [
-                %|%s=#{q(val)}|,
-                %|contains(%s,#{q(' %s '%val)})|,
-                %|starts-with(%s,#{q('%s '%val)})|,
-                %|starts-with(%s,#{q('%s '%val.reverse)})|,
-              ].join(' or ') % ([ma]*4)
+            value.map(&:to_s).map do |val|
+              ma.apply_check_for_token(q(config.case_sensitive? ? val : val.downcase))
             end.join(' and ')
           )
         end
