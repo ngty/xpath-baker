@@ -15,6 +15,27 @@ def xpf_match_attrs_args
 
   {
     # ///////////////////////////////////////////////////////////////////////////
+    # {:include_inner_text => ...}
+    # ///////////////////////////////////////////////////////////////////////////
+    # >> text
+    [{:text => 'A Bz'}, {:include_inner_text => true}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
+      expected_nodes = [' A  Bz ']
+    ] },
+    [{:text => 'A'}, {:include_inner_text => true}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="A"]]|,
+      expected_nodes = []
+    ] },
+    [{:text => 'A'}, {:include_inner_text => false}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(text())="A"]]|,
+      expected_nodes = [' A  Bz ']
+    ] },
+    [{:text => 'A Bz'}, {:include_inner_text => false}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(text())="A Bz"]]|,
+      expected_nodes = []
+    ] },
+
+    # ///////////////////////////////////////////////////////////////////////////
     # {:axis => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
@@ -30,11 +51,11 @@ def xpf_match_attrs_args
       expected_path  = %|//#{e}[./ancestor::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = []
     ] },
+    # >> attr
     [{:attr1 => 'AB BC'}, {:axis => :self}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    # >> attr
     [{:attr2 => 'XX'}, {:axis => :descendant}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::*[normalize-space(@attr2)="XX"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
