@@ -2,7 +2,12 @@ module XPF
   module Matchers
     class Text < Matcher(:value, :config)
       def condition
-        value == nil_value ? n(t) : [mt, mv].join('=')
+        value == nil_value ? n(t) : (
+          !value.is_a?(Array) ? [mt, mv].join('=') : (
+            value.map(&:to_s).map do |val|
+              mt.apply_check_for_token(q(config.case_sensitive? ? val : val.downcase))
+            end.join(' and ')
+        ))
       end
     end
   end

@@ -11,7 +11,7 @@ module XPF
       end
 
       def mt
-        c(n(t))
+        c(n(t)).extend(Enhancements::String)
       end
 
       def ma
