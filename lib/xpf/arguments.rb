@@ -8,10 +8,10 @@ module XPF
       def parse(*args)
         # TODO: Hmm ... perhaps there can be a better way to write the following chunk ?!
         if args.empty?
-          new_matchers_and_config([{}], {})
+          new_matchers_and_config([], {})
         elsif args.size == 1
           is_config?(config = args[0]) ?
-            new_matchers_and_config([{}], config) : new_matchers_and_config(args[0..0], {})
+            new_matchers_and_config([], config) : new_matchers_and_config(args[0..0], {})
         elsif is_config?(config = args[-1])
           new_matchers_and_config(args[0..-2], config)
         elsif args.all?{|arg| is_match_attrs?(arg) }
