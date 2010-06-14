@@ -19,7 +19,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
         %|normalize-space(@#{@name})="#{@val}"|,
         %|contains(normalize-space(@#{@name})," #{@val} ")|,
         %|starts-with(normalize-space(@#{@name}),"#{@val} ")|,
-        %|ends-with(normalize-space(@#{@name})," #{@val}")|,
+        %|starts-with(normalize-space(@#{@name}),"#{@val.to_s.reverse} ")|,
       ].join(' or ')
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @val, XPF::Configuration.new(config)).
@@ -32,12 +32,13 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
+      attr_expr = "@#{@name}"
       expected = '(%s)' % [
         %|%s="%s"|,
         %|contains(%s," %s ")|,
         %|starts-with(%s,"%s ")|,
-        %|ends-with(%s," %s")|,
-      ].join(' or ') % (["@#{@name}", @val]*4)
+        %|starts-with(%s,"%s ")|,
+      ].join(' or ') % ([attr_expr, @val.to_s]*3 + [attr_expr, @val.to_s.reverse])
       @condition_should_equal[{:normalize_space => false}, expected]
     end
 
@@ -46,12 +47,13 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
+      attr_expr = translate_casing("normalize-space(@#{@name})")
       expected = '(%s)' % [
-        %|%s=#{translate_casing(%|"%s"|)}|,
-        %|contains(%s,#{translate_casing(%|" %s "|)})|,
-        %|starts-with(%s,#{translate_casing(%|"%s "|)})|,
-        %|ends-with(%s,#{translate_casing(%|" %s"|)})|,
-      ].join(' or ') % ([translate_casing("normalize-space(@#{@name})"), @val]*4)
+        %|%s="%s"|,
+        %|contains(%s," %s ")|,
+        %|starts-with(%s,"%s ")|,
+        %|starts-with(%s,"%s ")|,
+      ].join(' or ') % ([attr_expr, @val.to_s.downcase]*3 + [attr_expr, @val.to_s.reverse.downcase])
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -66,7 +68,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
           %|normalize-space(@#{@name})="#{val}"|,
           %|contains(normalize-space(@#{@name})," #{val} ")|,
           %|starts-with(normalize-space(@#{@name}),"#{val} ")|,
-          %|ends-with(normalize-space(@#{@name})," #{val}")|,
+          %|starts-with(normalize-space(@#{@name}),"#{val.reverse} ")|,
         ].join(' or ')
       end.join(' and ')
       @condition_should_equal = lambda do |config, expected|
@@ -85,7 +87,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
           %|@#{@name}="#{val}"|,
           %|contains(@#{@name}," #{val} ")|,
           %|starts-with(@#{@name},"#{val} ")|,
-          %|ends-with(@#{@name}," #{val}")|,
+          %|starts-with(@#{@name},"#{val.reverse} ")|,
         ].join(' or ')
       end.join(' and ')
       @condition_should_equal[{:normalize_space => false}, expected]
@@ -96,13 +98,14 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
+      attr_expr = translate_casing("normalize-space(@#{@name})")
       expected = @vals.map do |val|
         '(%s)' % [
-          %|%s=#{translate_casing(%|"%s"|)}|,
-          %|contains(%s,#{translate_casing(%|" %s "|)})|,
-          %|starts-with(%s,#{translate_casing(%|"%s "|)})|,
-          %|ends-with(%s,#{translate_casing(%|" %s"|)})|,
-        ].join(' or ') % ([translate_casing("normalize-space(@#{@name})"), val]*4)
+          %|%s="%s"|,
+          %|contains(%s," %s ")|,
+          %|starts-with(%s,"%s ")|,
+          %|starts-with(%s,"%s ")|,
+        ].join(' or ') % ([attr_expr, val.downcase]*3 + [attr_expr, val.reverse.downcase])
       end.join(' and ')
       @condition_should_equal[{:case_sensitive => false}, expected]
     end

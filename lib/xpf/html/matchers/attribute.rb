@@ -6,13 +6,14 @@ module XPF
         def condition
           !("#{name}".downcase.to_sym == :class && value.is_a?(Array)) ? super : (
             value.map do |val|
-              tokens = [c(n("@#{name}")), val.strip]*4
+              val = val.to_s.strip
+              val = val.downcase unless config.case_sensitive?
               '(%s)' % [
-                %|%s=#{c(q('%s'))}|,
-                %|contains(%s,#{c(q(' %s '))})|,
-                %|starts-with(%s,#{c(q('%s '))})|,
-                %|ends-with(%s,#{c(q(' %s'))})|
-              ].join(' or ') % tokens
+                %|%s=#{q(val)}|,
+                %|contains(%s,#{q(' %s '%val)})|,
+                %|starts-with(%s,#{q('%s '%val)})|,
+                %|starts-with(%s,#{q('%s '%val.reverse)})|,
+              ].join(' or ') % ([ma]*4)
             end.join(' and ')
           )
         end
