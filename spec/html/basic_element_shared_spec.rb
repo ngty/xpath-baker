@@ -1,66 +1,40 @@
+require File.join(File.dirname(__FILE__), 'basic_element_shared_data')
+
 shared 'a basic html element' do
 
   before do
     @xpf_global_configure = lambda do |settings|
-      XPF.configure {|config| settings.each{|k,v| config.send(:"#{k}=",v) } }
+      XPF.configure do |config|
+        xpf_default_config.merge(settings).each {|k,v| config.send(:"#{k}=",v) }
+      end
     end
   end
 
-  {
-    {:scope => '//', :position => nil}       => lambda{|e| ["//#{e}", %w{AB CD}] },
-    {:scope => '//body/', :position => nil}  => lambda{|e| ["//body/#{e}", %w{AB CD}] },
-    {:scope => '//xoo/', :position => nil}   => lambda{|e| ["//xoo/#{e}", %w{}] },
-    {:scope => '//', :position => 2}         => lambda{|e| ["//#{e}[2]", %w{CD}] },
-    {:scope => '//', :position => '^2'}      => lambda{|e| ["//#{e}[2]", %w{CD}] },
-    {:scope => '//', :position => '2$'}      => lambda{|e| ["//#{e}[2]", %w{CD}] },
-    {:scope => '//body/', :position => 2}    => lambda{|e| ["//body/#{e}[2]", %w{CD}] },
-    {:scope => '//body/', :position => '^2'} => lambda{|e| ["//body/#{e}[2]", %w{CD}] },
-    {:scope => '//body/', :position => '2$'} => lambda{|e| ["//body/#{e}[2]", %w{CD}] },
-    {:scope => '//xoo/', :position => 2}     => lambda{|e| ["//xoo/#{e}[2]", %w{}] },
-  }.each do |config, args|
+  xpf_no_match_attrs_args.each do |args, expected_args|
 
-    contents = lambda do |element, path|
-      Nokogiri::HTML(%\
-        <html>
-          <body>
-            <#{element}>AB</#{element}>
-            <#{element}>CD</#{element}>
-          </body>
-        </html>
-      \).xpath(path).map(&:text)
-    end
-
-    ignored_config_settings = {
-      :case_sensitive     => [true, false],
-      :match_ordering     => [true, false],
-      :normalize_space    => [true, false],
-      :include_inner_text => [true, false],
-      :axis               => [:self, :descendant, :ancestor, :child, :parent],
-      :attribute_matcher  => [XPF::Matchers::Attribute, Class.new{}],
-      :text_matcher       => [XPF::Matchers::Text, Class.new{}],
-      :literal_matcher    => [XPF::Matchers::Literal, Class.new{}],
-      :group_matcher      => [XPF::Matchers::Group, Class.new{}],
-    }
+    contents, ignored_config_settings, config = args
 
     describe "> no match attrs nor config specified (w global config as #{config.inspect})" do
 
       should "return xpath as described" do
         @xpf_global_configure[config]
-        each_xpf {|x| x.send(@element).should.equal(args[@element][0]) }
+        each_xpf {|x| x.send(@element).should.equal(expected_args[@element][0]) }
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
         ignored_config_settings.each do |setting, vals|
           vals.each do |val|
             @xpf_global_configure[config.merge(setting => val)]
-            each_xpf {|x| x.send(@element).should.equal(args[@element][0]) }
+            each_xpf {|x| x.send(@element).should.equal(expected_args[@element][0]) }
           end
         end
       end
 
-      should "return xpath w/wo matching node(s)" do
+      should "return xpath that match intended node(s)" do
         @xpf_global_configure[config]
-        each_xpf {|x| contents[@element, x.send(@element)].should.equal(args[@element][1]) }
+        each_xpf do |x|
+          contents[@element, x.send(@element)].should.equal(expected_args[@element][1])
+        end
       end
 
     end
@@ -70,51 +44,89 @@ shared 'a basic html element' do
       before { @xpf_global_configure[{:scope => '/html//', :position => 9}] }
 
       should "return xpath as described" do
-        each_xpf {|x| x.send(@element, config).should.equal(args[@element][0]) }
+        each_xpf {|x| x.send(@element, config).should.equal(expected_args[@element][0]) }
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
         ignored_config_settings.each do |setting, vals|
           vals.each do |val|
             each_xpf do |x|
-              x.send(@element, config.merge(setting => val)).should.equal(args[@element][0])
+              x.send(@element, config.merge(setting => val)).should.equal(expected_args[@element][0])
             end
           end
         end
       end
 
-      should "return xpath w/wo matching node(s)" do
-        each_xpf {|x| contents[@element, x.send(@element, config)].should.equal(args[@element][1]) }
+      should "return xpath that match intended node(s)" do
+        each_xpf do |x|
+          contents[@element, x.send(@element, config)].should.equal(expected_args[@element][1])
+        end
       end
 
     end
 
   end
 
-#  {
+  xpf_match_attrs_args.each do |args, expected_args|
+
+    contents, ignored_config_settings, match_attrs, config = args
+
+    describe "> match attrs as #{match_attrs.inspect} w global config as #{config.inspect}" do
+
+      should "return xpath as described" do
+        @xpf_global_configure[config]
+        each_xpf {|x| x.send(@element, match_attrs).should.equal(expected_args[@element][0]) }
+      end
+
+      should "always return xpath as described (ignoring changes in other config settings)" do
+        ignored_config_settings.each do |setting, vals|
+          vals.each do |val|
+            @xpf_global_configure[config.merge(setting => val)]
+            each_xpf do |x|
+              x.send(@element, match_attrs).should.equal(expected_args[@element][0])
+            end
+          end
+        end
+      end
+
+      should "return xpath that match intended node(s)" do
+        @xpf_global_configure[config]
+        each_xpf do |x|
+          contents[@element, x.send(@element, match_attrs)].should.equal(expected_args[@element][1])
+        end
+      end
+
+    end
+
+#    describe "> match attrs as #{match_attrs.inspect} w common config as #{config.inspect}" do
 #
-#
-#  }.each do |, b|
-#
-#    contents = lambda do |element, path|
-#      Nokogiri::HTML(%\
-#        <html>
-#          <body>
-#            <#{element}>AB</#{element}>
-#            <#{element}>CD</#{element}>
-#          </body>
-#        </html>
-#      \).xpath(path).map(&:text)
-#    end
-#
-#    describe "> match attrs as #{match_attrs.inspect} w global config as #{config.inspect}" do
+#      before { @xpf_global_configure[{:scope => '/html//', :position => 9}] }
 #
 #      should "return xpath as described" do
+#        @xpf_global_configure[config]
+#        each_xpf {|x| x.send(@element, match_attrs).should.equal(args[@element][0]) }
+#      end
 #
+#      should "always return xpath as described (ignoring changes in other config settings)" do
+#        ignored_config_settings.each do |setting, vals|
+#          vals.each do |val|
+#            @xpf_global_configure[config.merge(setting => val)]
+#            each_xpf do |x|
+#              x.send(@element, match_attrs).should.equal(args[@element][0])
+#            end
+#          end
+#        end
+#      end
+#
+#      should "return xpath that match intended node(s)" do
+#        @xpf_global_configure[config]
+#        each_xpf {|x| contents[@element, x.send(@element, match_attrs)].should.equal(args[@element][1]) }
 #      end
 #
 #    end
-#
+
+  end
+
 #    describe "> match attrs as #{match_attrs.inspect} w common match attrs config as #{config.inspect}" do
 #
 #    end
