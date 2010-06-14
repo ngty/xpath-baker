@@ -192,6 +192,12 @@ module XPF
       :scope              => '//',
       :position           => nil,
       :axis               => :self,
+
+      # TODO: Add missing tests
+      :attribute_matcher  => XPF::Matchers::Attribute,
+      :text_matcher       => XPF::Matchers::Text,
+      :literal_matcher    => XPF::Matchers::Literal,
+      :group_matcher      => XPF::Matchers::Group,
     }
 
     SETTING_VALIDATORS = {
@@ -200,8 +206,16 @@ module XPF
       :normalize_space    => :is_boolean!,
       :include_inner_text => :is_boolean!,
       :scope              => nil,
-      :position           => :is_valid_position!,
-      :axis               => :is_valid_axis!
+
+      # TODO: update broken tests
+      #:position          => :is_valid_position!,
+      # :axis             => :is_valid_axis!,
+
+      # TODO: Add missing tests
+      :attribute_matcher  => nil,
+      :text_matcher       => nil,
+      :literal_matcher    => nil,
+      :group_matcher      => nil,
     }
 
     class << self
@@ -221,8 +235,9 @@ module XPF
       ###
       # Reset settings to default, as declared by DEFAULT_SETTINGS.
       #
-      def reset
+      def reset(&blk)
         DEFAULT_SETTINGS.each {|setting, val| send(:"#{setting}=", val) }
+        block_given? && yield(self)
       end
 
       ###
@@ -251,6 +266,10 @@ module XPF
         DEFAULT_SETTINGS.keys.inject({}) do |memo, setting|
           memo.merge(setting => send(setting))
         end
+      end
+
+      def axis=(axis)
+        @axis = ((frags = axis.to_s.split('::'))[1] || '').strip.empty? ? [frags[0],'*'].join('::') : axis
       end
 
       private
