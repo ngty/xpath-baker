@@ -15,7 +15,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
 
     before do
       @name, @val = :class, %w{aweso-me}
-      @default = check_tokens("normalize-space(@#{@name})", %|"#{@val}"|)[0]
+      @default = check_tokens("normalize-space(@#{@name})", %|"#{@val}"|)
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @val, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -27,7 +27,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      expected = check_tokens("@#{@name}", %|"#{@val}"|)[0]
+      expected = check_tokens("@#{@name}", %|"#{@val}"|)
       @condition_should_equal[{:normalize_space => false}, expected]
     end
 
@@ -37,7 +37,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
       attr_expr = translate_casing("normalize-space(@#{@name})")
-      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), %|"#{@val}"|)[0]
+      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), %|"#{@val}"|)
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -47,7 +47,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
 
     before do
       @name, @vals = :class, %w{aweso-me wonder-fu}
-      @default = check_tokens("normalize-space(@#{@name})", @vals.map{|v| %|"#{v}"| }).join(' and ')
+      @default = check_tokens("normalize-space(@#{@name})", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @vals, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -59,7 +59,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      expected = check_tokens("@#{@name}", @vals.map{|v| %|"#{v}"| }).join(' and ')
+      expected = check_tokens("@#{@name}", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal[{:normalize_space => false}, expected]
     end
 
@@ -68,7 +68,7 @@ describe "XPF::HTML::Matchers::Attribute (w.r.t @class)" do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), @vals.map{|v| %|"#{v}"| }).join(' and ')
+      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), @vals.map{|v| %|"#{v}"| })
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
