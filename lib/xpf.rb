@@ -1,9 +1,9 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-require 'xpf/configuration'
 require 'xpf/matchers'
-require 'xpf/arguments_parsing'
-require 'xpf/path_building'
+require 'xpf/configuration'
+require 'xpf/arguments'
+require 'xpf/xpath'
 
 module XPF
 
@@ -11,9 +11,6 @@ module XPF
   class InvalidConfigModeError   < Exception ; end
 
   class << self
-
-    include PathBuilding
-    include ArgumentsParsing
 
     ###
     # Do configuration, which can be:
@@ -33,7 +30,7 @@ module XPF
     def configure(mode = :update, &blk)
       case mode
       when :update then yield(Configuration)
-      when :reset then Configuration.reset
+      when :reset then Configuration.reset(&blk)
       else raise InvalidConfigModeError.new("Config mode :#{mode} is not supported !!")
       end
     end
