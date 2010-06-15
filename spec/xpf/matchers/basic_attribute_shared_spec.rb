@@ -39,7 +39,7 @@ shared 'basic attribute matcher' do
 
     before do
       @name, @val = @name || 'attr-x', %w{val-x1}
-      @default = check_tokens("normalize-space(@#{@name})", %|"#{@val}"|)
+      @default = check_tokens("normalize-space(@#{@name})", [%|"#{@val}"|])
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @val, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -51,7 +51,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      expected = check_tokens("@#{@name}", %|"#{@val}"|)
+      expected = check_tokens("@#{@name}", [%|"#{@val}"|])
       @condition_should_equal[{:normalize_space => false}, expected]
     end
 
@@ -61,7 +61,7 @@ shared 'basic attribute matcher' do
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
       attr_expr = translate_casing("normalize-space(@#{@name})")
-      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), %|"#{@val}"|)
+      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), [%|"#{@val}"|])
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -70,7 +70,7 @@ shared 'basic attribute matcher' do
   describe '> generating condition (w valid multi elements array value)' do
 
     before do
-      @name, @vals = @name || 'attr-x', %w{val-x1 val-x2}
+      @name, @vals = @name || 'attr-x', %w{val-x1 val-x2 val-x3}
       @default = check_tokens("normalize-space(@#{@name})", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @vals, XPF::Configuration.new(config)).
@@ -96,6 +96,14 @@ shared 'basic attribute matcher' do
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
+    should 'honor ordering when config[:match_ordering] is true' do
+      @condition_should_equal[{:match_ordering => true}, @default]
+    end
+
+    should 'not not honor ordering when config[:match_ordering] is false' do
+      expected = check_tokens("normalize-space(@#{@name})", @vals.map{|v| %|"#{v}"| }, false)
+      @condition_should_equal[{:match_ordering => false}, expected]
+    end
   end
 
   describe '> generating condition (with invalid value NIL_VALUE)' do
