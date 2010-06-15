@@ -10,9 +10,9 @@ shared 'a basic html element' do
     end
   end
 
-  xpf_no_match_attrs_args.each do |args, expected_args|
+  xpf_no_match_attrs_args.each do |working_args, expected_args|
 
-    contents, ignored_config_settings, config = args
+    contents, ignored_config, config = working_args
 
     describe "> no match attrs nor config specified (w global config as #{config.inspect})" do
 
@@ -22,7 +22,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
-        ignored_config_settings.each do |setting, vals|
+        ignored_config.each do |setting, vals|
           vals.each do |val|
             @xpf_global_configure[config.merge(setting => val)]
             each_xpf {|x| x.send(@element).should.equal(expected_args[@element][0]) }
@@ -48,7 +48,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
-        ignored_config_settings.each do |setting, vals|
+        ignored_config.each do |setting, vals|
           vals.each do |val|
             each_xpf do |x|
               x.send(@element, config.merge(setting => val)).should.equal(expected_args[@element][0])
@@ -67,9 +67,9 @@ shared 'a basic html element' do
 
   end
 
-  xpf_match_attrs_args.each do |args, expected_args|
+  xpf_single_match_attrs_generic_args.each do |working_args, expected_args|
 
-    contents, ignored_config_settings, match_attrs, config = args
+    contents, ignored_config, alternative_config, match_attrs, config = working_args
 
     describe "> match attrs as #{match_attrs.inspect} w global config as #{config.inspect}" do
 
@@ -79,7 +79,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
-        ignored_config_settings.each do |setting, vals|
+        ignored_config.each do |setting, vals|
           vals.each do |val|
             @xpf_global_configure[config.merge(setting => val)]
             each_xpf do |x|
@@ -98,32 +98,137 @@ shared 'a basic html element' do
 
     end
 
-#    describe "> match attrs as #{match_attrs.inspect} w common config as #{config.inspect}" do
-#
-#      before { @xpf_global_configure[{:scope => '/html//', :position => 9}] }
-#
-#      should "return xpath as described" do
-#        @xpf_global_configure[config]
-#        each_xpf {|x| x.send(@element, match_attrs).should.equal(args[@element][0]) }
-#      end
-#
-#      should "always return xpath as described (ignoring changes in other config settings)" do
-#        ignored_config_settings.each do |setting, vals|
-#          vals.each do |val|
-#            @xpf_global_configure[config.merge(setting => val)]
-#            each_xpf do |x|
-#              x.send(@element, match_attrs).should.equal(args[@element][0])
-#            end
-#          end
-#        end
-#      end
-#
-#      should "return xpath that match intended node(s)" do
-#        @xpf_global_configure[config]
-#        each_xpf {|x| contents[@element, x.send(@element, match_attrs)].should.equal(args[@element][1]) }
-#      end
-#
-#    end
+    describe "> match attrs as #{match_attrs.inspect} w common config as #{config.inspect}" do
+
+      before do
+        @xpf_global_configure[
+          config.inject({}) do |memo, (key, val)|
+            memo.merge(key => alternative_config[key][val])
+          end
+        ]
+      end
+
+      should "return xpath as described" do
+        each_xpf {|x| x.send(@element, match_attrs, config).should.equal(expected_args[@element][0]) }
+      end
+
+      should "always return xpath as described (ignoring changes in other config settings)" do
+        ignored_config.each do |setting, vals|
+          vals.each do |val|
+            each_xpf do |x|
+              x.send(@element, match_attrs, config).should.equal(expected_args[@element][0])
+            end
+          end
+        end
+      end
+
+      should "return xpath that match intended node(s)" do
+        each_xpf do |x|
+          contents[@element, x.send(@element, match_attrs, config)].should.equal(expected_args[@element][1])
+        end
+      end
+
+    end
+
+    next if config.keys.any?{|key| [:position, :scope].include?(key) }
+
+    describe "> match attrs as #{match_attrs.inspect} w per-match-attr config as #{config.inspect}" do
+
+      before do
+        @other_config = config.inject({}) {|memo, (key, val)| memo.merge(key => alternative_config[key][val]) }
+      end
+
+      should "return xpath as described" do
+        each_xpf do |x|
+          x.send(@element, [match_attrs, config], @other_config).
+            should.equal(expected_args[@element][0])
+        end
+      end
+
+      should "always return xpath as described (ignoring changes in other config settings)" do
+        ignored_config.each do |setting, vals|
+          vals.each do |val|
+            each_xpf do |x|
+              x.send(@element, [match_attrs, config], @other_config).
+                should.equal(expected_args[@element][0])
+            end
+          end
+        end
+      end
+
+      should "return xpath that match intended node(s)" do
+        each_xpf do |x|
+          contents[@element, x.send(@element, [match_attrs, config], @other_config)].
+            should.equal(expected_args[@element][1])
+        end
+      end
+
+    end
+
+  end
+
+  xpf_single_match_attrs_non_generic_args.each do |working_args, expected_args|
+
+    contents, ignored_config, match_attrs, config, other_config = working_args
+
+    describe "> match attrs as %s w per-match-attrs as %s & global config as %s" % [
+        match_attrs.inspect, config.inspect, other_config.inspect
+      ] do
+
+      before { @xpf_global_configure[other_config] }
+
+      should "return xpath as described" do
+        each_xpf {|x| x.send(@element, [match_attrs, config]).should.equal(expected_args[@element][0]) }
+      end
+
+      should "always return xpath as described (ignoring changes in other config settings)" do
+        ignored_config.each do |setting, vals|
+          vals.each do |val|
+            each_xpf do |x|
+              x.send(@element, [match_attrs, config]).should.equal(expected_args[@element][0])
+            end
+          end
+        end
+      end
+
+      should "return xpath that match intended node(s)" do
+        each_xpf do |x|
+          contents[@element, x.send(@element, [match_attrs, config])].should.equal(expected_args[@element][1])
+        end
+      end
+
+    end
+
+    describe "> match attrs as %s w per-match-attrs as %s & common config as %s" % [
+        match_attrs.inspect, config.inspect, other_config.inspect
+      ] do
+
+      should "return xpath as described" do
+        each_xpf do |x|
+          x.send(@element, [match_attrs, config], other_config).
+            should.equal(expected_args[@element][0])
+        end
+      end
+
+      should "always return xpath as described (ignoring changes in other config settings)" do
+        ignored_config.each do |setting, vals|
+          vals.each do |val|
+            each_xpf do |x|
+              x.send(@element, [match_attrs, config], other_config).
+                should.equal(expected_args[@element][0])
+            end
+          end
+        end
+      end
+
+      should "return xpath that match intended node(s)" do
+        each_xpf do |x|
+          contents[@element, x.send(@element, [match_attrs, config], other_config)].
+            should.equal(expected_args[@element][1])
+        end
+      end
+
+    end
 
   end
 

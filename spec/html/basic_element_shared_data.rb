@@ -1,11 +1,107 @@
-def xpf_match_attrs_args
-  ignored_config_settings = {:match_ordering => [true, false]}
+def xpf_single_match_attrs_non_generic_args
+  contents, ignored_config, _, _, _ = xpf_single_match_attrs_generic_args.keys[0]
+  {
+    # ///////////////////////////////////////////////////////////////////////////
+    # {:position => ...}
+    # ///////////////////////////////////////////////////////////////////////////
+    # >> text
+    [{:text => 'C Dw'}, {:position => nil}, {:position => 1}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"]][1]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:text => 'C Dw'}, {:position => nil}, {:position => '1$'}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"]][1]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:text => 'C Dw'}, {:position => nil}, {:position => '^1'}] => lambda{|e| [
+      expected_path  = %|//#{e}[1][./self::*[normalize-space(.)="C Dw"]]|,
+      expected_nodes = []
+    ] },
+    [{:text => 'C Dw'}, {:position => 1}, {:position => nil}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"][1]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:text => 'C Dw'}, {:position => '1$'}, {:position => nil}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"][1]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:text => 'C Dw'}, {:position => '^1'}, {:position => nil}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[1][normalize-space(.)="C Dw"]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    # >> attr
+    [{:attr1 => 'CD DE'}, {:position => nil}, {:position => 1}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"]][1]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:attr1 => 'CD DE'}, {:position => nil}, {:position => '1$'}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"]][1]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:attr1 => 'CD DE'}, {:position => nil}, {:position => '^1'}] => lambda{|e| [
+      expected_path  = %|//#{e}[1][./self::*[normalize-space(@attr1)="CD DE"]]|,
+      expected_nodes = []
+    ] },
+    [{:attr1 => 'CD DE'}, {:position => 1}, {:position => nil}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"][1]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:attr1 => 'CD DE'}, {:position => '1$'}, {:position => nil}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"][1]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:attr1 => 'CD DE'}, {:position => '^1'}, {:position => nil}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[1][normalize-space(@attr1)="CD DE"]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+
+    # ///////////////////////////////////////////////////////////////////////////
+    # {:scope => ...}
+    # ///////////////////////////////////////////////////////////////////////////
+    # >> text
+    [{:text => 'C Dw'}, {:scope => '//'}, {:scope => '//body/'}] => lambda{|e| [
+      expected_path  = %|//body/#{e}[./self::*[normalize-space(.)="C Dw"]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:text => 'C Dw'}, {:scope => '//'}, {:scope => '//xoo/'}] => lambda{|e| [
+      expected_path  = %|//xoo/#{e}[./self::*[normalize-space(.)="C Dw"]]|,
+      expected_nodes = []
+    ] },
+    # >> attr
+    [{:attr1 => 'CD DE'}, {:scope => '//'}, {:scope => '//body/'}] => lambda{|e| [
+      expected_path  = %|//body/#{e}[./self::*[normalize-space(@attr1)="CD DE"]]|,
+      expected_nodes = [' C  Dw ']
+    ] },
+    [{:attr1 => 'CD DE'}, {:scope => '//'}, {:scope => '//xoo/'}] => lambda{|e| [
+      expected_path  = %|//xoo/#{e}[./self::*[normalize-space(@attr1)="CD DE"]]|,
+      expected_nodes = []
+    ] },
+  }.inject({}){|memo, args| memo.merge([contents, ignored_config] + args[0] => args[1]) }
+end
+
+def xpf_single_match_attrs_generic_args
+  ignored_config = {
+    :match_ordering => [true, false]
+  }
+  alternative_config = {
+    :normalize_space    => (booleans = {true => false, false => true}),
+    :include_inner_text => booleans,
+    :case_sensitive     => booleans,
+    :scope              => {'//' => '//body/', '//body/' => '//xoo/', '//xoo/' => '//'},
+    :position           => {nil => 2, 2 => nil},
+    :axis               => {:self => :descendant, :ancestor => self, :descendant => :ancestor},
+    # :attribute_matcher  => XPF::Matchers::Attribute,
+    # :text_matcher       => XPF::Matchers::Text,
+    # :literal_matcher    => XPF::Matchers::Literal,
+    # :group_matcher      => XPF::Matchers::Group,
+  }
+
   contents = lambda do |element, path|
     Nokogiri::HTML(%\
       <html>
         <body>
           <#{element} attr1=" AB BC "> A <span attr2="XX"> Bz </span></#{element}>
-          <#{element} attr1=" CD DE "> C <span attr2="YY"> D </span></#{element}>
+          <#{element} attr1=" CD DE "> C <span attr2="YY"> Dw </span></#{element}>
           <#{element} attr1=" AB BC "> E <span attr2="XX"> Fx </span></#{element}>
           <#{element} attr1=" ab bc "> G <span attr2="xx"> Hy </span></#{element}>
         </body>
@@ -239,7 +335,7 @@ def xpf_match_attrs_args
       [' A  Bz ', ' E  Fx ', ' G  Hy ']
     ] },
   }.inject({}) do |memo, args|
-    memo.merge([contents, ignored_config_settings] + args[0] => args[1])
+    memo.merge([contents, ignored_config, alternative_config] + args[0] => args[1])
   end
 end
 
@@ -255,7 +351,7 @@ def xpf_no_match_attrs_args
     \).xpath(path).map(&:text)
   end
 
-  ignored_config_settings = {
+  ignored_config = {
     :case_sensitive     => [true, false],
     :match_ordering     => [true, false],
     :normalize_space    => [true, false],
@@ -279,7 +375,7 @@ def xpf_no_match_attrs_args
     {:scope => '//body/', :position => '2$'} => lambda{|e| ["//body/#{e}[2]", %w{CD}] },
     {:scope => '//xoo/', :position => 2}     => lambda{|e| ["//xoo/#{e}[2]", %w{}] },
   }.inject({}) do |memo, args|
-    memo.merge([contents, ignored_config_settings, args[0]] => args[1])
+    memo.merge([contents, ignored_config, args[0]] => args[1])
   end
 end
 
