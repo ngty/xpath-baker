@@ -1,4 +1,4 @@
-shared 'basic text matcher' do
+shared 'a basic text matcher' do
 
   describe '> generating condition (with valid string value)' do
 
