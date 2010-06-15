@@ -1,5 +1,53 @@
+def xpf_multiple_match_attrs_args
+  contents = lambda do |element, path|
+    Nokogiri::HTML(%\
+      <html>
+        <body>
+          <#{element} id="e1" attr1=" AB BC "> A <span attr2="XX"> Bz </span></#{element}>
+          <#{element} id="e2" attr1=" CD DE "> C <span attr2="YY"> Dw </span></#{element}>
+          <#{element} id="e3" attr1=" AB BC "> E <span attr2="XX">    </span></#{element}>
+          <#{element} id="e4" attr1=" ab bc "> G                             </#{element}>
+          <#{element} id="e5"                > G <span attr2="ZZ">    </span></#{element}>
+          <#{element} id="e6" attr1=" "      > C <span attr2="YY"> Dz </span></#{element}>
+          <#{element} id="e7" attr1=" AB BC "> F <span attr2="YY"> Dz </span></#{element}>
+        </body>
+      </html>
+    \).xpath(path).map(&:text)
+  end
+  {
+    [[[[:text], {:axis => 'descendant::span'}], [{:attr1 => 'AB BC'},{}]], {:position => 2}] => lambda{|e| [
+      expected_path  = %|//#{e}[./descendant::span[normalize-space(.)]][./self::*[normalize-space(@attr1)="AB BC"]][2]|,
+      expected_nodes = [' F  Dz ']
+    ] },
+    [[[[:text], {:axis => 'descendant::span'}], {:attr1 => 'AB BC'}], {:position => 2}] => lambda{|e| [
+      expected_path  = %|//#{e}[./descendant::span[normalize-space(.)]][./self::*[normalize-space(@attr1)="AB BC"][2]][2]|,
+      expected_nodes = []
+    ] },
+    [[[{:attr1 => 'AB BC'},{}], [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]][./descendant::span[normalize-space(.)]][2]|,
+      expected_nodes = [' F  Dz ']
+    ] },
+    [[{:attr1 => 'AB BC'}, [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"][2]][./descendant::span[normalize-space(.)]][2]|,
+      expected_nodes = []
+    ] },
+  }.inject({}) {|memo, (args, expectations)| memo.merge([contents] + args => expectations) }
+end
+
 def xpf_single_match_attrs_non_generic_args
-  contents, ignored_config, _, _, _ = xpf_single_match_attrs_generic_args.keys[0]
+  ignored_config = {
+    :match_ordering => [true, false]
+  }
+  contents = lambda do |element, path|
+    Nokogiri::HTML(%\
+      <html>
+        <body>
+          <#{element} attr1=" AB BC "> A <span attr2="XX"> Bz </span></#{element}>
+          <#{element} attr1=" CD DE "> C <span attr2="YY"> Dw </span></#{element}>
+        </body>
+      </html>
+    \).xpath(path).map(&:text)
+  end
   {
     # ///////////////////////////////////////////////////////////////////////////
     # {:position => ...}
