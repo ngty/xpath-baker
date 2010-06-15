@@ -5,7 +5,7 @@ module XPF
         value == nil_value ? n(a) : (
           !value.is_a?(Array) ? [ma, mv].join('=') : (
             value.map(&:to_s).map do |val|
-              ma.apply_check_for_token(q(config.case_sensitive? ? val : val.downcase))
+              ma.apply_check_for_token(q(d(val)))
             end.join(' and ')
         ))
       end

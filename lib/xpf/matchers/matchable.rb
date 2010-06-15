@@ -7,7 +7,7 @@ module XPF
       NIL_VALUE = Struct.new('NIL_VALUE')
 
       def mv
-        config.case_sensitive? ? q(value) : q(value.to_s.downcase)
+        config.case_sensitive? ? q(value) : q(d(value))
       end
 
       def mt
@@ -36,8 +36,12 @@ module XPF
       end
 
       def c(str)
-        config.case_sensitive ? str :
+        config.case_sensitive? ? str :
           %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
+      end
+
+      def d(str)
+        config.case_sensitive? ? str : str.to_s.downcase
       end
 
       def q(str)
