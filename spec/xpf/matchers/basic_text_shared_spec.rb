@@ -75,7 +75,7 @@ shared 'a basic text matcher' do
   describe '> generating condition (w valid multi elements array value)' do
 
     before do
-      @vals = %w{val-x1 val-x2}
+      @vals = %w{val-x1 val-x2 val-x3}
       @default = check_tokens("normalize-space(.)", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal = lambda do |config, expected|
         @text_matcher.new(@vals, XPF::Configuration.new(config)).condition.should.equal(expected)
@@ -98,6 +98,15 @@ shared 'a basic text matcher' do
     should 'not be case-sensitive when config[:case_sensitive] is false' do
       expected = check_tokens(translate_casing("normalize-space(.)"), @vals.map{|v| %|"#{v}"| })
       @condition_should_equal[{:case_sensitive => false}, expected]
+    end
+
+    should 'honor ordering when config[:match_ordering] is true' do
+      @condition_should_equal[{:match_ordering => true}, @default]
+    end
+
+    should 'not not honor ordering when config[:match_ordering] is false' do
+      expected = check_tokens("normalize-space(.)", @vals.map{|v| %|"#{v}"| }, false)
+      @condition_should_equal[{:match_ordering => false}, expected]
     end
 
   end

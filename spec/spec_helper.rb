@@ -15,9 +15,8 @@ def each_xpf(&blk)
   [XPF, send(:xpf)].each {|r| yield(r) }
 end
 
-def check_tokens(expr, tokens)
-  expr.extend(XPF::Matchers::Enhancements::String)
-  tokens.map{|token| expr.apply_check_for_token(token) }.join(' and ')
+def check_tokens(expr, tokens, enforce_ordering=true)
+  expr.extend(XPF::Matchers::Enhancements::String).check_tokens(tokens, enforce_ordering)
 end
 
 Bacon.summary_on_exit
