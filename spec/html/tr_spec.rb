@@ -4,7 +4,10 @@ require 'xpf/html'
 describe "XPF::HTML <tr/> support" do
 
   tr_path = lambda do |text_comparison, cells, match_ordering|
-    test = lambda{|val| %|#{text_comparison}="#{val}"| }
+    test = lambda do |val|
+      val.is_a?(Array) ? check_tokens(text_comparison, val.map{|v| %|"#{v}"| }, match_ordering) :
+        %|#{text_comparison}="#{val}"|
+    end
     '//tr[./self::*[%s]]' % (
       case cells
       when nil
@@ -121,14 +124,23 @@ describe "XPF::HTML <tr/> support" do
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:match_ordering => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:cells => [...]}
-    [{:cells => (cells = ['2', 'John Tan'])}, {:match_ordering => true}] =>
+    # >> {:cells => {...}}
+    [{:cells => (cells = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => true}] =>
       [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = ['John Tan', '2'])}, {:match_ordering => true}] =>
+    [{:cells => (cells = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => true}] =>
       [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = ['2', 'John Tan'])}, {:match_ordering => false}] =>
+    [{:cells => (cells = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => false}] =>
       [tr_path['normalize-space(.)', cells, false], %w{e3}],
-    [{:cells => (cells = ['John Tan', '2'])}, {:match_ordering => false}] =>
+    [{:cells => (cells = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => false}] =>
+      [tr_path['normalize-space(.)', cells, false], %w{e3}],
+    # >> {:cells => [...]}
+    [{:cells => (cells = ['2', %w{John Tan}])}, {:match_ordering => true}] =>
+      [tr_path['normalize-space(.)', cells, true], %w{e3}],
+    [{:cells => (cells = [%w{John Tan}, '2'])}, {:match_ordering => true}] =>
+      [tr_path['normalize-space(.)', cells, true], %w{}],
+    [{:cells => (cells = ['2', %w{Tan John}])}, {:match_ordering => false}] =>
+      [tr_path['normalize-space(.)', cells, false], %w{e3}],
+    [{:cells => (cells = [%w{Tan John}, '2'])}, {:match_ordering => false}] =>
       [tr_path['normalize-space(.)', cells, false], %w{e3}],
     # >> [:cells] (NA)
   }.each do |(match_attrs, config), (expected_path, expected_ids)|
@@ -152,6 +164,6 @@ describe "XPF::HTML <tr/> support" do
   # NOTE: These are all we need for 'a basic html element' shared spec.
   require File.join(File.dirname(__FILE__), 'basic_element_shared_spec')
   before { @element = :tr }
-  behaves_like 'a basic html element'
+  # behaves_like 'a basic html element'
 
 end
