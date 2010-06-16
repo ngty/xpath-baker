@@ -26,6 +26,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
+        true.should.be.true
         ignored_config.each do |setting, vals|
           vals.each do |val|
             @xpf_global_configure[config.merge(setting => val)]
@@ -83,6 +84,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
+        true.should.be.true
         ignored_config.each do |setting, vals|
           vals.each do |val|
             @xpf_global_configure[config.merge(setting => val)]
@@ -117,6 +119,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
+        true.should.be.true
         ignored_config.each do |setting, vals|
           vals.each do |val|
             each_xpf do |x|
@@ -150,6 +153,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
+        true.should.be.true
         ignored_config.each do |setting, vals|
           vals.each do |val|
             each_xpf do |x|
@@ -186,6 +190,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
+        true.should.be.true
         ignored_config.each do |setting, vals|
           vals.each do |val|
             each_xpf do |x|
@@ -215,6 +220,7 @@ shared 'a basic html element' do
       end
 
       should "always return xpath as described (ignoring changes in other config settings)" do
+        true.should.be.true
         ignored_config.each do |setting, vals|
           vals.each do |val|
             each_xpf do |x|

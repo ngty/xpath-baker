@@ -35,10 +35,7 @@ def xpf_multiple_match_attrs_args
 end
 
 def xpf_single_match_attrs_non_generic_args
-  ignored_config = {
-    :match_ordering => [true, false]
-  }
-  contents = lambda do |element, path|
+  ignored_config, contents = {}, lambda do |element, path|
     Nokogiri::HTML(%\
       <html>
         <body>
@@ -128,13 +125,11 @@ def xpf_single_match_attrs_non_generic_args
 end
 
 def xpf_single_match_attrs_generic_args
-  ignored_config = {
-    :match_ordering => [true, false]
-  }
-  alternative_config = {
+  ignored_config, alternative_config = {}, {
     :normalize_space    => (booleans = {true => false, false => true}),
     :include_inner_text => booleans,
     :case_sensitive     => booleans,
+    :match_ordering     => booleans,
     :scope              => {'//' => '//body/', '//body/' => '//xoo/', '//xoo/' => '//'},
     :position           => {nil => 2, 2 => nil},
     :axis               => {:self => :descendant, :ancestor => self, :descendant => :ancestor},
@@ -346,41 +341,71 @@ def xpf_single_match_attrs_generic_args
     ] },
 
     # ///////////////////////////////////////////////////////////////////////////
-    # Tokens matching (w match attr as array)
+    # Tokens matching (w match attr as array) / {:case_sensitive => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
     [{:text => %w{Bz}}, {:case_sensitive => true}] => lambda{|e| [
-      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|]),
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|], true),
       [' A  Bz ']
     ] },
     [{:text => %w{A Bz}}, {:case_sensitive => true}] => lambda{|e| [
-      %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(.)", [%|"A"|, %|"Bz"|]),
+      %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(.)", [%|"A"|, %|"Bz"|], true),
       [' A  Bz ']
     ] },
     [{:text => %w{a bZ}}, {:case_sensitive => true}] => lambda{|e| [
-      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"a"|, %|"bZ"|]),
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"a"|, %|"bZ"|], true),
       []
     ] },
     [{:text => %w{a bZ}}, {:case_sensitive => false}] => lambda{|e| [
-      "//#{e}[./self::*[%s]]" % check_tokens(translate_casing("normalize-space(.)"), [%|"a"|, %|"bz"|]),
+      "//#{e}[./self::*[%s]]" % check_tokens(translate_casing("normalize-space(.)"), [%|"a"|, %|"bz"|], true),
       [' A  Bz ']
     ] },
     # >> attr
     [{:attr1 => %w{AB}}, {:case_sensitive => true}] => lambda{|e| [
-      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"AB"|]),
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"AB"|], true),
       [' A  Bz ', ' E  Fx ']
     ] },
     [{:attr1 => %w{AB BC}}, {:case_sensitive => true}] => lambda{|e| [
-      %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(@attr1)", [%|"AB"|, %|"BC"|]),
+      %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(@attr1)", [%|"AB"|, %|"BC"|], true),
       [' A  Bz ', ' E  Fx ']
     ] },
     [{:attr1 => %w{ab bc}}, {:case_sensitive => true}] => lambda{|e| [
-      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"ab"|, %|"bc"|]),
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"ab"|, %|"bc"|], true),
       [' G  Hy ']
     ] },
     [{:attr1 => %w{AB BC}}, {:case_sensitive => false}] => lambda{|e| [
-      "//#{e}[./self::*[%s]]" % check_tokens(translate_casing("normalize-space(@attr1)"), [%|"ab"|, %|"bc"|]),
+      "//#{e}[./self::*[%s]]" % check_tokens(translate_casing("normalize-space(@attr1)"), [%|"ab"|, %|"bc"|], true),
       [' A  Bz ', ' E  Fx ', ' G  Hy ']
+    ] },
+
+    # ///////////////////////////////////////////////////////////////////////////
+    # Tokens matching (w match attr as array) / {:match_ordering => ...}
+    # ///////////////////////////////////////////////////////////////////////////
+    # >> text
+    [{:text => %w{A Bz}}, {:match_ordering => true}] => lambda{|e| [
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"A"|, %|"Bz"|], true),
+      [' A  Bz ']
+    ] },
+    [{:text => %w{Bz A}}, {:match_ordering => true}] => lambda{|e| [
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|, %|"A"|], true),
+      []
+    ] },
+    [{:text => %w{Bz A}}, {:match_ordering => false}] => lambda{|e| [
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|, %|"A"|], false),
+      [' A  Bz ']
+    ] },
+    # >> attr
+    [{:attr1 => %w{AB BC}}, {:match_ordering => true}] => lambda{|e| [
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"AB"|, %|"BC"|], true),
+      [' A  Bz ', ' E  Fx ']
+    ] },
+    [{:attr1 => %w{BC AB}}, {:match_ordering => true}] => lambda{|e| [
+      %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(@attr1)", [%|"BC"|, %|"AB"|], true),
+      []
+    ] },
+    [{:attr1 => %w{BC AB}}, {:match_ordering => false}] => lambda{|e| [
+      "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"BC"|, %|"AB"|], false),
+      [' A  Bz ', ' E  Fx ']
     ] },
   }.inject({}) do |memo, args|
     memo.merge([contents, ignored_config, alternative_config] + args[0] => args[1])
