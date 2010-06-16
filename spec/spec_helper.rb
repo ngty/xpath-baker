@@ -16,7 +16,20 @@ def each_xpf(&blk)
 end
 
 def check_tokens(expr, tokens, enforce_ordering=true)
-  expr.extend(XPF::Matchers::Enhancements::String).check_tokens(tokens, enforce_ordering)
+  tokens.map do |token|
+    '(%s)' % [
+      %|%s=#{token}|,
+      %|contains(%s,concat(" ",#{token}," "))|,
+      %|starts-with(%s,concat(#{token}," "))|,
+      %|substring(%s,string-length(%s)+1-string-length(concat(" ",#{token})))=concat(" ",#{token})|,
+    ].join(' or ') % ([expr]*5)
+  end.concat(
+    !enforce_ordering ? [] : (
+      prev = tokens[0]
+      tokens[1..-1].map do |token|
+        (prev, _ = token, 'contains(substring-after(%s,%s),concat(" ",%s))' % [expr, prev, token])[1]
+      end
+  )).join(' and ')
 end
 
 Bacon.summary_on_exit

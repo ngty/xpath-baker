@@ -1,66 +1,99 @@
 module XPF
   module Matchers
-    module Matchable #:nodoc:
+    module Matchable
 
       LOWERCASE_CHARS = ('a'..'z').to_a * ''
       UPPERCASE_CHARS = ('A'..'Z').to_a * ''
       NIL_VALUE = Struct.new('NIL_VALUE')
 
-      def mv
-        config.case_sensitive? ? q(value) : q(d(value))
-      end
+      protected
 
-      def mt
-        c(n(t)).extend(Enhancements::String)
-      end
-
-      def ma
-        c(n(a)).extend(Enhancements::String)
-      end
-
-      def mc(conditions)
-        ('self::*' == config.axis && conditions.empty?) ? nil :
-          p('./%s' % config.axis, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
-      end
-
-      def p(axis, conditions)
-        case (pos = config.position.to_s)
-        when '' then '%s%s' % [axis, conditions]
-        when /^\^/ then '%s[%s]%s' % [axis, pos.sub(/^\^/,''), conditions]
-        else '%s%s[%s]' % [axis, conditions, pos.sub(/\$$/,'')]
+        def me(expr, val)
+          !val.is_a?(Array) ? %|#{expr}=#{mv(val)}| : t(expr, val.map{|_val| mv(_val) })
         end
-      end
 
-      def a
-        "@#{name}"
-      end
+        def mv(val)
+          q(config.case_sensitive? ? val : val.to_s.downcase)
+        end
 
-      def c(str)
-        config.case_sensitive? ? str :
-          %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
-      end
+        def mt(val = nil)
+          c(val || nt)
+        end
 
-      def d(str)
-        config.case_sensitive? ? str : str.to_s.downcase
-      end
+        def ma(val = nil)
+          c(val || na)
+        end
 
-      def q(str)
-        !str.include?('"') ? %\"#{str}"\ : (
-          'concat(%s)' % str.split('"',-1).map {|s| %\"#{s}"\ }.join(%\,'"',\)
-        )
-      end
+        def mc(conditions)
+          ('self::*' == config.axis && conditions.empty?) ? nil :
+            f('./%s' % config.axis, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
+        end
 
-      def n(str)
-        config.normalize_space ? %\normalize-space(#{str})\ : str
-      end
+        def na
+          n("@#{name}")
+        end
 
-      def t
-        config.include_inner_text ? '.' : 'text()'
-      end
+        def nt
+          n(config.include_inner_text? ? '.' : 'text()')
+        end
 
-      def nil_value
-        NIL_VALUE
-      end
+        def nil_value
+          NIL_VALUE
+        end
+
+      private
+
+        def c(str) #:nodoc:
+          config.case_sensitive? ? str :
+            %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
+        end
+
+        def q(str) #:nodoc:
+          !str.include?('"') ? %\"#{str}"\ : (
+            'concat(%s)' % str.split('"',-1).map {|s| %\"#{s}"\ }.join(%\,'"',\)
+          )
+        end
+
+        def n(str) #:nodoc:
+          config.normalize_space? ? %\normalize-space(#{str})\ : str
+        end
+
+        def f(axis, conditions) #:nodoc:
+          case (pos = config.position.to_s)
+          when '' then '%s%s' % [axis, conditions]
+          when /^\^/ then '%s[%s]%s' % [axis, pos.sub(/^\^/,''), conditions]
+          else '%s%s[%s]' % [axis, conditions, pos.sub(/\$$/,'')]
+          end
+        end
+
+        # def v(expr, default_val) #:nodoc:
+        #   expr = (send(expr) rescue expr) if expr.is_a?(Symbol)
+        #   expr || default_val
+        # end
+
+        def t(expr, tokens) #:nodoc:
+          tokens.map{|tk| t1(expr,tk) }.concat(
+            !config.match_ordering? ? [] : (
+              prev = tokens[0]
+              tokens[1..-1].map{|curr| (prev, condition = t2(expr, prev, curr))[1] }
+          )).join(' and ')
+        end
+
+        def t1(expr, token) #:nodoc:
+          '(%s)' % [
+            %|%s=#{token}|,
+            %|contains(%s,concat(" ",#{token}," "))|,
+            %|starts-with(%s,concat(#{token}," "))|,
+            %|substring(%s,string-length(%s)+1-string-length(concat(" ",#{token})))=concat(" ",#{token})|,
+          ].join(' or ') % ([expr]*5)
+        end
+
+        def t2(expr, prev_token, curr_token) #:nodoc:
+          [
+            curr_token,
+            'contains(substring-after(%s,%s),concat(" ",%s))' % [expr, prev_token, curr_token]
+          ]
+        end
 
     end
   end
