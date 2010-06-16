@@ -130,6 +130,7 @@ def xpf_single_match_attrs_generic_args
     :include_inner_text => booleans,
     :case_sensitive     => booleans,
     :match_ordering     => booleans,
+    :greedy             => booleans,
     :scope              => {'//' => '//body/', '//body/' => '//xoo/', '//xoo/' => '//'},
     :position           => {nil => 2, 2 => nil},
     :axis               => {:self => :descendant, :ancestor => self, :descendant => :ancestor},
@@ -202,6 +203,28 @@ def xpf_single_match_attrs_generic_args
     [{:attr2 => 'XX'}, {:axis => :ancestor}] => lambda{|e| [
       expected_path  = %|//#{e}[./ancestor::*[normalize-space(@attr2)="XX"]]|,
       expected_nodes = []
+    ] },
+
+    # ///////////////////////////////////////////////////////////////////////////
+    # {:greedy => ...}
+    # ///////////////////////////////////////////////////////////////////////////
+    # >> text
+    [{:text => 'A Bz'}, {:greedy => true}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
+      expected_nodes = [' A  Bz ']
+    ] },
+    [{:text => 'A Bz'}, {:greedy => false}] => lambda{|e| [
+      expected_path  = %|//#{e}[not(.//#{e})][./self::*[normalize-space(.)="A Bz"]]|,
+      expected_nodes = [' A  Bz ']
+    ] },
+    # >> attr
+    [{:attr1 => 'AB BC'}, {:greedy => true}] => lambda{|e| [
+      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
+      expected_nodes = [' A  Bz ', ' E  Fx ']
+    ] },
+    [{:attr1 => 'AB BC'}, {:greedy => false}] => lambda{|e| [
+      expected_path  = %|//#{e}[not(.//#{e})][./self::*[normalize-space(@attr1)="AB BC"]]|,
+      expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
 
     # ///////////////////////////////////////////////////////////////////////////

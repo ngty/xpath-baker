@@ -185,6 +185,7 @@ module XPF
   class Configuration
 
     DEFAULT_SETTINGS = {
+      :greedy             => true,
       :case_sensitive     => true,
       :match_ordering     => true,
       :normalize_space    => true,
@@ -201,6 +202,7 @@ module XPF
     }
 
     SETTING_VALIDATORS = {
+      :greedy             => :is_boolean!,
       :case_sensitive     => :is_boolean!,
       :match_ordering     => :is_boolean!,
       :normalize_space    => :is_boolean!,

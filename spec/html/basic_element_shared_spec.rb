@@ -137,7 +137,7 @@ shared 'a basic html element' do
 
     end
 
-    next if config.keys.any?{|key| [:position, :scope].include?(key) }
+    next if config.keys.any?{|key| [:position, :scope, :greedy].include?(key) }
 
     describe "> match attrs as #{match_attrs.inspect} w per-match-attr config as #{config.inspect}" do
 

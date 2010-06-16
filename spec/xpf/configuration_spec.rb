@@ -4,6 +4,7 @@ describe "XPF::Configuration" do
 
   describe '> default' do
     {
+      :greedy             => [true, 'true'],
       :case_sensitive     => [true, 'true'],
       :match_ordering     => [true, 'true'],
       :include_inner_text => [true, 'true'],
@@ -21,6 +22,7 @@ describe "XPF::Configuration" do
 
   describe '> configuring (with valid values)' do
     {
+      :greedy             => [true, false],
       :case_sensitive     => [true, false],
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
@@ -45,6 +47,7 @@ describe "XPF::Configuration" do
 
   describe '> configuring (with invalid values)' do
     {
+      :greedy             => ['aa', 'boolean true/false'],
       :case_sensitive     => ['aa', 'boolean true/false'],
       :match_ordering     => ['aa', 'boolean true/false'],
       :include_inner_text => ['aa', 'boolean true/false'],
@@ -73,6 +76,7 @@ describe "XPF::Configuration" do
 
   describe '> configuring (with reset mode)' do
     {
+      :greedy             => [true, false],
       :case_sensitive     => [true, false],
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
