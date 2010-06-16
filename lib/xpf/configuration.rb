@@ -271,8 +271,15 @@ module XPF
       end
 
       def axis=(axis)
+        # TODO: Add missing spec !!
         @axis = ((frags = axis.to_s.split('::'))[1] || '').strip.empty? ?
           [frags[0].gsub('_','-'),'*'].join('::') : axis
+      end
+
+      def is_config?(something)
+        # TODO: Add missing spec !!
+        hash = something.is_a?(Hash) ? something : (something.to_hash rescue {})
+        !hash.empty? && (hash.keys - DEFAULT_SETTINGS.keys).empty?
       end
 
       private

@@ -62,6 +62,10 @@ module XPF
       end
     end
 
+    def is_config?(something)
+      Configuration.is_config?(something)
+    end
+
     protected
 
       ###
