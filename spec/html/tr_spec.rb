@@ -3,25 +3,31 @@ require 'xpf/html'
 
 describe "XPF::HTML <tr/> support" do
 
-  tr_path = lambda do |text_comparison, cells, match_ordering|
+  tr_axed_path = lambda do |text_comparison, cells, axis, match_ordering|
     test = lambda do |val|
       val.is_a?(Array) ? check_tokens(text_comparison, val.map{|v| %|"#{v}"| }, match_ordering) :
         %|#{text_comparison}="#{val}"|
     end
-    '//tr[./self::*[%s]]' % (
+    test_value = lambda{|val| (axis == 'self::*' ? '%s' : "./#{axis}[%s]") % test[val] }
+    test_field = lambda{|val| test[val] }
+    '//tr[%s]' % (
       case cells
       when nil
-        './td[%s]' % text_comparison
+        './td[%s]' % (axis == 'self::*' ? '%s' : "./#{axis}[%s]") % text_comparison
       when Hash
         cells.map do |field, val|
-          th = %|./ancestor::table[1]//th[#{test[field]}][1]|
-          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}][#{test[val]}]\
+          th = %|./ancestor::table[1]//th[#{test_field[field]}][1]|
+          %\./td[count(#{th}/preceding-sibling::th)+1][#{th}][#{test_value[val]}]\
         end.join('][')
       else
-        !match_ordering ? (cells.map {|val| './td[%s]' % test[val] }.join('][')) :
-          ('./td[%s]' % cells.map {|val| test[val] }.join(']/following-sibling::td['))
+        !match_ordering ? (cells.map {|val| './td[%s]' % test_value[val] }.join('][')) :
+          ('./td[%s]' % cells.map {|val| test_value[val] }.join(']/following-sibling::td['))
       end
     )
+  end
+
+  tr_path = lambda do |text_comparison, cells, match_ordering|
+    tr_axed_path[text_comparison, cells, 'self::*', match_ordering]
   end
 
   downcase = lambda do |cells|
@@ -35,11 +41,12 @@ describe "XPF::HTML <tr/> support" do
       <html>
         <body>
           <table>
-            <tr id="e1"><th>#</th> <th>Full <br/> Name</th>
-            <tr id="e2"><td> 1</td><td>Jane <br/> Lee</td>
-            <tr id="e3"><td>2 </td><td>John <br/> Tan</td>
-            <tr id="e4"><td>  </td><td>     <br/>    </td>
-            <tr id="e5"><td>  </td><td>     <br/> Poo </td>
+            <tr id="e1"><th>#</th> <th>Full <span> Name</span></th>
+            <tr id="e2"><td> 1</td><td>Jane <span> Lee </span></td>
+            <tr id="e3"><td>2 </td><td>John <span> Tan </span></td>
+            <tr id="e4"><td>  </td><td>     <span>     </span></td>
+            <tr id="e5"><td>  </td><td>Pett <span>     </span></td>
+            <tr id="e6"><td>  </td><td>     <span> Fan </span></td>
           </table>
         </body>
       </html>
@@ -53,26 +60,26 @@ describe "XPF::HTML <tr/> support" do
     # >> {:cells => {...}}
     [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => true}] =>
       [tr_path['normalize-space(.)', cells, nil], %w{e3}],
-    [{:cells => (cells = {'#' => '2 ', 'Full  Name' => 'John  Tan'})}, {:normalize_space => true}] =>
+    [{:cells => (cells = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => true}] =>
       [tr_path['normalize-space(.)', cells, nil], %w{}],
-    [{:cells => (cells = {'#' => '2 ', 'Full  Name' => 'John  Tan'})}, {:normalize_space => false}] =>
+    [{:cells => (cells = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => false}] =>
       [tr_path['.', cells, nil], %w{e3}],
     [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => false}] =>
       [tr_path['.', cells, nil], %w{}],
     # >> {:cells => [...]}
     [{:cells => (cells = ['2', 'John Tan'])}, {:normalize_space => true}] =>
       [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = ['2 ', 'John  Tan'])}, {:normalize_space => true}] =>
+    [{:cells => (cells = ['2 ', 'John  Tan '])}, {:normalize_space => true}] =>
       [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = ['2 ', 'John  Tan'])}, {:normalize_space => false}] =>
+    [{:cells => (cells = ['2 ', 'John  Tan '])}, {:normalize_space => false}] =>
       [tr_path['.', cells, true], %w{e3}],
     [{:cells => (cells = ['2', 'John Tan'])}, {:normalize_space => false}] =>
       [tr_path['.', cells, true], %w{}],
     # >> [:cells]
     [[:cells], {:normalize_space => true}] =>
-      [tr_path['normalize-space(.)', nil, nil], %w{e2 e3 e5}],
+      [tr_path['normalize-space(.)', nil, nil], %w{e2 e3 e5 e6}],
     [[:cells], {:normalize_space => false}] =>
-      [tr_path['.', nil, nil], %w{e2 e3 e4 e5}],
+      [tr_path['.', nil, nil], %w{e2 e3 e4 e5 e6}],
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:include_inner_text => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
@@ -96,9 +103,9 @@ describe "XPF::HTML <tr/> support" do
       [tr_path['normalize-space(text())', cells, true], %w{e3}],
     # >> [:cells]
     [[:cells], {:include_inner_text => true}] =>
-      [tr_path['normalize-space(.)', nil, nil], %w{e2 e3 e5}],
+      [tr_path['normalize-space(.)', nil, nil], %w{e2 e3 e5 e6}],
     [[:cells], {:include_inner_text => false}] =>
-      [tr_path['normalize-space(text())', nil, nil], %w{e2 e3}],
+      [tr_path['normalize-space(text())', nil, nil], %w{e2 e3 e5}],
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:case_sensitive => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
@@ -143,6 +150,24 @@ describe "XPF::HTML <tr/> support" do
     [{:cells => (cells = [%w{Tan John}, '2'])}, {:match_ordering => false}] =>
       [tr_path['normalize-space(.)', cells, false], %w{e3}],
     # >> [:cells] (NA)
+    # ///////////////////////////////////////////////////////////////////////////////////////////
+    # {:axis => ... }
+    # ///////////////////////////////////////////////////////////////////////////////////////////
+    # >> {:cells => {...}}
+    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axis => 'self::*'}] =>
+      [tr_axed_path['normalize-space(.)', cells, 'self::*', true], %w{}],
+    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axis => 'descendant::*'}] =>
+      [tr_axed_path['normalize-space(.)', cells, 'descendant::*', true], %w{e3}],
+    # >> {:cells => [...]}
+    [{:cells => (cells = ['Tan'])}, {:axis => 'self::*'}] =>
+      [tr_axed_path['normalize-space(.)', cells, 'self::*', true], %w{}],
+    [{:cells => (cells = ['Tan'])}, {:axis => 'descendant::*'}] =>
+      [tr_axed_path['normalize-space(.)', cells, 'descendant::*', true], %w{e3}],
+    # >> [:cells]
+    [[:cells], {:axis => 'self::*'}] =>
+      [tr_axed_path['normalize-space(.)', nil, 'self::*', true], %w{e2 e3 e5 e6}],
+    [[:cells], {:axis => 'descendant::*'}] =>
+      [tr_axed_path['normalize-space(.)', nil, 'descendant::*', true], %w{e2 e3 e6}],
   }.each do |(match_attrs, config), (expected_path, expected_ids)|
 
     describe '> match attrs as %s, & w config as %s' % [match_attrs.inspect, config.inspect] do
