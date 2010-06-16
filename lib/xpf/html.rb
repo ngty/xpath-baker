@@ -1,4 +1,5 @@
 require File.join(File.expand_path(File.dirname(__FILE__)), '..', 'xpf')
+require 'xpf/html/matchers'
 require 'xpf/html/tr'
 
 module XPF
