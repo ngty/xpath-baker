@@ -14,7 +14,6 @@ module XPF
 end
 
 require 'xpf/matchers/matchable'
-require 'xpf/matchers/enhancements'
 require 'xpf/matchers/group'
 require 'xpf/matchers/text'
 require 'xpf/matchers/literal'
