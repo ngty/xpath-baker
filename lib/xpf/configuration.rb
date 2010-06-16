@@ -269,7 +269,8 @@ module XPF
       end
 
       def axis=(axis)
-        @axis = ((frags = axis.to_s.split('::'))[1] || '').strip.empty? ? [frags[0],'*'].join('::') : axis
+        @axis = ((frags = axis.to_s.split('::'))[1] || '').strip.empty? ?
+          [frags[0].gsub('_','-'),'*'].join('::') : axis
       end
 
       private
