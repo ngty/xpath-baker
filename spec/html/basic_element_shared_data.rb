@@ -15,19 +15,19 @@ def xpf_multiple_match_attrs_args
     \).xpath(path).map(&:text)
   end
   {
-    [[[[:text], {:axis => 'descendant::span'}], [{:attr1 => 'AB BC'},{}]], {:position => 2}] => lambda{|e| [
+    [__LINE__, [[[:text], {:axis => 'descendant::span'}], [{:attr1 => 'AB BC'},{}]], {:position => 2}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::span[normalize-space(.)]][./self::*[normalize-space(@attr1)="AB BC"]][2]|,
       expected_nodes = [' F  Dz ']
     ] },
-    [[[[:text], {:axis => 'descendant::span'}], {:attr1 => 'AB BC'}], {:position => 2}] => lambda{|e| [
+    [__LINE__, [[[:text], {:axis => 'descendant::span'}], {:attr1 => 'AB BC'}], {:position => 2}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::span[normalize-space(.)]][./self::*[normalize-space(@attr1)="AB BC"][2]][2]|,
       expected_nodes = []
     ] },
-    [[[{:attr1 => 'AB BC'},{}], [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
+    [__LINE__, [[{:attr1 => 'AB BC'},{}], [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]][./descendant::span[normalize-space(.)]][2]|,
       expected_nodes = [' F  Dz ']
     ] },
-    [[{:attr1 => 'AB BC'}, [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
+    [__LINE__, [{:attr1 => 'AB BC'}, [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"][2]][./descendant::span[normalize-space(.)]][2]|,
       expected_nodes = []
     ] },
@@ -50,52 +50,52 @@ def xpf_single_match_attrs_non_generic_args
     # {:position => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'C Dw'}, {:position => nil}, {:position => 1}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:position => nil}, {:position => 1}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"]][1]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:text => 'C Dw'}, {:position => nil}, {:position => '1$'}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:position => nil}, {:position => '1$'}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"]][1]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:text => 'C Dw'}, {:position => nil}, {:position => '^1'}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:position => nil}, {:position => '^1'}] => lambda{|e| [
       expected_path  = %|//#{e}[1][./self::*[normalize-space(.)="C Dw"]]|,
       expected_nodes = []
     ] },
-    [{:text => 'C Dw'}, {:position => 1}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:position => 1}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"][1]]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:text => 'C Dw'}, {:position => '1$'}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:position => '1$'}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="C Dw"][1]]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:text => 'C Dw'}, {:position => '^1'}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:position => '^1'}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[1][normalize-space(.)="C Dw"]]|,
       expected_nodes = [' C  Dw ']
     ] },
     # >> attr
-    [{:attr1 => 'CD DE'}, {:position => nil}, {:position => 1}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:position => nil}, {:position => 1}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"]][1]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:attr1 => 'CD DE'}, {:position => nil}, {:position => '1$'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:position => nil}, {:position => '1$'}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"]][1]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:attr1 => 'CD DE'}, {:position => nil}, {:position => '^1'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:position => nil}, {:position => '^1'}] => lambda{|e| [
       expected_path  = %|//#{e}[1][./self::*[normalize-space(@attr1)="CD DE"]]|,
       expected_nodes = []
     ] },
-    [{:attr1 => 'CD DE'}, {:position => 1}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:position => 1}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"][1]]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:attr1 => 'CD DE'}, {:position => '1$'}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:position => '1$'}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="CD DE"][1]]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:attr1 => 'CD DE'}, {:position => '^1'}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:position => '^1'}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[1][normalize-space(@attr1)="CD DE"]]|,
       expected_nodes = [' C  Dw ']
     ] },
@@ -104,20 +104,20 @@ def xpf_single_match_attrs_non_generic_args
     # {:scope => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'C Dw'}, {:scope => '//'}, {:scope => '//body/'}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:scope => '//'}, {:scope => '//body/'}] => lambda{|e| [
       expected_path  = %|//body/#{e}[./self::*[normalize-space(.)="C Dw"]]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:text => 'C Dw'}, {:scope => '//'}, {:scope => '//xoo/'}] => lambda{|e| [
+    [__LINE__, {:text => 'C Dw'}, {:scope => '//'}, {:scope => '//xoo/'}] => lambda{|e| [
       expected_path  = %|//xoo/#{e}[./self::*[normalize-space(.)="C Dw"]]|,
       expected_nodes = []
     ] },
     # >> attr
-    [{:attr1 => 'CD DE'}, {:scope => '//'}, {:scope => '//body/'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:scope => '//'}, {:scope => '//body/'}] => lambda{|e| [
       expected_path  = %|//body/#{e}[./self::*[normalize-space(@attr1)="CD DE"]]|,
       expected_nodes = [' C  Dw ']
     ] },
-    [{:attr1 => 'CD DE'}, {:scope => '//'}, {:scope => '//xoo/'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'CD DE'}, {:scope => '//'}, {:scope => '//xoo/'}] => lambda{|e| [
       expected_path  = %|//xoo/#{e}[./self::*[normalize-space(@attr1)="CD DE"]]|,
       expected_nodes = []
     ] },
@@ -158,19 +158,19 @@ def xpf_single_match_attrs_generic_args
     # {:include_inner_text => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:include_inner_text => true}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:include_inner_text => true}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A'}, {:include_inner_text => true}] => lambda{|e| [
+    [__LINE__, {:text => 'A'}, {:include_inner_text => true}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A"]]|,
       expected_nodes = []
     ] },
-    [{:text => 'A'}, {:include_inner_text => false}] => lambda{|e| [
+    [__LINE__, {:text => 'A'}, {:include_inner_text => false}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(text())="A"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:include_inner_text => false}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:include_inner_text => false}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(text())="A Bz"]]|,
       expected_nodes = []
     ] },
@@ -179,28 +179,28 @@ def xpf_single_match_attrs_generic_args
     # {:axis => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:axis => :self}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:axis => :self}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'Bz'}, {:axis => :descendant}] => lambda{|e| [
+    [__LINE__, {:text => 'Bz'}, {:axis => :descendant}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::*[normalize-space(.)="Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:axis => :ancestor}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:axis => :ancestor}] => lambda{|e| [
       expected_path  = %|//#{e}[./ancestor::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = []
     ] },
     # >> attr
-    [{:attr1 => 'AB BC'}, {:axis => :self}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:axis => :self}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr2 => 'XX'}, {:axis => :descendant}] => lambda{|e| [
+    [__LINE__, {:attr2 => 'XX'}, {:axis => :descendant}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::*[normalize-space(@attr2)="XX"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr2 => 'XX'}, {:axis => :ancestor}] => lambda{|e| [
+    [__LINE__, {:attr2 => 'XX'}, {:axis => :ancestor}] => lambda{|e| [
       expected_path  = %|//#{e}[./ancestor::*[normalize-space(@attr2)="XX"]]|,
       expected_nodes = []
     ] },
@@ -209,20 +209,20 @@ def xpf_single_match_attrs_generic_args
     # {:greedy => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:greedy => true}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:greedy => true}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:greedy => false}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:greedy => false}] => lambda{|e| [
       expected_path  = %|//#{e}[not(.//#{e})][./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
     # >> attr
-    [{:attr1 => 'AB BC'}, {:greedy => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:greedy => true}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => 'AB BC'}, {:greedy => false}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:greedy => false}] => lambda{|e| [
       expected_path  = %|//#{e}[not(.//#{e})][./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
@@ -231,28 +231,28 @@ def xpf_single_match_attrs_generic_args
     # {:scope => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:scope => '//'}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:scope => '//'}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:scope => '//body/'}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:scope => '//body/'}] => lambda{|e| [
       expected_path  = %|//body/#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:scope => '//boo/'}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:scope => '//boo/'}] => lambda{|e| [
       expected_path  = %|//boo/#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = []
     ] },
     # >> attr
-    [{:attr1 => 'AB BC'}, {:scope => '//'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:scope => '//'}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => 'AB BC'}, {:scope => '//body/'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:scope => '//body/'}] => lambda{|e| [
       expected_path  = %|//body/#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => 'AB BC'}, {:scope => '//boo/'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:scope => '//boo/'}] => lambda{|e| [
       expected_path  = %|//boo/#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = []
     ] },
@@ -261,36 +261,36 @@ def xpf_single_match_attrs_generic_args
     # {:position => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:position => 2}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:position => 2}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"][2]][2]|,
       expected_nodes = []
     ] },
-    [{:text => 'A Bz'}, {:position => '2$'}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:position => '2$'}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"][2]][2]|,
       expected_nodes = []
     ] },
-    [{:text => 'A Bz'}, {:position => '^2'}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:position => '^2'}] => lambda{|e| [
       expected_path  = %|//#{e}[2][./self::*[2][normalize-space(.)="A Bz"]]|,
       expected_nodes = []
     ] },
     # >> attr
-    [{:attr1 => 'AB BC'}, {:position => nil}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:position => nil}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => 'AB BC'}, {:position => 2}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:position => 2}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"][2]][2]|,
       expected_nodes = []
     ] },
-    [{:attr1 => 'AB BC'}, {:position => '2$'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:position => '2$'}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"][2]][2]|,
       expected_nodes = []
     ] },
-    [{:attr1 => 'AB BC'}, {:position => '^2'}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:position => '^2'}] => lambda{|e| [
       expected_path  = %|//#{e}[2][./self::*[2][normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = []
     ] },
@@ -299,36 +299,36 @@ def xpf_single_match_attrs_generic_args
     # {:normalize_space => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:normalize_space => true}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:normalize_space => true}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => ' A  Bz '}, {:normalize_space => true}] => lambda{|e| [
+    [__LINE__, {:text => ' A  Bz '}, {:normalize_space => true}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[normalize-space(.)=" A  Bz "]]|,
       expected_nodes = []
     ] },
-    [{:text => ' A  Bz '}, {:normalize_space => false}] => lambda{|e| [
+    [__LINE__, {:text => ' A  Bz '}, {:normalize_space => false}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[.=" A  Bz "]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'A Bz'}, {:normalize_space => false}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:normalize_space => false}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[.="A Bz"]]|,
       expected_nodes = []
     ] },
     # >> attr
-    [{:attr1 => 'AB BC'}, {:normalize_space => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:normalize_space => true}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => ' AB BC '}, {:normalize_space => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => ' AB BC '}, {:normalize_space => true}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[normalize-space(@attr1)=" AB BC "]]|,
       expected_nodes = []
     ] },
-    [{:attr1 => ' AB BC '}, {:normalize_space => false}] => lambda{|e| [
+    [__LINE__, {:attr1 => ' AB BC '}, {:normalize_space => false}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[@attr1=" AB BC "]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => 'AB BC'}, {:normalize_space => false}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:normalize_space => false}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[@attr1="AB BC"]]|,
       expected_nodes = []
     ] },
@@ -337,28 +337,28 @@ def xpf_single_match_attrs_generic_args
     # {:case_sensitive => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => 'A Bz'}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:case_sensitive => true}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [{:text => 'a bZ'}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:text => 'a bZ'}, {:case_sensitive => true}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[normalize-space(.)="a bZ"]]|,
       expected_nodes = []
     ] },
-    [{:text => 'a bZ'}, {:case_sensitive => false}] => lambda{|e| [
+    [__LINE__, {:text => 'a bZ'}, {:case_sensitive => false}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[%s="a bz"]]| % translate_casing("normalize-space(.)"),
       expected_nodes = [' A  Bz ']
     ] },
     # >> attr
-    [{:attr1 => 'AB BC'}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:case_sensitive => true}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => 'ab bc'}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'ab bc'}, {:case_sensitive => true}] => lambda{|e| [
       expected_path = %|//#{e}[./self::*[normalize-space(@attr1)="ab bc"]]|,
       expected_nodes = [' G  Hy ']
     ] },
-    [{:attr1 => 'ab bc'}, {:case_sensitive => false}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'ab bc'}, {:case_sensitive => false}] => lambda{|e| [
       %|//#{e}[./self::*[%s="ab bc"]]| % translate_casing("normalize-space(@attr1)"),
       [' A  Bz ', ' E  Fx ', ' G  Hy ']
     ] },
@@ -367,36 +367,36 @@ def xpf_single_match_attrs_generic_args
     # Tokens matching (w match attr as array) / {:case_sensitive => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => %w{Bz}}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:text => %w{Bz}}, {:case_sensitive => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|], true),
       [' A  Bz ']
     ] },
-    [{:text => %w{A Bz}}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:text => %w{A Bz}}, {:case_sensitive => true}] => lambda{|e| [
       %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(.)", [%|"A"|, %|"Bz"|], true),
       [' A  Bz ']
     ] },
-    [{:text => %w{a bZ}}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:text => %w{a bZ}}, {:case_sensitive => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"a"|, %|"bZ"|], true),
       []
     ] },
-    [{:text => %w{a bZ}}, {:case_sensitive => false}] => lambda{|e| [
+    [__LINE__, {:text => %w{a bZ}}, {:case_sensitive => false}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens(translate_casing("normalize-space(.)"), [%|"a"|, %|"bz"|], true),
       [' A  Bz ']
     ] },
     # >> attr
-    [{:attr1 => %w{AB}}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{AB}}, {:case_sensitive => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"AB"|], true),
       [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => %w{AB BC}}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{AB BC}}, {:case_sensitive => true}] => lambda{|e| [
       %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(@attr1)", [%|"AB"|, %|"BC"|], true),
       [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => %w{ab bc}}, {:case_sensitive => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{ab bc}}, {:case_sensitive => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"ab"|, %|"bc"|], true),
       [' G  Hy ']
     ] },
-    [{:attr1 => %w{AB BC}}, {:case_sensitive => false}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{AB BC}}, {:case_sensitive => false}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens(translate_casing("normalize-space(@attr1)"), [%|"ab"|, %|"bc"|], true),
       [' A  Bz ', ' E  Fx ', ' G  Hy ']
     ] },
@@ -405,28 +405,28 @@ def xpf_single_match_attrs_generic_args
     # Tokens matching (w match attr as array) / {:match_ordering => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [{:text => %w{A Bz}}, {:match_ordering => true}] => lambda{|e| [
+    [__LINE__, {:text => %w{A Bz}}, {:match_ordering => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"A"|, %|"Bz"|], true),
       [' A  Bz ']
     ] },
-    [{:text => %w{Bz A}}, {:match_ordering => true}] => lambda{|e| [
+    [__LINE__, {:text => %w{Bz A}}, {:match_ordering => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|, %|"A"|], true),
       []
     ] },
-    [{:text => %w{Bz A}}, {:match_ordering => false}] => lambda{|e| [
+    [__LINE__, {:text => %w{Bz A}}, {:match_ordering => false}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(.)", [%|"Bz"|, %|"A"|], false),
       [' A  Bz ']
     ] },
     # >> attr
-    [{:attr1 => %w{AB BC}}, {:match_ordering => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{AB BC}}, {:match_ordering => true}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"AB"|, %|"BC"|], true),
       [' A  Bz ', ' E  Fx ']
     ] },
-    [{:attr1 => %w{BC AB}}, {:match_ordering => true}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{BC AB}}, {:match_ordering => true}] => lambda{|e| [
       %|//#{e}[./self::*[%s]]| % check_tokens("normalize-space(@attr1)", [%|"BC"|, %|"AB"|], true),
       []
     ] },
-    [{:attr1 => %w{BC AB}}, {:match_ordering => false}] => lambda{|e| [
+    [__LINE__, {:attr1 => %w{BC AB}}, {:match_ordering => false}] => lambda{|e| [
       "//#{e}[./self::*[%s]]" % check_tokens("normalize-space(@attr1)", [%|"BC"|, %|"AB"|], false),
       [' A  Bz ', ' E  Fx ']
     ] },

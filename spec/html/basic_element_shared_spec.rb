@@ -74,9 +74,9 @@ shared 'a basic html element' do
 
   xpf_single_match_attrs_generic_args.each do |working_args, expected_args|
 
-    contents, ignored_config, alternative_config, match_attrs, config = working_args
+    contents, ignored_config, alternative_config, line, match_attrs, config = working_args
 
-    describe "> match attrs as #{match_attrs.inspect} w global config as #{config.inspect}" do
+    describe "> match attrs as #{match_attrs.inspect} w global config as #{config.inspect} [##{line}]" do
 
       should "return xpath as described" do
         @xpf_global_configure[config]
@@ -104,7 +104,7 @@ shared 'a basic html element' do
 
     end
 
-    describe "> match attrs as #{match_attrs.inspect} w common config as #{config.inspect}" do
+    describe "> match attrs as #{match_attrs.inspect} w common config as #{config.inspect} [##{line}]" do
 
       before do
         @xpf_global_configure[
@@ -139,7 +139,7 @@ shared 'a basic html element' do
 
     next if config.keys.any?{|key| [:position, :scope, :greedy].include?(key) }
 
-    describe "> match attrs as #{match_attrs.inspect} w per-match-attr config as #{config.inspect}" do
+    describe "> match attrs as #{match_attrs.inspect} w per-match-attr config as #{config.inspect} [##{line}]" do
 
       before do
         @other_config = config.inject({}) {|memo, (key, val)| memo.merge(key => alternative_config[key][val]) }
@@ -177,10 +177,10 @@ shared 'a basic html element' do
 
   xpf_single_match_attrs_non_generic_args.each do |working_args, expected_args|
 
-    contents, ignored_config, match_attrs, config, other_config = working_args
+    contents, ignored_config, line, match_attrs, config, other_config = working_args
 
-    describe "> match attrs as %s w per-match-attrs as %s & global config as %s" % [
-        match_attrs.inspect, config.inspect, other_config.inspect
+    describe "> match attrs as %s w per-match-attrs as %s & global config as %s [#%s]" % [
+        match_attrs.inspect, config.inspect, other_config.inspect, line
       ] do
 
       before { @xpf_global_configure[other_config] }
@@ -208,8 +208,8 @@ shared 'a basic html element' do
 
     end
 
-    describe "> match attrs as %s w per-match-attrs as %s & common config as %s" % [
-        match_attrs.inspect, config.inspect, other_config.inspect
+    describe "> match attrs as %s w per-match-attrs as %s & common config as %s [#%s]" % [
+        match_attrs.inspect, config.inspect, other_config.inspect, line
       ] do
 
       should "return xpath as described" do
@@ -242,12 +242,12 @@ shared 'a basic html element' do
 
   end
 
-  xpf_multiple_match_attrs_args.each do |(contents, match_attrs, config), expected_args|
+  xpf_multiple_match_attrs_args.each do |(contents, line, match_attrs, config), expected_args|
 
     args = [match_attrs, config].flatten(1)
 
-    describe "> match attrs as %s, & w common config as %s" % [
-        match_attrs.map(&:inspect).join(' & '), config.inspect
+    describe "> match attrs as %s, & w common config as %s [#%s]" % [
+        match_attrs.map(&:inspect).join(' & '), config.inspect, line
       ] do
 
       should "return xpath as described" do
