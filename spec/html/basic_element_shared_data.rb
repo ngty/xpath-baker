@@ -11,7 +11,6 @@ def xpf_multiple_match_attrs_args
         <%s id="e1" attr1="x"><b>X</b></%s>
         <%s id="e2" attr1="x"><b> </b></%s>
         <%s id="e3" attr1="x"><b>X</b></%s>
-        <%s id="e4" attr1="z"><b>X</b></%s>
       |,
       # Match Attrs & Config
       match_attrs = [
@@ -40,16 +39,20 @@ def xpf_multiple_match_attrs_args
     # ///////////////////////////////////////////////////////////////////////////////////////
     [
       debug_line = __LINE__,
-      content,
+      content = %|
+        <%s id="e1" attr1="x"><b>X</b></%s>
+        <%s id="e2" attr1="x"><b> </b></%s>
+        <%s id="e3" attr1="x"><b>X</b></%s>
+      |,
       # Match Attrs & Config
       match_attrs = [
         [[:text], {:axis => 'descendant::b'}],
         [{:attr1 => 'x'}]
       ],
-      config = {:position => 2},
+      config = {:position => 1},
       # Expectation Args
-      path = %|//%s[./descendant::b[normalize-space(.)]][./self::*[normalize-space(@attr1)="x"][2]][2]|,
-      ids = []
+      path = %|//%s[./descendant::b[normalize-space(.)]][./self::*[normalize-space(@attr1)="x"][1]][1]|,
+      ids = %w{e1}
     ],
     [
       debug_line = __LINE__,
@@ -58,8 +61,8 @@ def xpf_multiple_match_attrs_args
       match_attrs.reverse,
       config,
       # Expectation Args
-      path  = %|//%s[./self::*[normalize-space(@attr1)="x"][2]][./descendant::b[normalize-space(.)]][2]|,
-      ids = []
+      path  = %|//%s[./self::*[normalize-space(@attr1)="x"][1]][./descendant::b[normalize-space(.)]][1]|,
+      ids = %w{e1}
     ],
 
   ].map do |debug_line, content, match_attrs, config, expected_path, expected_ids|
