@@ -1,7 +1,7 @@
 module XPF
   module HTML
     module Matchers
-      module Cells
+      module TD
 
         module Matchable
 
@@ -15,7 +15,7 @@ module XPF
 
         end
 
-        class Nil < XPF::Matchers::Matcher(:scope, :value, :config)
+        class Nil < CM::Matcher(:scope, :value, :config)
 
           include Matchable
 
@@ -25,7 +25,7 @@ module XPF
 
         end
 
-        class Hash < XPF::Matchers::Matcher(:scope, :value, :config)
+        class Hash < CM::Matcher(:scope, :value, :config)
 
           include Matchable
 
@@ -41,7 +41,7 @@ module XPF
 
         end
 
-        class Array < XPF::Matchers::Matcher(:scope, :value, :config)
+        class Array < CM::Matcher(:scope, :value, :config)
 
           include Matchable
 

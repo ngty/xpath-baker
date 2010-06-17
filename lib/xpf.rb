@@ -68,6 +68,8 @@ module XPF
 
     protected
 
+      attr_reader :supported_elements
+
       ###
       # This is to avoid XPF from running in multiple modes. Once mode has been declared
       # redeclaring will raise XPF::ModeAlreadyDeclaredError.
@@ -77,6 +79,16 @@ module XPF
           raise ModeAlreadyDeclaredError.new("Mode has already been declared as :#{MODE} !!")
         else
           const_set(:MODE, mode)
+        end
+      end
+
+      # TODO: Missing documentation !!
+      def declare_support_for(elements_args)
+        elements_args.each do |element, config|
+          (@supported_elements ||= []) << element
+          (class << self ; self ; end).send(:define_method, element) do |*args|
+            XPath.new(element, config).build(*args)
+          end
         end
       end
 
