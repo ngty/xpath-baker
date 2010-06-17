@@ -67,7 +67,7 @@ module XPF
         end
 
         def is_config?(arg)
-          Configuration.is_config?(arg)
+          Configuration.describes_config?(arg)
         end
 
         def is_match_attrs?(arg)

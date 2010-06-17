@@ -276,10 +276,9 @@ module XPF
           [frags[0].gsub('_','-'),'*'].join('::') : axis
       end
 
-      def is_config?(something)
+      def describes_config?(something)
         # TODO: Add missing spec !!
-        hash = something.is_a?(Hash) ? something : (something.to_hash rescue {})
-        !hash.empty? && (hash.keys - DEFAULT_SETTINGS.keys).empty?
+        something.is_a?(Hash) && (something.keys - DEFAULT_SETTINGS.keys).empty?
       end
 
       private
