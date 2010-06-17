@@ -14,6 +14,7 @@ shared 'a basic html element' do
     XPF.configure(:reset)
   end
 
+=begin
   xpf_no_match_attrs_args.each do |working_args, expected_args|
 
     contents, ignored_config, config = working_args
@@ -241,25 +242,24 @@ shared 'a basic html element' do
     end
 
   end
+=end
 
-  xpf_multiple_match_attrs_args.each do |(contents, line, match_attrs, config), expected_args|
-
-    args = [match_attrs, config].flatten(1)
+  xpf_multiple_match_attrs_args.each do |debug_line, match_attrs, config, node_ids, expected|
 
     describe "> match attrs as %s, & w common config as %s [#%s]" % [
-        match_attrs.map(&:inspect).join(' & '), config.inspect, line
+        match_attrs.map(&:inspect).join(' & '), config.inspect, debug_line
       ] do
 
+      before do
+        @get_path = lambda{|x| x.send(@element, *[match_attrs, config].flatten(1)) }
+      end
+
       should "return xpath as described" do
-        each_xpf do |x|
-          x.send(@element, *args).should.equal(expected_args[@element][0])
-        end
+        each_xpf{|x| @get_path[x].should.equal(expected[@element,0]) }
       end
 
       should "return xpath that match intended node(s)" do
-        each_xpf do |x|
-          contents[@element, x.send(@element, *args)].should.equal(expected_args[@element][1])
-        end
+        each_xpf{|x| node_ids[@element,@get_path[x]].should.equal(expected[@element,1]) }
       end
 
     end

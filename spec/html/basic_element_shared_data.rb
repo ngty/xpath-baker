@@ -1,37 +1,77 @@
 def xpf_multiple_match_attrs_args
-  contents = lambda do |element, path|
-    Nokogiri::HTML(%\
-      <html>
-        <body>
-          <#{element} id="e1" attr1=" AB BC "> A <span attr2="XX"> Bz </span></#{element}>
-          <#{element} id="e2" attr1=" CD DE "> C <span attr2="YY"> Dw </span></#{element}>
-          <#{element} id="e3" attr1=" AB BC "> E <span attr2="XX">    </span></#{element}>
-          <#{element} id="e4" attr1=" ab bc "> G                             </#{element}>
-          <#{element} id="e5"                > G <span attr2="ZZ">    </span></#{element}>
-          <#{element} id="e6" attr1=" "      > C <span attr2="YY"> Dz </span></#{element}>
-          <#{element} id="e7" attr1=" AB BC "> F <span attr2="YY"> Dz </span></#{element}>
-        </body>
-      </html>
-    \).xpath(path).map(&:text)
+  [
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    # NOTE: 2 match groups + common config
+    # * match group x .. array match attrs + group-specific config
+    # * match group y ... hash match attrs + dummy (place-holding) group-specific config
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    [
+      debug_line = __LINE__,
+      content = %|
+        <%s id="e1" attr1="x"><b>X</b></%s>
+        <%s id="e2" attr1="x"><b> </b></%s>
+        <%s id="e3" attr1="x"><b>X</b></%s>
+        <%s id="e4" attr1="z"><b>X</b></%s>
+      |,
+      # Match Attrs & Config
+      match_attrs = [
+        [[:text], {:axis => 'descendant::b'}],
+        [{:attr1 => 'x'},{}]
+      ],
+      config = {:position => 2},
+      # Expectation Args
+      path = %|//%s[./descendant::b[normalize-space(.)]][./self::*[normalize-space(@attr1)="x"]][2]|,
+      ids = %w{e3}
+    ],
+    [
+      debug_line = __LINE__,
+      content,
+      # Match Attrs & Config
+      match_attrs.reverse,
+      config,
+      # Expectation Args
+      path = %|//%s[./self::*[normalize-space(@attr1)="x"]][./descendant::b[normalize-space(.)]][2]|,
+      ids = %w{e3}
+    ],
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    # NOTE: 2 match groups & common config
+    # * 1st match group ... array match attrs + group-specific config
+    # * 2nd match group ... hash match attrs only
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    [
+      debug_line = __LINE__,
+      content,
+      # Match Attrs & Config
+      match_attrs = [
+        [[:text], {:axis => 'descendant::b'}],
+        [{:attr1 => 'x'}]
+      ],
+      config = {:position => 2},
+      # Expectation Args
+      path = %|//%s[./descendant::b[normalize-space(.)]][./self::*[normalize-space(@attr1)="x"][2]][2]|,
+      ids = []
+    ],
+    [
+      debug_line = __LINE__,
+      content,
+      # Match Attrs & Config
+      match_attrs.reverse,
+      config,
+      # Expectation Args
+      path  = %|//%s[./self::*[normalize-space(@attr1)="x"][2]][./descendant::b[normalize-space(.)]][2]|,
+      ids = []
+    ],
+
+  ].map do |debug_line, content, match_attrs, config, expected_path, expected_ids|
+    matching_node_ids = lambda do |element, path|
+      Nokogiri::HTML('<html><body>%s</body></html>' % content % ([element]*100)).
+        xpath(path).map{|node| node.attribute('id').to_s }
+    end
+    expectations = lambda do |element, i|
+      [expected_path % ([element]*20), expected_ids][i]
+    end
+    [debug_line, match_attrs, config, matching_node_ids, expectations]
   end
-  {
-    [__LINE__, [[[:text], {:axis => 'descendant::span'}], [{:attr1 => 'AB BC'},{}]], {:position => 2}] => lambda{|e| [
-      expected_path  = %|//#{e}[./descendant::span[normalize-space(.)]][./self::*[normalize-space(@attr1)="AB BC"]][2]|,
-      expected_nodes = [' F  Dz ']
-    ] },
-    [__LINE__, [[[:text], {:axis => 'descendant::span'}], {:attr1 => 'AB BC'}], {:position => 2}] => lambda{|e| [
-      expected_path  = %|//#{e}[./descendant::span[normalize-space(.)]][./self::*[normalize-space(@attr1)="AB BC"][2]][2]|,
-      expected_nodes = []
-    ] },
-    [__LINE__, [[{:attr1 => 'AB BC'},{}], [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
-      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]][./descendant::span[normalize-space(.)]][2]|,
-      expected_nodes = [' F  Dz ']
-    ] },
-    [__LINE__, [{:attr1 => 'AB BC'}, [[:text], {:axis => 'descendant::span'}]], {:position => 2}] => lambda{|e| [
-      expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"][2]][./descendant::span[normalize-space(.)]][2]|,
-      expected_nodes = []
-    ] },
-  }.inject({}) {|memo, (args, expectations)| memo.merge([contents] + args => expectations) }
 end
 
 def xpf_single_match_attrs_non_generic_args
