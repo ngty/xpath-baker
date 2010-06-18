@@ -56,12 +56,6 @@ module XPF
           (@configs + [config]).inject({}){|memo, c| memo.merge(c) }
         end
 
-#        def new_matcher(*args)
-#          match_attrs, config = (0..1).map {|i| args[i] || {} }
-#          [args.size < 3, is_config?(config), is_match_attrs?(match_attrs)].all? ?
-#            new_matcher(match_attrs, config) : raise_args_err(__LINE__)
-#        end
-
         def new_matcher(match_attrs, config)
           _config = new_config(config)
           _config.group_matcher.new(match_attrs, _config)
