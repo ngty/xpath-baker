@@ -1,114 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
-
-def xpf_invalid_permutated_arguments
-{
-  '1~s'        => ['attr1'],
-  '1~:'        => [:attr1],
-
-  '2~ss'       => ['attr1', 'attr2'],
-  '2~::'       => [:attr1, :attr2],
-
-  '2~s[h,c]'   => ['attr1', [{:attr2 => 2}, {:position => 2}]],
-  '2~:[h,c]'   => [:attr1, [{:attr2 => 2}, {:position => 2}]],
-  '2~s[h]'     => ['attr1', [{:attr2 => 2}]],
-  '2~:[h]'     => [:attr1, [{:attr2 => 2}]],
-  '2~sh'       => ['attr1', {:attr2 => 2}],
-  '2~:h'       => [:attr1, {:attr2 => 2}],
-  '2~s[a,c]'   => ['attr1', [[:attr2], {:position => 2}]],
-  '2~:[a,c]'   => [:attr1, [[:attr2], {:position => 2}]],
-  '2~s[a]'     => ['attr1', [[:attr2]]],
-  '2~:[a]'     => [:attr1, [[:attr2]]],
-  '2~sa'       => ['attr1', [:attr2]],
-  '2~:a'       => [:attr1, [:attr2]],
-
-  '2~[h,c]s'   => [[{:attr2 => 2}, {:position => 2}], 'attr1'],
-  '2~[h,c]:'   => [[{:attr2 => 2}, {:position => 2}], :attr1],
-  '2~[h]s'     => [[{:attr2 => 2}], 'attr1'],
-  '2~[h]:'     => [[{:attr2 => 2}], :attr1],
-  '2~hs'       => [{:attr2 => 2}, 'attr1'],
-  '2~h:'       => [{:attr2 => 2}, :attr1],
-  '2~[a,c]s'   => [[[:attr2], {:position => 2}], 'attr1'],
-  '2~[a,c]:'   => [[[:attr2], {:position => 2}], :attr],
-  '2~[a]s'     => [[[:attr2]], 'attr1'],
-  '2~[a]:'     => [[[:attr2]], :attr1],
-  '2~as'       => [[:attr2], 'attr1'],
-  '2~a:'       => [[:attr2], :attr1],
-}
-end
-
-def xpf_valid_permutated_arguments
-{
-  '1~[h,c]'           => [[{:attr1 => 1}, {:position => 1}]],
-  '1~[a,c]'           => [[[:attr1], {:position => 1}]],
-  '1~[h]'             => [[{:attr1 => 1}]],
-  '1~[a]'             => [[[:attr1]]],
-  '1~a'               => [[:attr1]],
-  '1~h'               => [{:attr1 => 1}],
-
-  '2~[h,c][h,c]'      => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}]],
-  '2~[a,c][h,c]'      => [[[:attr1], {:position => 1}], [{:attr2 => 2}, {:position => 2}]],
-  '2~[h,c][a,c]'      => [[{:attr1 => 1}, {:position => 1}], [[:attr2], {:position => 2}]],
-
-  '2~[h][h,c]'        => [[{:attr1 => 1}], [{:attr2 => 2}, {:position => 2}]],
-  '2~[a][h,c]'        => [[[:attr1]], [{:attr2 => 2}, {:position => 2}]],
-  '2~[h][a,c]'        => [[{:attr1 => 1}], [[:attr2], {:position => 2}]],
-
-  '2~[h,c][h]'        => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}]],
-  '2~[a,c][h]'        => [[[:attr1], {:position => 1}], [{:attr2 => 2}]],
-  '2~[h,c][a]'        => [[{:attr1 => 1}, {:position => 1}], [[:attr2]]],
-
-  '2~a[h,c]'          => [[:attr1], [{:attr2 => 2}, {:position => 2}]],
-  '2~[h,c]a'          => [[{:attr1 => 1}, {:position => 1}], [:attr2]],
-  '2~a[h]'            => [[:attr1], [{:attr2 => 2}]],
-  '2~[h]a'            => [[{:attr1 => 1}], [:attr2]],
-  '2~ah'              => [[:attr1], {:attr2 => 2}],
-  '2~ha'              => [{:attr1 => 1}, [:attr2]],
-
-  # Well, the followings are actually not needed, but anyway, since they are done,
-  # and specs run fast, we just leave them around (to be safe, i guess).
-  '3~[h,c][h,c][h,c]' => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[a,c][a,c][a,c]' => [[[:attr1], {:position => 1}], [[:attr2], {:position => 2}], [[:attr3], {:position => 3}]],
-  '3~[a,c][h,c][h,c]' => [[[:attr1], {:position => 1}], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h,c][a,c][h,c]' => [[{:attr1 => 1}, {:position => 1}], [[:attr2], {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h,c][h,c][a,c]' => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}], [[:attr3], {:position => 3}]],
-
-  '3~[h][h,c][h,c]'   => [[{:attr1 => 1}], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[a][a,c][a,c]'   => [[[:attr1]], [[:attr2], {:position => 2}], [[:attr3], {:position => 3}]],
-  '3~[a][h,c][h,c]'   => [[[:attr1]], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h][a,c][h,c]'   => [[{:attr1 => 1}], [[:attr2], {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h][h,c][a,c]'   => [[{:attr1 => 1}], [{:attr2 => 2}, {:position => 2}], [[:attr3], {:position => 3}]],
-
-  '3~h[h,c][h,c]'     => [{:attr1 => 1}, [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~a[a,c][a,c]'     => [[:attr1], [[:attr2], {:position => 2}], [[:attr3], {:position => 3}]],
-  '3~a[h,c][h,c]'     => [[:attr1], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~h[a,c][h,c]'     => [{:attr1 => 1}, [[:attr2], {:position => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~h[h,c][a,c]'     => [{:attr1 => 1}, [{:attr2 => 2}, {:position => 2}], [[:attr3], {:position => 3}]],
-
-  '3~[h,c][h][h,c]'   => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[a,c][a][a,c]'   => [[[:attr1], {:position => 1}], [[:attr2]], [[:attr3], {:position => 3}]],
-  '3~[a,c][h][h,c]'   => [[[:attr1], {:position => 1}], [{:attr2 => 2}], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h,c][a][h,c]'   => [[{:attr1 => 1}, {:position => 1}], [[:attr2]], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h,c][h][a,c]'   => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}], [[:attr3], {:position => 3}]],
-
-  '3~[h,c]h[h,c]'     => [[{:attr1 => 1}, {:position => 1}], {:attr2 => 2}, [{:attr3 => 3}, {:position => 3}]],
-  '3~[a,c]a[a,c]'     => [[[:attr1], {:position => 1}], [:attr2], [[:attr3], {:position => 3}]],
-  '3~[a,c]h[h,c]'     => [[[:attr1], {:position => 1}], {:attr2 => 2}, [{:attr3 => 3}, {:position => 3}]],
-  '3~[h,c]a[h,c]'     => [[{:attr1 => 1}, {:position => 1}], [:attr2], [{:attr3 => 3}, {:position => 3}]],
-  '3~[h,c]h[a,c]'     => [[{:attr1 => 1}, {:position => 1}], {:attr2 => 2}, [[:attr3], {:position => 3}]],
-
-  '3~[h,c][h,c][h]'   => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}]],
-  '3~[a,c][a,c][a]'   => [[[:attr1], {:position => 1}], [[:attr2], {:position => 2}], [[:attr3]]],
-  '3~[a,c][h,c][h]'   => [[[:attr1], {:position => 1}], [{:attr2 => 2}, {:position => 2}], [{:attr3 => 3}]],
-  '3~[h,c][a,c][h]'   => [[{:attr1 => 1}, {:position => 1}], [[:attr2], {:position => 2}], [{:attr3 => 3}]],
-  '3~[h,c][h,c][a]'   => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}], [[:attr3]]],
-
-  '3~[h,c][h,c]h'     => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}], {:attr3 => 3}],
-  '3~[a,c][a,c]a'     => [[[:attr1], {:position => 1}], [[:attr2], {:position => 2}], [:attr3]],
-  '3~[a,c][h,c]h'     => [[[:attr1], {:position => 1}], [{:attr2 => 2}, {:position => 2}], {:attr3 => 3}],
-  '3~[h,c][a,c]h'     => [[{:attr1 => 1}, {:position => 1}], [[:attr2], {:position => 2}], {:attr3 => 3}],
-  '3~[h,c][h,c]a'     => [[{:attr1 => 1}, {:position => 1}], [{:attr2 => 2}, {:position => 2}], [:attr3]],
-}
-end
+require File.join(File.dirname(__FILE__), 'arguments_data')
 
 describe 'XPF::Arguments' do
 
@@ -168,23 +59,28 @@ describe 'XPF::Arguments' do
 
   end
 
-  {'w'  => {:position => 9}, 'wo' => {}}.each do |mode, default_config|
-    describe "> parsing valid args (#{mode} custom default config)" do
-      xpf_valid_permutated_arguments.each do |type, args|
+  [{:position => 9, :scope => '//awe/some'}, {}].each do |common_config|
+    xpf_valid_permutated_arguments.each do |args, expected|
 
-        should "return config as specified ... \##{type}" do
-          @parse[args + (default_config.empty? ? [] : [default_config])].last.
-            should.equal(default_config)
+      describe "> parsing valid args %s" % (
+        common_config.empty? ? args.map(&:inspect).join(', ') :
+          [args.map(&:inspect).join(', '), common_config.inspect].join(', ')
+        ) do
+
+        before do
+          @parsed_args = lambda{|i| @parse[args + (common_config.empty? ? [] : [common_config])][i] }
         end
 
-        should "return matchers w configs as specified ... \##{type}" do
-          @parse[args + (default_config.empty? ? [] : [default_config])].first.map(&:last).should.
-            equal(args.map{|arg| arg[1] || default_config })
+        should "return config as specified" do
+          @parsed_args[1].should.equal(common_config)
         end
 
-        should "return matchers w match attrs as specified ... \##{type}" do
-          @parse[args + (default_config.empty? ? [] : [default_config])].first.map(&:first).should.
-            equal(args.map{|arg| arg[0].is_a?(Hash) ? arg[0] : (arg[0].is_a?(Array) ? arg[0] : arg) })
+        should "return matchers w configs as specified" do
+          @parsed_args[0].map(&:last).should.equal(expected[1].map{|c| common_config.merge(c) })
+        end
+
+        should "return matchers w match attrs as specified" do
+          @parsed_args[0].map(&:first).should.equal(expected[0])
         end
 
       end
@@ -193,9 +89,9 @@ describe 'XPF::Arguments' do
 
   {'w'  => {:position => 9}, 'wo' => {}}.each do |mode, default_config|
     describe "> parsing invalid args (#{mode} custom default config)" do
-      xpf_invalid_permutated_arguments.each do |type, args|
+      xpf_invalid_permutated_arguments.each do |args|
 
-        should "raise XPF::InvalidArgumentError ... \##{type}" do
+        should "raise XPF::InvalidArgumentError w #{args.inspect}" do
           lambda { @parse[args + (default_config.empty? ? [] : [default_config])] }.
             should.raise(XPF::InvalidArgumentError).
             message.should.equal([
