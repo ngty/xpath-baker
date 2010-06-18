@@ -10,10 +10,13 @@ describe "XPF::Configuration" do
       :include_inner_text => [true, 'true'],
       :normalize_space    => [true, 'true'],
       :scope              => ['//', '//'],
-      :position           => [nil, 'nil'],
-      :axis               => [:self, ':self']
-    }.each do |setting, args|
-      val, display_val = args
+      :position           => [nil, nil],
+      :axis               => ['self::*', 'self::*'],
+      :attribute_matcher  => [XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'],
+      :text_matcher       => [XPF::Matchers::Text, 'XPF::Matchers::Text'],
+      :literal_matcher    => [XPF::Matchers::Literal, 'XPF::Matchers::Literal'],
+      :group_matcher      => [XPF::Matchers::Group, 'XPF::Matchers::Group'],
+    }.each do |setting, (val, display_val)|
       should "have :#{setting} as #{display_val}" do
         XPF.configure {|config| config.send(setting).should.equal val }
       end
@@ -27,12 +30,7 @@ describe "XPF::Configuration" do
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
       :normalize_space    => [true, false],
-      :scope              => ['/', '/watever'],
-      :position           => [nil, 1, 10],
-      :axis               => %w{
-        ancestor ancestor_or_self child descendant descendant_or_self following
-        following_sibling namespace parent preceding preceding_sibling self
-      }.map(&:to_sym)
+      :scope              => ['/', '//awe/some'],
     }.each do |setting, vals|
       should "be able to change :#{setting}" do
         XPF.configure do |config|
@@ -43,6 +41,78 @@ describe "XPF::Configuration" do
         end
       end
     end
+
+    should 'be able to change :position' do
+      XPF.configure do |config|
+        {
+          0       => [nil, {}],
+          2       => ['[2]', {:start? => false, :end? => true}],
+          '2^'    => ['[2]', {:start? => true, :end? => false}],
+          '2$'    => ['[2]', {:start? => false, :end? => true}],
+          '=2'    => ['[2]', {:start? => false, :end? => true}],
+          '=2^'   => ['[2]', {:start? => true, :end? => false}],
+          '=2$'   => ['[2]', {:start? => false, :end? => true}],
+          '!=2'   => ['[position()!=2]', {:start? => false, :end? => true}],
+          '!=2^'  => ['[position()!=2]', {:start? => true, :end? => false}],
+          '!=2$'  => ['[position()!=2]', {:start? => false, :end? => true}],
+          '1!~2'  => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
+          '1!~2^' => ['[not(position()>=1 and position()<=2)]', {:start? => true, :end? => false}],
+          '1!~2$' => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
+          '1~2'   => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
+          '1~2^'  => ['[position()>=1 and position()<=2]', {:start? => true, :end? => false}],
+          '1~2$'  => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
+          '>=2'   => ['[position()>=2]', {:start? => false, :end? => true}],
+          '>=2^'  => ['[position()>=2]', {:start? => true, :end? => false}],
+          '>=2$'  => ['[position()>=2]', {:start? => false, :end? => true}],
+          '>2'    => ['[position()>2]', {:start? => false, :end? => true}],
+          '>2^'   => ['[position()>2]', {:start? => true, :end? => false}],
+          '>2$'   => ['[position()>2]', {:start? => false, :end? => true}],
+          '<=2'   => ['[position()<=2]', {:start? => false, :end? => true}],
+          '<=2^'  => ['[position()<=2]', {:start? => true, :end? => false}],
+          '<=2$'  => ['[position()<=2]', {:start? => false, :end? => true}],
+          '<2'    => ['[position()<2]', {:start? => false, :end? => true}],
+          '<2^'   => ['[position()<2]', {:start? => true, :end? => false}],
+          '<2$'   => ['[position()<2]', {:start? => false, :end? => true}],
+        }.each do |val, (expected, test_meths)|
+          config.position = val
+          config.position.should.equal(expected)
+          test_meths.each{|meth, val| config.position.send(meth).should.equal(val) }
+        end
+      end
+    end
+
+    should 'be able to change :axis' do
+      XPF.configure do |config|
+        {
+          :ancestor               => 'ancestor::*',           'ancestor'              => 'ancestor::*',
+          :ancestor_or_self       => 'ancestor-or-self::*',   'ancestor-or-self'      => 'ancestor-or-self::*',
+          :child                  => 'child::*',              'child'                 => 'child::*',
+          :descendant             => 'descendant::*',         'descendant'            => 'descendant::*',
+          :descendant_or_self     => 'descendant-or-self::*', 'descendant-or-self'    => 'descendant-or-self::*',
+          :following              => 'following::*',          'following'             => 'following::*',
+          :following_sibling      => 'following-sibling::*',  'following-sibling'     => 'following-sibling::*',
+          :parent                 => 'parent::*',             'parent'                => 'parent::*',
+          :preceding              => 'preceding::*',          'preceding'             => 'preceding::*',
+          :preceding_sibling      => 'preceding-sibling::*',  'preceding-sibling'     => 'preceding-sibling::*',
+          :self                   => 'self::*',               'self'                  => 'self::*',
+          'ancestor::'            => 'ancestor::*',           'ancestor::x'           => 'ancestor::x',
+          'ancestor-or-self::'    => 'ancestor-or-self::*',   'ancestor-or-self::x'   => 'ancestor-or-self::x',
+          'child::'               => 'child::*',              'child::x'              => 'child::x',
+          'descendant::'          => 'descendant::*',         'descendant::x'         => 'descendant::x',
+          'descendant-or-self::'  => 'descendant-or-self::*', 'descendant-or-self::x' => 'descendant-or-self::x',
+          'following::'           => 'following::*',          'following::x'          => 'following::x',
+          'following-sibling::'   => 'following-sibling::*',  'following-sibling::x'  => 'following-sibling::x',
+          'parent::'              => 'parent::*',             'parent::x'             => 'parent::x',
+          'preceding::'           => 'preceding::*',          'preceding::x'          => 'preceding::x',
+          'preceding-sibling::'   => 'preceding-sibling::*',  'preceding-sibling::x'  => 'preceding-sibling::x',
+          'self::'                => 'self::*',               'self::x'               => 'self::x',
+        }.each do |val, expected|
+          config.axis = val
+          config.axis.should.equal expected
+        end
+      end
+    end
+
   end
 
   describe '> configuring (with invalid values)' do
@@ -52,13 +122,13 @@ describe "XPF::Configuration" do
       :match_ordering     => ['aa', 'boolean true/false'],
       :include_inner_text => ['aa', 'boolean true/false'],
       :normalize_space    => ['aa', 'boolean true/false'],
-      :position           => ['aa', 0, 'nil or a non-zero integer'],
-      :axis               => [
-        'aa', 'any of :%s & :%s' % [%w{
-          ancestor ancestor_or_self child descendant descendant_or_self following
-          following_sibling namespace parent preceding preceding_sibling
-        }.join(', :'), 'self']
-      ]
+      #:position           => ['aa', nil, 'nil or a non-zero integer'],
+      #:axis               => [
+      #   'aa', 'any of :%s & :%s' % [%w{
+      #     ancestor ancestor_or_self child descendant descendant_or_self following
+      #     following_sibling namespace parent preceding preceding_sibling
+      #   }.join(', :'), 'self']
+      # ]
     }.each do |setting, args|
       vals, msg = args[0..-2], args[-1]
       should "raise XPF::InvalidConfigSettingValueError when :#{setting} is assigned invalid value" do
@@ -82,8 +152,8 @@ describe "XPF::Configuration" do
       :include_inner_text => [true, false],
       :normalize_space    => [true, false],
       :scope              => ['//', '/'],
-      :position           => [nil, 10],
-      :axis               => [:self, :following],
+      #:position           => [nil, 10],
+      #:axis               => [:self, :following],
     }.each do |setting, args|
       default_val, custom_val = args
       should "revert customized :#{setting} to default" do
@@ -102,11 +172,11 @@ describe "XPF::Configuration" do
     end
   end
 
-  describe '> converting to hash' do
-    should 'return configured settings as a hash' do
-      XPF::Configuration.to_hash.should.equal XPF::Configuration::DEFAULT_SETTINGS
-    end
-  end
+#  describe '> converting to hash' do
+#    should 'return configured settings as a hash' do
+#      XPF::Configuration.to_hash.should.equal XPF::Configuration::DEFAULT_SETTINGS
+#    end
+#  end
 
   describe '> getting a new configuration' do
 

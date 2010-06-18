@@ -184,21 +184,40 @@ module XPF
   #
   class Configuration
 
+    # %w{!g !c !o !n !i s
+    #'ng,nc,no,nn,ni,>1^,1~7$,<=8^,
+    # %w{ng nc no nn ni 1~7$}
+    # %w{g c o n i 1~7$ descendant-or-self::a //body/watever XPF::Matchers::Attribute XPF::Matchers::Text}
     DEFAULT_SETTINGS = {
-      :greedy             => true,
-      :case_sensitive     => true,
-      :match_ordering     => true,
-      :normalize_space    => true,
-      :include_inner_text => true,
-      :scope              => '//',
-      :position           => nil,
-      :axis               => :self,
+      :greedy             => true,   # g, !g
+      :case_sensitive     => true,   # c, !c
+      :match_ordering     => true,   # o, !o
+      :normalize_space    => true,   # n, !n
+      :include_inner_text => true,   # i, !i
+      :scope              => '//',   # //some/thing
+      :position           => 0,      # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
+      :axis               => :self,  # descendant-or-self::a, descendant_or_self::a
 
       # TODO: Add missing tests
       :attribute_matcher  => XPF::Matchers::Attribute,
       :text_matcher       => XPF::Matchers::Text,
       :literal_matcher    => XPF::Matchers::Literal,
       :group_matcher      => XPF::Matchers::Group,
+      # :subtag_matcher
+    }
+
+    SETTING_TRANSLATORS = {
+      '!g' => {:greedy             => false},
+      '!n' => {:normalize_space    => false},
+      '!c' => {:case_sensitive     => false},
+      '!o' => {:match_ordering     => false},
+      '!i' => {:include_inner_text => false},
+
+      'g'  => {:greedy             => true},
+      'n'  => {:normalize_space    => true},
+      'c'  => {:case_sensitive     => true},
+      'o'  => {:match_ordering     => true},
+      'i'  => {:include_inner_text => true},
     }
 
     SETTING_VALIDATORS = {
@@ -276,9 +295,25 @@ module XPF
           [frags[0].gsub('_','-'),'*'].join('::') : axis
       end
 
+      def position=(position)
+        @position = Position.convert(position.to_s)
+      end
+
       def describes_config?(something)
         # TODO: Add missing spec !!
-        something.is_a?(Hash) && (something.keys - DEFAULT_SETTINGS.keys).empty?
+        case something
+        when Hash then (something.keys - DEFAULT_SETTINGS.keys).empty?
+        when Array then translate(something) rescue false
+        else false
+        end
+      end
+
+      def translate(args)
+        # TODO: Add missing spec !!
+        if args.is_a?(Array)
+        else
+          raise InvalidArgumentError
+        end
       end
 
       private
@@ -316,6 +351,45 @@ module XPF
         end
 
     end
+
+    private
+
+      module Position #:nodoc:
+        class << self
+
+          def convert(str)
+            (expr =
+              case str.sub(/(\$|\^)$/,'')
+              when '0' then nil
+              when /^(\d+)$/, /^=(\d+)$/ then '[%s]' % $1
+              when /^!=(\d+)$/ then '[position()!=%s]' % $1
+              when /^(\d+)~(\d+)$/ then '[position()>=%s and position()<=%s]' % [$1,$2]
+              when /^(\d+)!~(\d+)$/ then '[not(position()>=%s and position()<=%s)]' % [$1,$2]
+              when /^(>)(\d+)$/, /^(>=)(\d+)$/, /^(<)(\d+)$/, /^(<=)(\d+)$/ then '[position()%s%s]' % [$1,$2]
+              else nil
+              end
+            ) && expr.extend(Extensions).init(str.end_with?('^'))
+          end
+
+          module Extensions
+
+            def init(is_start)
+              @is_start = is_start
+              self
+            end
+
+            def start?
+              @is_start
+            end
+
+            def end?
+              !@is_start
+            end
+
+          end
+
+        end
+      end
 
   end
 
