@@ -223,9 +223,9 @@ module XPF
         /::Group$/     => lambda{|klass| {:group_matcher => constantize(klass)} }
       },
       :test_fail => {
-        :Scope     => lambda{|val| {:scope => const_get(:Scope).convert(val.to_s)} },
-        :AxialNode => lambda{|val| {:axial_node => const_get(:AxialNode).convert(val.to_s)} },
-        :Position  => lambda{|val| {:position => const_get(:Position).convert(val.to_s)} },
+        :Scope     => lambda{|val| {:scope => val.to_s} },
+        :AxialNode => lambda{|val| {:axial_node => val.to_s} },
+        :Position  => lambda{|val| {:position => val.to_s} },
       }
     }
 
@@ -263,6 +263,7 @@ module XPF
       end
 
       ###
+      # TODO: Update !!
       # Duplicates a copy of Configuration, further customized by +settings+ hash.
       #
       # Raises:
@@ -270,15 +271,11 @@ module XPF
       # * InvalidConfigSettingValueError if any setting value is invalid
       #
       def new(settings)
-        config, error = self.dup, ConfigSettingNotSupportedError
-        settings.each do |setting, val|
-          setter = :"#{setting}="
-          fail_unless("Config setting :#{setting} is not supported !!", error) do
-            config.respond_to?(setter)
-          end
-          config.send(setter, val)
+        case settings
+        when Hash then new_from_hash(settings)
+        when Array then new_from_array(settings)
+        else raise InvalidArgumentError.new('Initializing new configuration requires an Array/Hash !!')
         end
-        config
       end
 
       ###
@@ -290,11 +287,12 @@ module XPF
         end
       end
 
+      # TODO: Add DOC
       def describes_config?(something)
         begin
           case something
           when Hash then (something.keys - DEFAULT_SETTINGS.keys).empty?
-          when Array then translate_from_array(something) && true
+          when Array then new_from_array(something, true) && true
           else false
           end
         rescue InvalidArgumentError, InvalidConfigSettingValueError
@@ -302,31 +300,42 @@ module XPF
         end
       end
 
+      # TODO: Add DOC
       def axial_node=(expr)
         @axial_node = AxialNode.convert(expr.to_s)
       end
 
+      # TODO: Add DOC
       def position=(expr)
         @position = Position.convert(expr.to_s)
       end
 
+      # TODO: Add DOC
       def scope=(expr)
         @scope = Scope.convert(expr.to_s)
       end
 
       private
 
-        def translate_from_array(args)
-          fail_unless("Config settings translation expects an Array !!", InvalidArgumentError) do
-            !args.is_a?(Array) ? nil : (
-              args.inject({}) do |memo, arg|
-                memo.merge(
-                  fail_unless("Config setting '#{arg}' cannot be mapped to any supported settings !!"){
-                    simple_translation(arg) || regexp_translation(arg) || test_fail_translation(arg)
-                })
-              end
-            )
+        def new_from_hash(settings)
+          config = self.dup
+          settings.each do |setting, val|
+            config.respond_to?(setter = :"#{setting}=") ? config.send(setter, val) :
+              raise(ConfigSettingNotSupportedError.new("Config setting :#{setting} is not supported !!"))
           end
+          config
+        end
+
+        def new_from_array(settings, test_mode = false)
+          config = settings.inject({}) do |memo, val|
+            if config = simple_translation(val) || regexp_translation(val) || test_fail_translation(val)
+              memo.merge(config)
+            else
+              raise InvalidConfigSettingValueError.new \
+                "Config setting value '#{val}' cannot be mapped to any supported settings !!"
+            end
+          end
+          test_mode ? true : new_from_hash(config)
         end
 
         def simple_translation(arg)
@@ -339,9 +348,9 @@ module XPF
         end
 
         def test_fail_translation(arg)
-          _, config = SETTING_TRANSLATIONS[:test_fail].find do |klass,_|
+          _, config = SETTING_TRANSLATIONS[:test_fail].find do |klass,config|
             begin
-              const_get(klass).convert(arg.to_s)
+              config[const_get(klass).convert(arg.to_s)]
             rescue InvalidConfigSettingValueError
               nil
             end

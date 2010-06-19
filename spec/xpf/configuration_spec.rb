@@ -6,6 +6,71 @@ describe "XPF::Configuration" do
     XPF.configure(:reset)
   end
 
+  valid_axial_node_args = {
+    :ancestor               => 'ancestor::*',           'ancestor'              => 'ancestor::*',
+    :ancestor_or_self       => 'ancestor-or-self::*',   'ancestor-or-self'      => 'ancestor-or-self::*',
+    :child                  => 'child::*',              'child'                 => 'child::*',
+    :descendant             => 'descendant::*',         'descendant'            => 'descendant::*',
+    :descendant_or_self     => 'descendant-or-self::*', 'descendant-or-self'    => 'descendant-or-self::*',
+    :following              => 'following::*',          'following'             => 'following::*',
+    :following_sibling      => 'following-sibling::*',  'following-sibling'     => 'following-sibling::*',
+    :parent                 => 'parent::*',             'parent'                => 'parent::*',
+    :preceding              => 'preceding::*',          'preceding'             => 'preceding::*',
+    :preceding_sibling      => 'preceding-sibling::*',  'preceding-sibling'     => 'preceding-sibling::*',
+    :self                   => 'self::*',               'self'                  => 'self::*',
+    'ancestor::'            => 'ancestor::*',           'ancestor::x'           => 'ancestor::x',
+    'ancestor-or-self::'    => 'ancestor-or-self::*',   'ancestor-or-self::x'   => 'ancestor-or-self::x',
+    'child::'               => 'child::*',              'child::x'              => 'child::x',
+    'descendant::'          => 'descendant::*',         'descendant::x'         => 'descendant::x',
+    'descendant-or-self::'  => 'descendant-or-self::*', 'descendant-or-self::x' => 'descendant-or-self::x',
+    'following::'           => 'following::*',          'following::x'          => 'following::x',
+    'following-sibling::'   => 'following-sibling::*',  'following-sibling::x'  => 'following-sibling::x',
+    'parent::'              => 'parent::*',             'parent::x'             => 'parent::x',
+    'preceding::'           => 'preceding::*',          'preceding::x'          => 'preceding::x',
+    'preceding-sibling::'   => 'preceding-sibling::*',  'preceding-sibling::x'  => 'preceding-sibling::x',
+    'self::'                => 'self::*',               'self::x'               => 'self::x',
+  }
+
+  valid_position_args = {
+    0       => [nil, {}],
+    2       => ['[2]', {:start? => false, :end? => true}],
+    '2^'    => ['[2]', {:start? => true, :end? => false}],
+    '2$'    => ['[2]', {:start? => false, :end? => true}],
+    '!2'    => ['[position()!=2]', {:start? => false, :end? => true}],
+    '!2^'   => ['[position()!=2]', {:start? => true, :end? => false}],
+    '!2$'   => ['[position()!=2]', {:start? => false, :end? => true}],
+    '1~2'   => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
+    '1~2^'  => ['[position()>=1 and position()<=2]', {:start? => true, :end? => false}],
+    '1~2$'  => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
+    '!1~2'  => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
+    '!1~2^' => ['[not(position()>=1 and position()<=2)]', {:start? => true, :end? => false}],
+    '!1~2$' => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
+    '>=2'   => ['[position()>=2]', {:start? => false, :end? => true}],
+    '>=2^'  => ['[position()>=2]', {:start? => true, :end? => false}],
+    '>=2$'  => ['[position()>=2]', {:start? => false, :end? => true}],
+    '!>=2'  => ['[not(position()>=2)]', {:start? => false, :end? => true}],
+    '!>=2^' => ['[not(position()>=2)]', {:start? => true, :end? => false}],
+    '!>=2$' => ['[not(position()>=2)]', {:start? => false, :end? => true}],
+    '>2'    => ['[position()>2]', {:start? => false, :end? => true}],
+    '>2^'   => ['[position()>2]', {:start? => true, :end? => false}],
+    '>2$'   => ['[position()>2]', {:start? => false, :end? => true}],
+    '!>2'   => ['[not(position()>2)]', {:start? => false, :end? => true}],
+    '!>2^'  => ['[not(position()>2)]', {:start? => true, :end? => false}],
+    '!>2$'  => ['[not(position()>2)]', {:start? => false, :end? => true}],
+    '<=2'   => ['[position()<=2]', {:start? => false, :end? => true}],
+    '<=2^'  => ['[position()<=2]', {:start? => true, :end? => false}],
+    '<=2$'  => ['[position()<=2]', {:start? => false, :end? => true}],
+    '!<=2'  => ['[not(position()<=2)]', {:start? => false, :end? => true}],
+    '!<=2^' => ['[not(position()<=2)]', {:start? => true, :end? => false}],
+    '!<=2$' => ['[not(position()<=2)]', {:start? => false, :end? => true}],
+    '<2'    => ['[position()<2]', {:start? => false, :end? => true}],
+    '<2^'   => ['[position()<2]', {:start? => true, :end? => false}],
+    '<2$'   => ['[position()<2]', {:start? => false, :end? => true}],
+    '!<2'   => ['[not(position()<2)]', {:start? => false, :end? => true}],
+    '!<2^'  => ['[not(position()<2)]', {:start? => true, :end? => false}],
+    '!<2$'  => ['[not(position()<2)]', {:start? => false, :end? => true}],
+  }
+
   describe '> default' do
     {
       :greedy             => [true, 'true'],
@@ -48,46 +113,7 @@ describe "XPF::Configuration" do
 
     should 'be able to change :position' do
       XPF.configure do |config|
-        {
-          nil     => [nil, {}],
-          0       => [nil, {}],
-          2       => ['[2]', {:start? => false, :end? => true}],
-          '2^'    => ['[2]', {:start? => true, :end? => false}],
-          '2$'    => ['[2]', {:start? => false, :end? => true}],
-          '!2'    => ['[position()!=2]', {:start? => false, :end? => true}],
-          '!2^'   => ['[position()!=2]', {:start? => true, :end? => false}],
-          '!2$'   => ['[position()!=2]', {:start? => false, :end? => true}],
-          '1~2'   => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
-          '1~2^'  => ['[position()>=1 and position()<=2]', {:start? => true, :end? => false}],
-          '1~2$'  => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
-          '!1~2'  => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
-          '!1~2^' => ['[not(position()>=1 and position()<=2)]', {:start? => true, :end? => false}],
-          '!1~2$' => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
-          '>=2'   => ['[position()>=2]', {:start? => false, :end? => true}],
-          '>=2^'  => ['[position()>=2]', {:start? => true, :end? => false}],
-          '>=2$'  => ['[position()>=2]', {:start? => false, :end? => true}],
-          '!>=2'  => ['[not(position()>=2)]', {:start? => false, :end? => true}],
-          '!>=2^' => ['[not(position()>=2)]', {:start? => true, :end? => false}],
-          '!>=2$' => ['[not(position()>=2)]', {:start? => false, :end? => true}],
-          '>2'    => ['[position()>2]', {:start? => false, :end? => true}],
-          '>2^'   => ['[position()>2]', {:start? => true, :end? => false}],
-          '>2$'   => ['[position()>2]', {:start? => false, :end? => true}],
-          '!>2'   => ['[not(position()>2)]', {:start? => false, :end? => true}],
-          '!>2^'  => ['[not(position()>2)]', {:start? => true, :end? => false}],
-          '!>2$'  => ['[not(position()>2)]', {:start? => false, :end? => true}],
-          '<=2'   => ['[position()<=2]', {:start? => false, :end? => true}],
-          '<=2^'  => ['[position()<=2]', {:start? => true, :end? => false}],
-          '<=2$'  => ['[position()<=2]', {:start? => false, :end? => true}],
-          '!<=2'  => ['[not(position()<=2)]', {:start? => false, :end? => true}],
-          '!<=2^' => ['[not(position()<=2)]', {:start? => true, :end? => false}],
-          '!<=2$' => ['[not(position()<=2)]', {:start? => false, :end? => true}],
-          '<2'    => ['[position()<2]', {:start? => false, :end? => true}],
-          '<2^'   => ['[position()<2]', {:start? => true, :end? => false}],
-          '<2$'   => ['[position()<2]', {:start? => false, :end? => true}],
-          '!<2'   => ['[not(position()<2)]', {:start? => false, :end? => true}],
-          '!<2^'  => ['[not(position()<2)]', {:start? => true, :end? => false}],
-          '!<2$'  => ['[not(position()<2)]', {:start? => false, :end? => true}],
-        }.each do |val, (expected, test_meths)|
+        valid_position_args.merge(nil => [nil, {}]).each do |val, (expected, test_meths)|
           config.position = val
           config.position.should.equal(expected)
           test_meths.each{|meth, val| config.position.send(meth).should.equal(val) }
@@ -97,30 +123,7 @@ describe "XPF::Configuration" do
 
     should 'be able to change :axial_node' do
       XPF.configure do |config|
-        {
-          :ancestor               => 'ancestor::*',           'ancestor'              => 'ancestor::*',
-          :ancestor_or_self       => 'ancestor-or-self::*',   'ancestor-or-self'      => 'ancestor-or-self::*',
-          :child                  => 'child::*',              'child'                 => 'child::*',
-          :descendant             => 'descendant::*',         'descendant'            => 'descendant::*',
-          :descendant_or_self     => 'descendant-or-self::*', 'descendant-or-self'    => 'descendant-or-self::*',
-          :following              => 'following::*',          'following'             => 'following::*',
-          :following_sibling      => 'following-sibling::*',  'following-sibling'     => 'following-sibling::*',
-          :parent                 => 'parent::*',             'parent'                => 'parent::*',
-          :preceding              => 'preceding::*',          'preceding'             => 'preceding::*',
-          :preceding_sibling      => 'preceding-sibling::*',  'preceding-sibling'     => 'preceding-sibling::*',
-          :self                   => 'self::*',               'self'                  => 'self::*',
-          'ancestor::'            => 'ancestor::*',           'ancestor::x'           => 'ancestor::x',
-          'ancestor-or-self::'    => 'ancestor-or-self::*',   'ancestor-or-self::x'   => 'ancestor-or-self::x',
-          'child::'               => 'child::*',              'child::x'              => 'child::x',
-          'descendant::'          => 'descendant::*',         'descendant::x'         => 'descendant::x',
-          'descendant-or-self::'  => 'descendant-or-self::*', 'descendant-or-self::x' => 'descendant-or-self::x',
-          'following::'           => 'following::*',          'following::x'          => 'following::x',
-          'following-sibling::'   => 'following-sibling::*',  'following-sibling::x'  => 'following-sibling::x',
-          'parent::'              => 'parent::*',             'parent::x'             => 'parent::x',
-          'preceding::'           => 'preceding::*',          'preceding::x'          => 'preceding::x',
-          'preceding-sibling::'   => 'preceding-sibling::*',  'preceding-sibling::x'  => 'preceding-sibling::x',
-          'self::'                => 'self::*',               'self::x'               => 'self::x',
-        }.each do |val, expected|
+        valid_axial_node_args.each do |val, expected|
           config.axial_node = val
           config.axial_node.should.equal expected
         end
@@ -229,33 +232,28 @@ describe "XPF::Configuration" do
       end
     end
 
-    should 'return false if something is an Array but not all contents are config settings' do
-      XPF::Configuration.describes_config?(%w{!n x}).should.be.false
-    end
+    {
+      'Array' => [%w{!n x},%w{!n //boo/ self::*}, []],
+      'Hash'  => [{:position => nil, :watever => false},{:position => nil, :scope => '//boo/'}, {}]
+    }.each do |type, (invalid, valid, empty)|
 
-    should 'return false if something is a Hash but not all contents are config settings' do
-      XPF::Configuration.describes_config?(:position => nil, :watever => false).should.be.false
-    end
+      should "return false if something is #{type} but not all contents are config settings" do
+        XPF::Configuration.describes_config?(invalid).should.be.false
+      end
 
-    should 'return true if something is an Array and all contents are config settings' do
-      XPF::Configuration.describes_config?(%w{!n //boo/ self::*}).should.be.true
-    end
+      should "return true if something is #{type} and all contents are config settings" do
+        XPF::Configuration.describes_config?(valid).should.be.true
+      end
 
-    should 'return true if something is a Hash and all contents are config settings' do
-      XPF::Configuration.describes_config?(:position => nil, :scope => '//boo/').should.be.true
-    end
+      should "return true if something is an empty #{type}" do
+        XPF::Configuration.describes_config?(empty).should.be.true
+      end
 
-    should 'return true if something is an empty Array' do
-      XPF::Configuration.describes_config?([]).should.be.true
-    end
-
-    should 'return true if something is an empty Hash' do
-      XPF::Configuration.describes_config?({}).should.be.true
     end
 
   end
 
-  describe '> getting a new configuration' do
+  describe '> getting a new configuration (w hash)' do
 
     should 'duplicate a copy of itself' do
       configuration = XPF::Configuration.new({})
@@ -265,7 +263,7 @@ describe "XPF::Configuration" do
 
     should 'have hash overrides its settings' do
       orig_settings = XPF::Configuration.to_hash
-      normalize_space_val = !orig_settings[:normalize_space]
+      normalize_space_val = {true => false, false => true}[orig_settings[:normalize_space]]
       configuration = XPF::Configuration.new(:normalize_space => normalize_space_val)
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
@@ -280,6 +278,77 @@ describe "XPF::Configuration" do
       lambda { XPF::Configuration.new(:case_sensitive => 'ee') }.
         should.raise(XPF::InvalidConfigSettingValueError).
         message.should.equal('Config setting :case_sensitive must be boolean true/false !!')
+    end
+
+  end
+
+  describe '> getting a new configuration (w array)' do
+
+    should 'duplicate a copy of itself' do
+      configuration = XPF::Configuration.new([])
+      configuration.to_hash.should.equal XPF::Configuration.to_hash
+      configuration.object_id.should.not.equal XPF::Configuration
+    end
+
+    should 'have array overrides its settings' do
+      orig_settings = XPF::Configuration.to_hash
+      normalize_space_val = !orig_settings[:normalize_space]
+      configuration = XPF::Configuration.new([{:true => 'n', false => '!n'}[normalize_space_val]])
+      configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
+    end
+
+    should 'be able to map valid shorthand settings to their respective verbose counterparts' do
+      {
+         'g' => [:greedy, true],
+        '!g' => [:greedy, false],
+         'c' => [:case_sensitive, true],
+        '!c' => [:case_sensitive, false],
+         'o' => [:match_ordering, true],
+        '!o' => [:match_ordering, false],
+         'n' => [:normalize_space, true],
+        '!n' => [:normalize_space, false],
+         'i' => [:include_inner_text, true],
+        '!i' => [:include_inner_text, false],
+      }.each do |shorthand, (setting, expected)|
+        XPF::Configuration.new([shorthand]).to_hash[setting].should.equal(expected)
+      end
+    end
+
+    should 'be able to identify & assign :axial_node setting' do
+      valid_axial_node_args.values.each do |val|
+        XPF::Configuration.new([val]).to_hash[:axial_node].should.equal(val)
+      end
+    end
+
+    should 'be able to identify & assign :position setting' do
+      valid_position_args.each do |val, expected|
+        position = XPF::Configuration.new([val]).to_hash[:position]
+        position.should.equal(expected[0])
+        expected[1].each{|meth, _val| position.send(meth).should.equal(_val) }
+      end
+    end
+
+    should 'be able to identify & assign :scope setting' do
+      ['/', '//awe/some/'].each do |val|
+        XPF::Configuration.new([val]).to_hash[:scope].should.equal(val)
+      end
+    end
+
+    should 'be able to identify & assign :group_matcher setting'
+    should 'be able to identify & assign :attribute_matcher setting'
+    should 'be able to identify & assign :literal_matcher setting'
+    should 'be able to identify & assign :text_matcher setting'
+
+    should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
+      [
+        '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
+        '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
+        'awe/some', '//awe/some', 'awe/some', 'x', '!x'
+      ].each do |val|
+        lambda { XPF::Configuration.new([val]) }.
+          should.raise(XPF::InvalidConfigSettingValueError).
+          message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
+      end
     end
 
   end
