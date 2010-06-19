@@ -223,18 +223,30 @@ describe "XPF::Configuration" do
 
   describe '> determining if an object describes configuration' do
 
-    should 'return false if something is not a Hash' do
-      [[], Object.new, ''].each do |something|
+    should 'return false if something is not neither a Hash nor an Array' do
+      [:something, 'something', /something/, Object.new].each do |something|
         XPF::Configuration.describes_config?(something).should.be.false
       end
     end
 
-    should 'return false if something is Hash but not all contents are config settings' do
+    should 'return false if something is an Array but not all contents are config settings' do
+      XPF::Configuration.describes_config?(%w{!n x}).should.be.false
+    end
+
+    should 'return false if something is a Hash but not all contents are config settings' do
       XPF::Configuration.describes_config?(:position => nil, :watever => false).should.be.false
     end
 
-    should 'return true if something is Hash and all contents are config settings' do
+    should 'return true if something is an Array and all contents are config settings' do
+      XPF::Configuration.describes_config?(%w{!n //boo/ self::*}).should.be.true
+    end
+
+    should 'return true if something is a Hash and all contents are config settings' do
       XPF::Configuration.describes_config?(:position => nil, :scope => '//boo/').should.be.true
+    end
+
+    should 'return true if something is an empty Array' do
+      XPF::Configuration.describes_config?([]).should.be.true
     end
 
     should 'return true if something is an empty Hash' do

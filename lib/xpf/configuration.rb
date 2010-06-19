@@ -203,17 +203,30 @@ module XPF
       :group_matcher      => XPF::Matchers::Group,
     }
 
-    EASY_SETTINGS_TRANSLATIONS = { #:nodoc:
-       'g' => {:greedy => true},
-      '!g' => {:greedy => false},
-       'c' => {:case_sensitive => true},
-      '!c' => {:case_sensitive => false},
-       'o' => {:match_ordering => true},
-      '!o' => {:match_ordering => false},
-       'n' => {:normalize_space => true},
-      '!n' => {:normalize_space => false},
-       'i' => {:include_inner_text => true},
-      '!i' => {:include_inner_text => false},
+    SETTING_TRANSLATIONS = { #:nodoc:
+      :simple => {
+         'g' => {:greedy => true},
+        '!g' => {:greedy => false},
+         'c' => {:case_sensitive => true},
+        '!c' => {:case_sensitive => false},
+         'o' => {:match_ordering => true},
+        '!o' => {:match_ordering => false},
+         'n' => {:normalize_space => true},
+        '!n' => {:normalize_space => false},
+         'i' => {:include_inner_text => true},
+        '!i' => {:include_inner_text => false},
+      },
+      :regexp => {
+        /::Attribute$/ => lambda{|klass| {:attribute_matcher => constantize(klass)} },
+        /::Text$/      => lambda{|klass| {:text_matcher => constantize(klass)} },
+        /::Literal$/   => lambda{|klass| {:literal_matcher => constantize(klass)} },
+        /::Group$/     => lambda{|klass| {:group_matcher => constantize(klass)} }
+      },
+      :test_fail => {
+        :Scope     => lambda{|val| {:scope => const_get(:Scope).convert(val.to_s)} },
+        :AxialNode => lambda{|val| {:axial_node => const_get(:AxialNode).convert(val.to_s)} },
+        :Position  => lambda{|val| {:position => const_get(:Position).convert(val.to_s)} },
+      }
     }
 
     SETTING_VALIDATORS = { #:nodoc:
@@ -222,7 +235,6 @@ module XPF
       :match_ordering     => :is_boolean!,
       :normalize_space    => :is_boolean!,
       :include_inner_text => :is_boolean!,
-      :scope              => :is_valid_scope!,
     }
 
     class << self
@@ -279,17 +291,14 @@ module XPF
       end
 
       def describes_config?(something)
-        case something
-        when Hash then (something.keys - DEFAULT_SETTINGS.keys).empty?
-        else false
-        end
-      end
-
-      def translate(args)
-        # TODO: Add missing spec !!
-        if args.is_a?(Array)
-        else
-          raise InvalidArgumentError
+        begin
+          case something
+          when Hash then (something.keys - DEFAULT_SETTINGS.keys).empty?
+          when Array then translate_from_array(something) && true
+          else false
+          end
+        rescue InvalidArgumentError, InvalidConfigSettingValueError
+          false
         end
       end
 
@@ -301,17 +310,48 @@ module XPF
         @position = Position.convert(expr.to_s)
       end
 
+      def scope=(expr)
+        @scope = Scope.convert(expr.to_s)
+      end
+
       private
+
+        def translate_from_array(args)
+          fail_unless("Config settings translation expects an Array !!", InvalidArgumentError) do
+            !args.is_a?(Array) ? nil : (
+              args.inject({}) do |memo, arg|
+                memo.merge(
+                  fail_unless("Config setting '#{arg}' cannot be mapped to any supported settings !!"){
+                    simple_translation(arg) || regexp_translation(arg) || test_fail_translation(arg)
+                })
+              end
+            )
+          end
+        end
+
+        def simple_translation(arg)
+          SETTING_TRANSLATIONS[:simple][arg]
+        end
+
+        def regexp_translation(arg)
+          _, config = SETTING_TRANSLATIONS[:regexp].find{|regexp,_| arg.to_s =~ regexp }
+          config && config[arg]
+        end
+
+        def test_fail_translation(arg)
+          _, config = SETTING_TRANSLATIONS[:test_fail].find do |klass,_|
+            begin
+              const_get(klass).convert(arg.to_s)
+            rescue InvalidConfigSettingValueError
+              nil
+            end
+          end
+          config && config[arg]
+        end
 
         def is_boolean!(setting, val)
           fail_unless("Config setting :#{setting} must be boolean true/false !!") do
             [true, false].include?(val)
-          end
-        end
-
-        def is_valid_scope!(setting, val)
-          fail_unless("Config setting :#{setting} must start & end with '/' !!") do
-            val.start_with?('/') && val.end_with?('/')
           end
         end
 
@@ -322,6 +362,19 @@ module XPF
     end
 
     private
+
+      module Scope #:nodoc:
+        class << self
+
+          ERROR = InvalidConfigSettingValueError.new \
+            "Config setting :scope must start & end with '/' !!"
+
+          def convert(str)
+            (str.start_with?('/') && str.end_with?('/')) ? str : raise(ERROR)
+          end
+
+        end
+      end
 
       module AxialNode #:nodoc:
         class << self
