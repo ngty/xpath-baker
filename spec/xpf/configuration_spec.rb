@@ -2,6 +2,10 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 describe "XPF::Configuration" do
 
+  before do
+    XPF.configure(:reset)
+  end
+
   describe '> default' do
     {
       :greedy             => [true, 'true'],
@@ -11,7 +15,7 @@ describe "XPF::Configuration" do
       :normalize_space    => [true, 'true'],
       :scope              => ['//', '//'],
       :position           => [nil, nil],
-      :axis               => ['self::*', 'self::*'],
+      :axial_node         => ['self::*', 'self::*'],
       :attribute_matcher  => [XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'],
       :text_matcher       => [XPF::Matchers::Text, 'XPF::Matchers::Text'],
       :literal_matcher    => [XPF::Matchers::Literal, 'XPF::Matchers::Literal'],
@@ -45,34 +49,44 @@ describe "XPF::Configuration" do
     should 'be able to change :position' do
       XPF.configure do |config|
         {
+          nil     => [nil, {}],
           0       => [nil, {}],
           2       => ['[2]', {:start? => false, :end? => true}],
           '2^'    => ['[2]', {:start? => true, :end? => false}],
           '2$'    => ['[2]', {:start? => false, :end? => true}],
-          '=2'    => ['[2]', {:start? => false, :end? => true}],
-          '=2^'   => ['[2]', {:start? => true, :end? => false}],
-          '=2$'   => ['[2]', {:start? => false, :end? => true}],
-          '!=2'   => ['[position()!=2]', {:start? => false, :end? => true}],
-          '!=2^'  => ['[position()!=2]', {:start? => true, :end? => false}],
-          '!=2$'  => ['[position()!=2]', {:start? => false, :end? => true}],
-          '1!~2'  => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
-          '1!~2^' => ['[not(position()>=1 and position()<=2)]', {:start? => true, :end? => false}],
-          '1!~2$' => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
+          '!2'    => ['[position()!=2]', {:start? => false, :end? => true}],
+          '!2^'   => ['[position()!=2]', {:start? => true, :end? => false}],
+          '!2$'   => ['[position()!=2]', {:start? => false, :end? => true}],
           '1~2'   => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
           '1~2^'  => ['[position()>=1 and position()<=2]', {:start? => true, :end? => false}],
           '1~2$'  => ['[position()>=1 and position()<=2]', {:start? => false, :end? => true}],
+          '!1~2'  => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
+          '!1~2^' => ['[not(position()>=1 and position()<=2)]', {:start? => true, :end? => false}],
+          '!1~2$' => ['[not(position()>=1 and position()<=2)]', {:start? => false, :end? => true}],
           '>=2'   => ['[position()>=2]', {:start? => false, :end? => true}],
           '>=2^'  => ['[position()>=2]', {:start? => true, :end? => false}],
           '>=2$'  => ['[position()>=2]', {:start? => false, :end? => true}],
+          '!>=2'  => ['[not(position()>=2)]', {:start? => false, :end? => true}],
+          '!>=2^' => ['[not(position()>=2)]', {:start? => true, :end? => false}],
+          '!>=2$' => ['[not(position()>=2)]', {:start? => false, :end? => true}],
           '>2'    => ['[position()>2]', {:start? => false, :end? => true}],
           '>2^'   => ['[position()>2]', {:start? => true, :end? => false}],
           '>2$'   => ['[position()>2]', {:start? => false, :end? => true}],
+          '!>2'   => ['[not(position()>2)]', {:start? => false, :end? => true}],
+          '!>2^'  => ['[not(position()>2)]', {:start? => true, :end? => false}],
+          '!>2$'  => ['[not(position()>2)]', {:start? => false, :end? => true}],
           '<=2'   => ['[position()<=2]', {:start? => false, :end? => true}],
           '<=2^'  => ['[position()<=2]', {:start? => true, :end? => false}],
           '<=2$'  => ['[position()<=2]', {:start? => false, :end? => true}],
+          '!<=2'  => ['[not(position()<=2)]', {:start? => false, :end? => true}],
+          '!<=2^' => ['[not(position()<=2)]', {:start? => true, :end? => false}],
+          '!<=2$' => ['[not(position()<=2)]', {:start? => false, :end? => true}],
           '<2'    => ['[position()<2]', {:start? => false, :end? => true}],
           '<2^'   => ['[position()<2]', {:start? => true, :end? => false}],
           '<2$'   => ['[position()<2]', {:start? => false, :end? => true}],
+          '!<2'   => ['[not(position()<2)]', {:start? => false, :end? => true}],
+          '!<2^'  => ['[not(position()<2)]', {:start? => true, :end? => false}],
+          '!<2$'  => ['[not(position()<2)]', {:start? => false, :end? => true}],
         }.each do |val, (expected, test_meths)|
           config.position = val
           config.position.should.equal(expected)
@@ -81,7 +95,7 @@ describe "XPF::Configuration" do
       end
     end
 
-    should 'be able to change :axis' do
+    should 'be able to change :axial_node' do
       XPF.configure do |config|
         {
           :ancestor               => 'ancestor::*',           'ancestor'              => 'ancestor::*',
@@ -107,8 +121,8 @@ describe "XPF::Configuration" do
           'preceding-sibling::'   => 'preceding-sibling::*',  'preceding-sibling::x'  => 'preceding-sibling::x',
           'self::'                => 'self::*',               'self::x'               => 'self::x',
         }.each do |val, expected|
-          config.axis = val
-          config.axis.should.equal expected
+          config.axial_node = val
+          config.axial_node.should.equal expected
         end
       end
     end
@@ -117,23 +131,41 @@ describe "XPF::Configuration" do
 
   describe '> configuring (with invalid values)' do
     {
-      :greedy             => ['aa', 'boolean true/false'],
-      :case_sensitive     => ['aa', 'boolean true/false'],
-      :match_ordering     => ['aa', 'boolean true/false'],
-      :include_inner_text => ['aa', 'boolean true/false'],
-      :normalize_space    => ['aa', 'boolean true/false'],
-      #:position           => ['aa', nil, 'nil or a non-zero integer'],
-      #:axis               => [
-      #   'aa', 'any of :%s & :%s' % [%w{
-      #     ancestor ancestor_or_self child descendant descendant_or_self following
-      #     following_sibling namespace parent preceding preceding_sibling
-      #   }.join(', :'), 'self']
-      # ]
+      :greedy             => ['aa', 0, 1, 'be boolean true/false'],
+      :case_sensitive     => ['aa', 0, 1, 'be boolean true/false'],
+      :match_ordering     => ['aa', 0, 1, 'be boolean true/false'],
+      :include_inner_text => ['aa', 0, 1, 'be boolean true/false'],
+      :normalize_space    => ['aa', 0, 1, 'be boolean true/false'],
+      :position           => [
+        '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
+        '!>=02', '!-2', '!2^$', '2$^', '!!2',
+        'match any of the following: %s or %s' % [
+          '(1) nil or any integer (0 & nil are taken as no position specified)',
+          '(2) /^(!)?(>|>=|<|<=)?([1-9]\d*)(\^|\$)?$/'
+        ]
+      ],
+      :axial_node               => [
+        'aa', 'self::watever:', 'aa::', 'match any of the following: %s or %s' % [[
+          :ancestor, 'ancestor', 'ancestor::*', /^ancestor::\w+$/,
+          :ancestor_or_self, 'ancestor-or-self', 'ancestor-or-self::*', /^ancestor-or-self::\w+$/,
+          :attribute, 'attribute', 'attribute::*', /^attribute::\w+$/,
+          :child, 'child', 'child::*', /^child::\w+$/,
+          :descendant, 'descendant', 'descendant::*', /^descendant::\w+$/,
+          :descendant_or_self, 'descendant-or-self', 'descendant-or-self::*', /^descendant-or-self::\w+$/,
+          :following, 'following', 'following::*', /^following::\w+$/,
+          :following_sibling, 'following-sibling', 'following-sibling::*', /^following-sibling::\w+$/,
+          :namespace, 'namespace', 'namespace::*', /^namespace::\w+$/,
+          :parent, 'parent', 'parent::*', /^parent::\w+$/,
+          :preceding, 'preceding', 'preceding::*', /^preceding::\w+$/,
+          :preceding_sibling, 'preceding-sibling', 'preceding-sibling::*', /^preceding-sibling::\w+$/,
+          :self, 'self', 'self::*'
+        ].join(', '), /^self::\w+$/]
+      ]
     }.each do |setting, args|
       vals, msg = args[0..-2], args[-1]
       should "raise XPF::InvalidConfigSettingValueError when :#{setting} is assigned invalid value" do
         XPF.configure do |config|
-          full_msg = "Config setting :#{setting} must be %s !!" % msg
+          full_msg = "Config setting :#{setting} must %s !!" % msg
           vals.each do |val|
             lambda { config.send(:"#{setting}=", val) }.
               should.raise(XPF::InvalidConfigSettingValueError).
@@ -146,21 +178,31 @@ describe "XPF::Configuration" do
 
   describe '> configuring (with reset mode)' do
     {
-      :greedy             => [true, false],
-      :case_sensitive     => [true, false],
-      :match_ordering     => [true, false],
-      :include_inner_text => [true, false],
-      :normalize_space    => [true, false],
-      :scope              => ['//', '/'],
-      #:position           => [nil, 10],
-      #:axis               => [:self, :following],
-    }.each do |setting, args|
-      default_val, custom_val = args
-      should "revert customized :#{setting} to default" do
-        XPF.configure {|config| config.send(:"#{setting}=", custom_val) }
+      :greedy             => [true, val = false, val],
+      :case_sensitive     => [true, val = false, val],
+      :match_ordering     => [true, val = false, val],
+      :include_inner_text => [true, val = false, val],
+      :normalize_space    => [true, val = false, val],
+      :scope              => ['//', val = '/', val],
+      :position           => [nil, 10, '[10]'],
+      :axial_node         => ['self::*', val = 'following::*', val],
+      :attribute_matcher  => [XPF::Matchers::Attribute, val = Class.new{ A = 1 }, val],
+      :text_matcher       => [XPF::Matchers::Text, val = Class.new{ B = 1 }, val],
+      :literal_matcher    => [XPF::Matchers::Literal, val = Class.new{ C = 1 }, val],
+      :group_matcher      => [XPF::Matchers::Group, val = Class.new{ D = 1 }, val],
+    }.each do |setting, (default_val, assigned_custom_val, expected_custom_val)|
+
+      should "revert customized :#{setting} to default (when no block is given)" do
+        XPF.configure {|config| config.send(:"#{setting}=", assigned_custom_val) }
         XPF.configure(:reset)
         XPF.configure {|config| config.send(:"#{setting}").should.equal default_val }
       end
+
+      should "set customized :#{setting} to specified value (when block is given)" do
+        XPF.configure(:reset) {|config| config.send(:"#{setting}=", assigned_custom_val) }
+        XPF.configure {|config| config.send(:"#{setting}").should.equal expected_custom_val }
+      end
+
     end
   end
 
@@ -172,11 +214,33 @@ describe "XPF::Configuration" do
     end
   end
 
-#  describe '> converting to hash' do
-#    should 'return configured settings as a hash' do
-#      XPF::Configuration.to_hash.should.equal XPF::Configuration::DEFAULT_SETTINGS
-#    end
-#  end
+  describe '> converting to hash' do
+    should 'return configured settings as a hash' do
+      XPF::Configuration.to_hash.should.equal XPF::Configuration::DEFAULT_SETTINGS
+    end
+  end
+
+  describe '> determining if an object describes configuration' do
+
+    should 'return false if something is not a Hash' do
+      [[], Object.new, ''].each do |something|
+        XPF::Configuration.describes_config?(something).should.be.false
+      end
+    end
+
+    should 'return false if something is Hash but not all contents are config settings' do
+      XPF::Configuration.describes_config?(:position => nil, :watever => false).should.be.false
+    end
+
+    should 'return true if something is Hash and all contents are config settings' do
+      XPF::Configuration.describes_config?(:position => nil, :scope => '//boo/').should.be.true
+    end
+
+    should 'return true if something is an empty Hash' do
+      XPF::Configuration.describes_config?({}).should.be.true
+    end
+
+  end
 
   describe '> getting a new configuration' do
 

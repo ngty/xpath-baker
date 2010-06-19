@@ -111,7 +111,7 @@ module XPF
   # </table>
   #
   # TODO: This part needs to be updated !!
-  # 5). *axis* specifies the matched node-set w.r.t the current reference node:
+  # 5). *axial_node* specifies the matched node-set w.r.t the current reference node:
   #
   # <table>
   # <tr>
@@ -189,14 +189,14 @@ module XPF
     # %w{ng nc no nn ni 1~7$}
     # %w{g c o n i 1~7$ descendant-or-self::a //body/watever XPF::Matchers::Attribute XPF::Matchers::Text}
     DEFAULT_SETTINGS = {
-      :greedy             => true,   # g, !g
-      :case_sensitive     => true,   # c, !c
-      :match_ordering     => true,   # o, !o
-      :normalize_space    => true,   # n, !n
-      :include_inner_text => true,   # i, !i
-      :scope              => '//',   # //some/thing
-      :position           => 0,      # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
-      :axis               => :self,  # descendant-or-self::a, descendant_or_self::a
+      :greedy             => true,       # g, !g
+      :case_sensitive     => true,       # c, !c
+      :match_ordering     => true,       # o, !o
+      :normalize_space    => true,       # n, !n
+      :include_inner_text => true,       # i, !i
+      :scope              => '//',       # //some/thing
+      :position           => nil,        # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
+      :axial_node         => 'self::*',  # descendant-or-self::a, descendant_or_self::a
 
       # TODO: Add missing tests
       :attribute_matcher  => XPF::Matchers::Attribute,
@@ -227,16 +227,6 @@ module XPF
       :normalize_space    => :is_boolean!,
       :include_inner_text => :is_boolean!,
       :scope              => nil,
-
-      # TODO: update broken tests
-      #:position          => :is_valid_position!,
-      # :axis             => :is_valid_axis!,
-
-      # TODO: Add missing tests
-      :attribute_matcher  => nil,
-      :text_matcher       => nil,
-      :literal_matcher    => nil,
-      :group_matcher      => nil,
     }
 
     class << self
@@ -244,7 +234,10 @@ module XPF
       DEFAULT_SETTINGS.keys.each do |setting|
 
         attr_accessor setting
-        alias_method :"#{setting}?", setting
+
+        if SETTING_VALIDATORS[setting] == :is_boolean!
+          alias_method :"#{setting}?", setting if SETTING_VALIDATORS[setting] == :is_boolean!
+        end
 
         define_method(:"#{setting}=") do |val|
           (validator = SETTING_VALIDATORS[setting]) && send(validator, setting, val)
@@ -289,21 +282,9 @@ module XPF
         end
       end
 
-      def axis=(axis)
-        # TODO: Add missing spec !!
-        @axis = ((frags = axis.to_s.split('::'))[1] || '').strip.empty? ?
-          [frags[0].gsub('_','-'),'*'].join('::') : axis
-      end
-
-      def position=(position)
-        @position = Position.convert(position.to_s)
-      end
-
       def describes_config?(something)
-        # TODO: Add missing spec !!
         case something
         when Hash then (something.keys - DEFAULT_SETTINGS.keys).empty?
-        when Array then translate(something) rescue false
         else false
         end
       end
@@ -316,34 +297,20 @@ module XPF
         end
       end
 
+      def axial_node=(expr)
+        @axial_node = AxialNode.convert(expr.to_s)
+      end
+
+      def position=(expr)
+        @position = Position.convert(expr.to_s)
+      end
+
       private
 
         def is_boolean!(setting, val)
           fail_unless("Config setting :#{setting} must be boolean true/false !!") do
             [true, false].include?(val)
           end
-        end
-
-        def is_valid_position!(setting, val)
-          fail_unless("Config setting :#{setting} must be nil or a non-zero integer !!") do
-            val.nil? or (val.is_a?(Integer) && val.nonzero?)
-          end
-        end
-
-        def is_valid_axis!(setting, val)
-          axes = ''
-          # TODO: This part needs to be updated !! Cos we wanna support:
-          # * :ancestor, :ancestor_or_self
-          # * 'ancestor', 'ancestor-or-self', ...
-          # * 'ancestor::*', 'ancestor-or-self::*'
-          #
-#          axes = %w{
-#            ancestor ancestor_or_self child descendant descendant_or_self following
-#            following_sibling namespace parent preceding preceding_sibling self
-#          }.map(&:to_sym)
-#          msg = "Config setting :#{setting} must be any of :%s & :%s !!" %
-#            [axes[0..-2].map(&:to_s).join(', :'), axes[-1]]
-#          fail_unless(msg) { axes.include?(val) }
         end
 
         def fail_unless(msg, error = InvalidConfigSettingValueError)
@@ -354,21 +321,52 @@ module XPF
 
     private
 
+      module AxialNode #:nodoc:
+        class << self
+
+          VALID_VALS = %w{
+            ancestor ancestor-or-self attribute child descendant descendant-or-self
+            following following-sibling namespace parent preceding preceding-sibling self
+          }.inject([]) do |memo, val|
+            memo + [val.gsub('-','_').to_sym, val, "#{val}::*", /^#{val}::\w+$/]
+          end
+
+          ERROR = InvalidConfigSettingValueError.new(
+            'Config setting :axial_node must match any of the following: %s or %s !!' %
+              [VALID_VALS[0..-2].join(', '), VALID_VALS[-1]]
+          )
+
+          def convert(str)
+            frags = str.gsub('_','-').split('::').map(&:strip)
+            case expr = ((frags[1] || '').empty? ? [frags[0], '*'] : frags[0..1]).join('::')
+            when *VALID_VALS then expr
+            else raise ERROR
+            end
+          end
+
+        end
+      end
+
       module Position #:nodoc:
         class << self
 
+          ERROR = InvalidConfigSettingValueError.new(
+            'Config setting :position must match any of the following: %s or %s !!' % [
+              '(1) nil or any integer (0 & nil are taken as no position specified)',
+              '(2) /^(!)?(>|>=|<|<=)?([1-9]\d*)(\^|\$)?$/'
+          ])
+
           def convert(str)
-            (expr =
-              case str.sub(/(\$|\^)$/,'')
-              when '0' then nil
-              when /^(\d+)$/, /^=(\d+)$/ then '[%s]' % $1
-              when /^!=(\d+)$/ then '[position()!=%s]' % $1
-              when /^(\d+)~(\d+)$/ then '[position()>=%s and position()<=%s]' % [$1,$2]
-              when /^(\d+)!~(\d+)$/ then '[not(position()>=%s and position()<=%s)]' % [$1,$2]
-              when /^(>)(\d+)$/, /^(>=)(\d+)$/, /^(<)(\d+)$/, /^(<=)(\d+)$/ then '[position()%s%s]' % [$1,$2]
-              else nil
+            negate = str.start_with?('!')
+            quote = lambda{|expr| (negate ? '[not(%s)]' : '[%s]') % expr }
+            expr = case str
+              when '0', '' then nil
+              when /^!?([1-9]\d*)[\^\$]?$/ then (negate ? '[position()!=%s]' : '[%s]') % $1
+              when /^!?([1-9]\d*)~([1-9]\d*)[\^\$]?$/ then quote['position()>=%s and position()<=%s' % [$1,$2]]
+              when /^!?(>|>=|<|<=)([1-9]\d*)[\^\$]?$/ then quote['position()%s%s' % [$1,$2]]
+              else raise ERROR
               end
-            ) && expr.extend(Extensions).init(str.end_with?('^'))
+            expr && expr.extend(Extensions).init(str.end_with?('^'))
           end
 
           module Extensions
