@@ -197,36 +197,32 @@ module XPF
       :scope              => '//',       # //some/thing
       :position           => nil,        # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
       :axial_node         => 'self::*',  # descendant-or-self::a, descendant_or_self::a
-
-      # TODO: Add missing tests
       :attribute_matcher  => XPF::Matchers::Attribute,
       :text_matcher       => XPF::Matchers::Text,
       :literal_matcher    => XPF::Matchers::Literal,
       :group_matcher      => XPF::Matchers::Group,
-      # :subtag_matcher
     }
 
-    SETTING_TRANSLATORS = {
-      '!g' => {:greedy             => false},
-      '!n' => {:normalize_space    => false},
-      '!c' => {:case_sensitive     => false},
-      '!o' => {:match_ordering     => false},
+    EASY_SETTINGS_TRANSLATIONS = { #:nodoc:
+       'g' => {:greedy => true},
+      '!g' => {:greedy => false},
+       'c' => {:case_sensitive => true},
+      '!c' => {:case_sensitive => false},
+       'o' => {:match_ordering => true},
+      '!o' => {:match_ordering => false},
+       'n' => {:normalize_space => true},
+      '!n' => {:normalize_space => false},
+       'i' => {:include_inner_text => true},
       '!i' => {:include_inner_text => false},
-
-      'g'  => {:greedy             => true},
-      'n'  => {:normalize_space    => true},
-      'c'  => {:case_sensitive     => true},
-      'o'  => {:match_ordering     => true},
-      'i'  => {:include_inner_text => true},
     }
 
-    SETTING_VALIDATORS = {
+    SETTING_VALIDATORS = { #:nodoc:
       :greedy             => :is_boolean!,
       :case_sensitive     => :is_boolean!,
       :match_ordering     => :is_boolean!,
       :normalize_space    => :is_boolean!,
       :include_inner_text => :is_boolean!,
-      :scope              => nil,
+      :scope              => :is_valid_scope!,
     }
 
     class << self
@@ -310,6 +306,12 @@ module XPF
         def is_boolean!(setting, val)
           fail_unless("Config setting :#{setting} must be boolean true/false !!") do
             [true, false].include?(val)
+          end
+        end
+
+        def is_valid_scope!(setting, val)
+          fail_unless("Config setting :#{setting} must start & end with '/' !!") do
+            val.start_with?('/') && val.end_with?('/')
           end
         end
 

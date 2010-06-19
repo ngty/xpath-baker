@@ -34,7 +34,7 @@ describe "XPF::Configuration" do
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
       :normalize_space    => [true, false],
-      :scope              => ['/', '//awe/some'],
+      :scope              => ['/', '//awe/some/'],
     }.each do |setting, vals|
       should "be able to change :#{setting}" do
         XPF.configure do |config|
@@ -136,6 +136,7 @@ describe "XPF::Configuration" do
       :match_ordering     => ['aa', 0, 1, 'be boolean true/false'],
       :include_inner_text => ['aa', 0, 1, 'be boolean true/false'],
       :normalize_space    => ['aa', 0, 1, 'be boolean true/false'],
+      :scope              => ['boo', '/boo', '//boo', "start & end with '/'"],
       :position           => [
         '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2',
