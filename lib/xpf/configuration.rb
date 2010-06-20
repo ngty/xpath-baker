@@ -223,9 +223,9 @@ module XPF
         /::Group$/     => lambda{|klass| {:group_matcher => classify(klass)} }
       },
       :test_fail => {
-        :Scope     => lambda{|val| {:scope => val.to_s} },
-        :AxialNode => lambda{|val| {:axial_node => val.to_s} },
-        :Position  => lambda{|val| {:position => val.to_s} },
+        :Scope     => lambda{|val| {:scope => val} },
+        :AxialNode => lambda{|val| {:axial_node => val} },
+        :Position  => lambda{|val| {:position => val} },
       }
     }
 
@@ -328,7 +328,7 @@ module XPF
 
         def new_from_array(settings, test_mode = false)
           config = settings.inject({}) do |memo, val|
-            if config = simple_translation(val) || regexp_translation(val) || test_fail_translation(val)
+            if config = simple_mapping(val) || regexp_mapping(val) || test_fail_mapping(val)
               memo.merge(config)
             else
               raise InvalidConfigSettingValueError.new \
@@ -338,16 +338,16 @@ module XPF
           test_mode ? true : new_from_hash(config)
         end
 
-        def simple_translation(arg)
+        def simple_mapping(arg)
           SETTING_MAPPERS[:simple][arg]
         end
 
-        def regexp_translation(arg)
+        def regexp_mapping(arg)
           _, config = SETTING_MAPPERS[:regexp].find{|regexp,_| arg.to_s =~ regexp }
           config && config[arg]
         end
 
-        def test_fail_translation(arg)
+        def test_fail_mapping(arg)
           _, config = SETTING_MAPPERS[:test_fail].find do |klass,config|
             begin
               config[const_get(klass).convert(arg.to_s)]
@@ -355,7 +355,7 @@ module XPF
               nil
             end
           end
-          config && config[arg]
+          config && config[arg.to_s]
         end
 
         def is_boolean!(setting, val)
