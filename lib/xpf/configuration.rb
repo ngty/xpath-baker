@@ -203,7 +203,7 @@ module XPF
       :group_matcher      => XPF::Matchers::Group,
     }
 
-    SETTING_TRANSLATIONS = { #:nodoc:
+    SETTING_MAPPERS = { #:nodoc:
       :simple => {
          'g' => {:greedy => true},
         '!g' => {:greedy => false},
@@ -217,10 +217,10 @@ module XPF
         '!i' => {:include_inner_text => false},
       },
       :regexp => {
-        /::Attribute$/ => lambda{|klass| {:attribute_matcher => constantize(klass)} },
-        /::Text$/      => lambda{|klass| {:text_matcher => constantize(klass)} },
-        /::Literal$/   => lambda{|klass| {:literal_matcher => constantize(klass)} },
-        /::Group$/     => lambda{|klass| {:group_matcher => constantize(klass)} }
+        /::Attribute$/ => lambda{|klass| {:attribute_matcher => classify(klass)} },
+        /::Text$/      => lambda{|klass| {:text_matcher => classify(klass)} },
+        /::Literal$/   => lambda{|klass| {:literal_matcher => classify(klass)} },
+        /::Group$/     => lambda{|klass| {:group_matcher => classify(klass)} }
       },
       :test_fail => {
         :Scope     => lambda{|val| {:scope => val.to_s} },
@@ -339,16 +339,16 @@ module XPF
         end
 
         def simple_translation(arg)
-          SETTING_TRANSLATIONS[:simple][arg]
+          SETTING_MAPPERS[:simple][arg]
         end
 
         def regexp_translation(arg)
-          _, config = SETTING_TRANSLATIONS[:regexp].find{|regexp,_| arg.to_s =~ regexp }
+          _, config = SETTING_MAPPERS[:regexp].find{|regexp,_| arg.to_s =~ regexp }
           config && config[arg]
         end
 
         def test_fail_translation(arg)
-          _, config = SETTING_TRANSLATIONS[:test_fail].find do |klass,config|
+          _, config = SETTING_MAPPERS[:test_fail].find do |klass,config|
             begin
               config[const_get(klass).convert(arg.to_s)]
             rescue InvalidConfigSettingValueError
@@ -366,6 +366,11 @@ module XPF
 
         def fail_unless(msg, error = InvalidConfigSettingValueError)
           yield or raise(error.new(msg))
+        end
+
+        def classify(klass)
+          klass.is_a?(Class) ? klass :
+            klass.to_s.split('::').inject(Object){|src, const| src.const_get(const) }
         end
 
     end

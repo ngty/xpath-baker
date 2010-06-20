@@ -71,6 +71,8 @@ describe "XPF::Configuration" do
     '!<2$'  => ['[not(position()<2)]', {:start? => false, :end? => true}],
   }
 
+  valid_scope_args = %w{// /awe/some/ //awesome/ //awe/some/}
+
   describe '> default' do
     {
       :greedy             => [true, 'true'],
@@ -99,7 +101,7 @@ describe "XPF::Configuration" do
       :match_ordering     => [true, false],
       :include_inner_text => [true, false],
       :normalize_space    => [true, false],
-      :scope              => ['/', '//awe/some/'],
+      :scope              => valid_scope_args,
     }.each do |setting, vals|
       should "be able to change :#{setting}" do
         XPF.configure do |config|
@@ -314,30 +316,33 @@ describe "XPF::Configuration" do
       end
     end
 
-    should 'be able to identify & assign :axial_node setting' do
-      valid_axial_node_args.values.each do |val|
-        XPF::Configuration.new([val]).to_hash[:axial_node].should.equal(val)
+    {
+      :axial_node => valid_axial_node_args.values,
+      :scope => valid_scope_args
+    }.each do |setting, vals|
+      should "be able to extract & assign :#{setting} setting" do
+        vals.each{|val| XPF::Configuration.new([val]).to_hash[setting].should.equal(val) }
       end
     end
 
-    should 'be able to identify & assign :position setting' do
+    {
+      :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
+      :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
+      :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
+      :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
+    }.each do |setting, (vals, expected)|
+      should "be able to extract & assign :#{setting} setting" do
+        vals.each{|val| XPF::Configuration.new([val]).to_hash[setting].should.equal(expected) }
+      end
+    end
+
+    should 'be able to extract & assign :position setting' do
       valid_position_args.each do |val, expected|
         position = XPF::Configuration.new([val]).to_hash[:position]
         position.should.equal(expected[0])
         expected[1].each{|meth, _val| position.send(meth).should.equal(_val) }
       end
     end
-
-    should 'be able to identify & assign :scope setting' do
-      ['/', '//awe/some/'].each do |val|
-        XPF::Configuration.new([val]).to_hash[:scope].should.equal(val)
-      end
-    end
-
-    should 'be able to identify & assign :group_matcher setting'
-    should 'be able to identify & assign :attribute_matcher setting'
-    should 'be able to identify & assign :literal_matcher setting'
-    should 'be able to identify & assign :text_matcher setting'
 
     should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
       [
