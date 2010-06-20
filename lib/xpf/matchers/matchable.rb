@@ -25,8 +25,8 @@ module XPF
         end
 
         def mc(conditions)
-          ('self::*' == config.axis && conditions.empty?) ? nil :
-            f('./%s' % config.axis, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
+          ('self::*' == config.axial_node && conditions.empty?) ? nil :
+            f('./%s' % config.axial_node, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
         end
 
         def na
@@ -58,12 +58,14 @@ module XPF
           config.normalize_space? ? %\normalize-space(#{str})\ : str
         end
 
-        def f(axis, conditions) #:nodoc:
-          case (pos = config.position.to_s)
-          when '' then '%s%s' % [axis, conditions]
-          when /^\^/ then '%s[%s]%s' % [axis, pos.sub(/^\^/,''), conditions]
-          else '%s%s[%s]' % [axis, conditions, pos.sub(/\$$/,'')]
-          end
+        def f(axial_node, conditions) #:nodoc:
+          '%s%s%s' % (
+            if (pos = config.position).nil?
+              [axial_node, conditions, nil]
+            else
+              pos.start? ? [axial_node, pos, conditions] : [axial_node, conditions, pos]
+            end
+          )
         end
 
         # def v(expr, default_val) #:nodoc:
