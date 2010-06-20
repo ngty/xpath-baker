@@ -2,8 +2,8 @@ def xpf_multiple_match_attrs_args
   [
     # ///////////////////////////////////////////////////////////////////////////////////////
     # NOTE: 2 match groups + common config
-    # * match group x .. array match attrs + group-specific config
-    # * match group y ... hash match attrs + dummy (place-holding) group-specific config
+    # * match group x .. [[match_attrs], {config}]
+    # * match group y ... [{match_attrs}, {}]
     # ///////////////////////////////////////////////////////////////////////////////////////
     [
       debug_line = __LINE__,
@@ -34,8 +34,8 @@ def xpf_multiple_match_attrs_args
     ],
     # ///////////////////////////////////////////////////////////////////////////////////////
     # NOTE: 2 match groups & common config
-    # * 1st match group ... array match attrs + group-specific config
-    # * 2nd match group ... hash match attrs only
+    # * 1st match group ... [[match_attrs], {config}]
+    # * 2nd match group ... [{match_attrs}]
     # ///////////////////////////////////////////////////////////////////////////////////////
     [
       debug_line = __LINE__,
@@ -48,6 +48,38 @@ def xpf_multiple_match_attrs_args
       match_attrs = [
         [[:text], {:axis => 'descendant::b'}],
         [{:attr1 => 'x'}]
+      ],
+      config = {:position => 1},
+      # Expectation Args
+      path = %|//%s[./descendant::b[normalize-space(.)]][./self::*[normalize-space(@attr1)="x"][1]][1]|,
+      ids = %w{e1}
+    ],
+    [
+      debug_line = __LINE__,
+      content,
+      # Match Attrs & Config
+      match_attrs.reverse,
+      config,
+      # Expectation Args
+      path  = %|//%s[./self::*[normalize-space(@attr1)="x"][1]][./descendant::b[normalize-space(.)]][1]|,
+      ids = %w{e1}
+    ],
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    # NOTE: 2 match groups & common config
+    # * 1st match group ... [[match_attrs], {config}]
+    # * 2nd match group ... {match_attrs}
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    [
+      debug_line = __LINE__,
+      content = %|
+        <%s id="e1" attr1="x"><b>X</b></%s>
+        <%s id="e2" attr1="x"><b> </b></%s>
+        <%s id="e3" attr1="x"><b>X</b></%s>
+      |,
+      # Match Attrs & Config
+      match_attrs = [
+        [[:text], {:axis => 'descendant::b'}],
+        {:attr1 => 'x'}
       ],
       config = {:position => 1},
       # Expectation Args
