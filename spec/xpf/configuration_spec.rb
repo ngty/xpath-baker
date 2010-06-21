@@ -255,6 +255,69 @@ describe "XPF::Configuration" do
 
   end
 
+  describe '> normalizing non-default format configuration (w array)' do
+
+    {
+       :greedy             => {'g' => true, '!g' => false},
+       :case_sensitive     => {'c' => true, '!c' => false},
+       :match_ordering     => {'o' => true, '!o' => false},
+       :normalize_space    => {'n' => true, '!n' => false},
+       :include_inner_text => {'i' => true, '!i' => false},
+    }.each do |setting, val_vs_expected|
+      should "be able to normalize :#{setting} setting" do
+        val_vs_expected.each do |val, expected|
+          XPF::Configuration.normalize([val]).should.equal({setting => expected})
+        end
+      end
+    end
+
+    {
+      :axial_node => valid_axial_node_args.values,
+      :scope => valid_scope_args
+    }.each do |setting, vals|
+      should "be able to normalize :#{setting} setting" do
+        vals.each{|val| XPF::Configuration.normalize([val]).should.equal({setting => val}) }
+      end
+    end
+
+    {
+      :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
+      :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
+      :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
+      :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
+    }.each do |setting, (vals, expected)|
+      should "be able to normalize :#{setting} setting" do
+        vals.each{|val| XPF::Configuration.normalize([val]).should.equal({setting => expected}) }
+      end
+    end
+
+    should 'be able to normalize :position setting' do
+      valid_position_args.keys.each do |val|
+        XPF::Configuration.normalize([val]).should.equal({:position => val.to_s})
+      end
+    end
+
+    should 'raise XPF::InvalidArgumentError if arg is not an array' do
+      [{}, nil, Object.new, 1, '1'].each do |arg|
+        lambda { XPF::Configuration.normalize(arg) }.
+          should.raise(XPF::InvalidArgumentError).
+          message.should.equal('Config normalizing can ONLY be done for Array !!')
+      end
+    end
+
+    should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be normalized' do
+      [
+        '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
+        '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
+        'awe/some', '//awe/some', 'awe/some', 'x', '!x'
+      ].each do |val|
+        lambda { XPF::Configuration.normalize([val]) }.
+          should.raise(XPF::InvalidConfigSettingValueError).
+          message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
+      end
+    end
+  end
+
   describe '> getting a new configuration (w hash)' do
 
     should 'duplicate a copy of itself' do
@@ -298,6 +361,8 @@ describe "XPF::Configuration" do
       configuration = XPF::Configuration.new([{:true => 'n', false => '!n'}[normalize_space_val]])
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
+
+    # NOTE: The following contains some overlappings for specs of #normalize
 
     should 'be able to map valid shorthand settings to their respective verbose counterparts' do
       {

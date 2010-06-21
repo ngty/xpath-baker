@@ -315,6 +315,20 @@ module XPF
         @scope = Scope.convert(expr.to_s)
       end
 
+      def normalize(settings)
+        if settings.is_a?(Array)
+          raise_err = lambda do |val|
+            raise InvalidConfigSettingValueError.new \
+              "Config setting value '#{val}' cannot be mapped to any supported settings !!"
+          end
+          settings.inject({}) do |memo, val|
+            memo.merge(simple_mapping(val) || regexp_mapping(val) || test_fail_mapping(val) || raise_err[val])
+          end
+        else
+          raise InvalidArgumentError.new('Config normalizing can ONLY be done for Array !!')
+        end
+      end
+
       private
 
         def new_from_hash(settings)
@@ -327,14 +341,7 @@ module XPF
         end
 
         def new_from_array(settings, test_mode = false)
-          config = settings.inject({}) do |memo, val|
-            if config = simple_mapping(val) || regexp_mapping(val) || test_fail_mapping(val)
-              memo.merge(config)
-            else
-              raise InvalidConfigSettingValueError.new \
-                "Config setting value '#{val}' cannot be mapped to any supported settings !!"
-            end
-          end
+          config = normalize(settings)
           test_mode ? true : new_from_hash(config)
         end
 
