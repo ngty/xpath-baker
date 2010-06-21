@@ -11,10 +11,10 @@ module XPF
           if args.empty?
             new_matchers_and_config([], {})
           elsif args.size == 1
-            is_config?(config = args[0]) ? new_matchers_and_config([], config) :
+            is_config?(config = args[0]) ? new_matchers_and_config([], normalize_config(config)) :
               new_matchers_and_config(args[0..0], {})
           elsif is_config?(config = args[-1])
-            @configs << config
+            @configs << (config = normalize_config(config))
             new_matchers_and_config(args[0..-2], config)
           elsif args.all?{|arg| is_match_attrs?(arg) }
             new_matchers_and_config(args, {})
@@ -27,7 +27,7 @@ module XPF
       end
 
       def parse_with_config(args, config)
-        @configs = [config]
+        @configs = [normalize_config(config)]
         parse(*args)
       end
 
@@ -40,8 +40,8 @@ module XPF
 
         def new_matchers(match_args, config)
           match_args.map do |arg|
-            if arg.is_a?(Array) && arg.size == 2 && is_config?(arg[-1])
-              new_matcher(arg[0], chained_config(arg[1]))
+            if arg.is_a?(Array) && arg.size == 2 && is_config?(_config = arg[-1])
+              new_matcher(arg[0], chained_config(normalize_config(_config)))
             elsif arg.is_a?(Array) && arg.size == 1 && is_match_attrs?(arg[0])
               new_matcher(arg[0], config)
             elsif is_match_attrs?(arg)
@@ -67,6 +67,10 @@ module XPF
 
         def is_config?(arg)
           Configuration.describes_config?(arg)
+        end
+
+        def normalize_config(arg)
+          Configuration.normalize(arg)
         end
 
         def is_match_attrs?(arg)

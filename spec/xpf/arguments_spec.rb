@@ -26,6 +26,8 @@ describe 'XPF::Arguments' do
     end
   end
 
+  normalize_config = lambda{|arg| XPF::Configuration.normalize(arg) }
+
   describe '> parsing (w zero args)' do
 
     before do
@@ -59,7 +61,7 @@ describe 'XPF::Arguments' do
 
   end
 
-  [{:position => 9, :scope => '//awe/some'}, {}].each do |common_config|
+  [{:position => 9, :scope => '//awe/some/'}, %w{9 //awe/some/}, [], {}].each do |common_config|
     xpf_valid_permutated_arguments.each do |args, expected|
 
       describe "> parsing valid args %s" % (
@@ -72,11 +74,13 @@ describe 'XPF::Arguments' do
         end
 
         should "return config as specified" do
-          @parsed_args[1].should.equal(common_config)
+          @parsed_args[1].should.equal(normalize_config[common_config])
         end
 
         should "return matchers w configs as specified" do
-          @parsed_args[0].map(&:last).should.equal(expected[1].map{|c| common_config.merge(c) })
+          @parsed_args[0].map(&:last).should.equal(
+            expected[1].map{|c| normalize_config[common_config].merge(normalize_config[c]) }
+          )
         end
 
         should "return matchers w match attrs as specified" do
