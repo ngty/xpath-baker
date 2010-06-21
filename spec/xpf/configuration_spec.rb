@@ -297,14 +297,6 @@ describe "XPF::Configuration" do
       end
     end
 
-    should 'raise XPF::InvalidArgumentError if arg is not an array' do
-      [{}, nil, Object.new, 1, '1'].each do |arg|
-        lambda { XPF::Configuration.normalize(arg) }.
-          should.raise(XPF::InvalidArgumentError).
-          message.should.equal('Config normalizing can ONLY be done for Array !!')
-      end
-    end
-
     should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be normalized' do
       [
         '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
@@ -314,6 +306,23 @@ describe "XPF::Configuration" do
         lambda { XPF::Configuration.normalize([val]) }.
           should.raise(XPF::InvalidConfigSettingValueError).
           message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
+      end
+    end
+
+  end
+
+  describe '> normalizing non-default format configuration (w hash)' do
+    should 'return arg as it is' do
+      XPF::Configuration.normalize(arg = {:aa => 1}).should.equal(arg)
+    end
+  end
+
+  describe '> normalizing non-default format configuration (w non array/hash)' do
+    should 'raise XPF::InvalidArgumentError' do
+      [nil, Object.new, 1, '1'].each do |arg|
+        lambda { XPF::Configuration.normalize(arg) }.
+          should.raise(XPF::InvalidArgumentError).
+          message.should.equal('Config normalizing can ONLY be done for Array/Hash !!')
       end
     end
   end
@@ -362,7 +371,8 @@ describe "XPF::Configuration" do
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
 
-    # NOTE: The following contains some overlappings for specs of #normalize
+    # TODO: The following contains some overlappings for specs of #normalize, pls find time
+    # to do cleaning up !!
 
     should 'be able to map valid shorthand settings to their respective verbose counterparts' do
       {
