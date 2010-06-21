@@ -62,8 +62,12 @@ module XPF
       end
     end
 
-    def describes_config?(something)
+    def is_config?(something)
       Configuration.describes_config?(something)
+    end
+
+    def normalize_config(config)
+      Configuration.normalize(config)
     end
 
     protected
