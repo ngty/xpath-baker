@@ -83,6 +83,7 @@ describe "XPF::Configuration" do
       :scope              => ['//', '//'],
       :position           => [nil, nil],
       :axial_node         => ['self::*', 'self::*'],
+      :element_matcher    => [XPF::Matchers::Element, 'XPF::Matchers::Element'],
       :attribute_matcher  => [XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'],
       :text_matcher       => [XPF::Matchers::Text, 'XPF::Matchers::Text'],
       :any_text_matcher   => [XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'],
@@ -198,6 +199,7 @@ describe "XPF::Configuration" do
       :literal_matcher    => [XPF::Matchers::Literal, val = Class.new{ C = 1 }, val],
       :group_matcher      => [XPF::Matchers::Group, val = Class.new{ D = 1 }, val],
       :any_text_matcher   => [XPF::Matchers::AnyText, val = Class.new{ E = 1 }, val],
+      :element_matcher    => [XPF::Matchers::Element, val = Class.new{ F = 1 }, val],
     }.each do |setting, (default_val, assigned_custom_val, expected_custom_val)|
 
       should "revert customized :#{setting} to default (when no block is given)" do
@@ -285,6 +287,7 @@ describe "XPF::Configuration" do
     {
       :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
       :any_text_matcher => [[XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'], XPF::Matchers::AnyText],
+      :element_matcher => [[XPF::Matchers::Element, 'XPF::Matchers::Element'], XPF::Matchers::Element],
       :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
       :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
       :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
@@ -406,6 +409,7 @@ describe "XPF::Configuration" do
     {
       :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
       :any_text_matcher => [[XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'], XPF::Matchers::AnyText],
+      :element_matcher => [[XPF::Matchers::Element, 'XPF::Matchers::Element'], XPF::Matchers::Element],
       :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
       :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
       :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],

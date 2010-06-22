@@ -20,8 +20,8 @@ module XPF
           c(val || nt)
         end
 
-        def ma(val = nil)
-          c(val || na)
+        def mn(val = nil)
+          c(val || nn)
         end
 
         def mc(conditions)
@@ -29,7 +29,7 @@ module XPF
             f('./%s' % config.axial_node, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
         end
 
-        def na
+        def nn
           n(name)
         end
 
@@ -55,7 +55,7 @@ module XPF
         end
 
         def n(str) #:nodoc:
-          config.normalize_space? ? %\normalize-space(#{str})\ : str
+          config.normalize_space? ? %\normalize-space(#{str})\ : "#{str}"
         end
 
         def f(axial_node, conditions) #:nodoc:

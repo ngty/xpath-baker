@@ -197,6 +197,7 @@ module XPF
       :scope              => '//',       # //some/thing
       :position           => nil,        # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
       :axial_node         => 'self::*',  # descendant-or-self::a, descendant_or_self::a
+      :element_matcher    => XPF::Matchers::Element,
       :attribute_matcher  => XPF::Matchers::Attribute,
       :text_matcher       => XPF::Matchers::Text,
       :any_text_matcher   => XPF::Matchers::AnyText,
@@ -218,6 +219,7 @@ module XPF
         '!i' => {:include_inner_text => false},
       },
       :regexp => {
+        /::Element$/   => lambda{|klass| {:element_matcher => classify(klass)} },
         /::Attribute$/ => lambda{|klass| {:attribute_matcher => classify(klass)} },
         /::Text$/      => lambda{|klass| {:text_matcher => classify(klass)} },
         /::AnyText$/   => lambda{|klass| {:any_text_matcher => classify(klass)} },

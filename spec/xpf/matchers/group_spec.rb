@@ -139,15 +139,27 @@ describe "XPF::Matchers::Group" do
       end
     end
 
-    should 'return expr that reflect attr condition if match attrs is {:attr1 => ..., ...}' do
+    should 'return expr that reflect attr condition if match attrs is {:@attr1 => ..., ...}' do
       [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
         @condition_should_equal[{:@attr1 => 'value-x'}, config, './descendant::*[normalize-space(@attr1)="value-x"]']
       end
     end
 
-    should 'return expr that reflect presence of attr if match attrs is [:attr1, ...]' do
+    should 'return expr that reflect presence of attr if match attrs is [:@attr1, ...]' do
       [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
         @condition_should_equal[[:@attr1], config, './descendant::*[normalize-space(@attr1)]']
+      end
+    end
+
+    should 'return expr that reflect element condition if match attrs is {:element1 => ..., ...}' do
+      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
+        @condition_should_equal[{:element1 => 'value-x'}, config, './descendant::*[normalize-space(element1)="value-x"]']
+      end
+    end
+
+    should 'return expr that reflect presence of element if match attrs is [:element1, ...]' do
+      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
+        @condition_should_equal[[:element1], config, './descendant::*[normalize-space(element1)]']
       end
     end
 

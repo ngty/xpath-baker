@@ -41,7 +41,7 @@ module XPF
           when '+' then config.text_matcher.new(val, new_config[true])
           when '-' then config.text_matcher.new(val, new_config[false])
           when '*' then config.any_text_matcher.new(val, config)
-          else raise ArgumentError
+          else config.element_matcher.new(name, val, config)
           end
         end
 
