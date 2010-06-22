@@ -199,6 +199,7 @@ module XPF
       :axial_node         => 'self::*',  # descendant-or-self::a, descendant_or_self::a
       :attribute_matcher  => XPF::Matchers::Attribute,
       :text_matcher       => XPF::Matchers::Text,
+      :any_text_matcher   => XPF::Matchers::AnyText,
       :literal_matcher    => XPF::Matchers::Literal,
       :group_matcher      => XPF::Matchers::Group,
     }
@@ -219,6 +220,7 @@ module XPF
       :regexp => {
         /::Attribute$/ => lambda{|klass| {:attribute_matcher => classify(klass)} },
         /::Text$/      => lambda{|klass| {:text_matcher => classify(klass)} },
+        /::AnyText$/   => lambda{|klass| {:any_text_matcher => classify(klass)} },
         /::Literal$/   => lambda{|klass| {:literal_matcher => classify(klass)} },
         /::Group$/     => lambda{|klass| {:group_matcher => classify(klass)} }
       },
