@@ -53,15 +53,89 @@ describe "XPF::Matchers::Group" do
       end
     end
 
-    should 'return expr that reflect text condition if match attrs is {:text => ..., ...}' do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[{:text => 'text-x'}, config, './descendant::*[normalize-space(.)="text-x"]']
+    should 'return expr that reflect either direct or all inner text condition if match attrs is {:* => ..., ...}' do
+      [
+        {:axial_node => 'descendant::*', :include_inner_text => true},
+        {:axial_node => 'descendant::*', :include_inner_text => false},
+        %w{descendant::* i},
+        %w{descendant::* !i},
+      ].each do |config|
+        tokens = %w{text() .}.map{|s| %|normalize-space(#{s})="text-x"| }
+        @condition_should_equal[{:* => 'text-x'}, config, './descendant::*[(%s) or (%s)]' % tokens]
       end
     end
 
-    should 'return expr that reflect presence of text if match attrs is [:text, ...]' do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[[:text], config, './descendant::*[normalize-space(.)]']
+    should 'return expr that reflect presence of either direct or all inner text if match attrs is [:*, ...]' do
+      [
+        {:axial_node => 'descendant::*', :include_inner_text => true},
+        {:axial_node => 'descendant::*', :include_inner_text => false},
+        %w{descendant::* i},
+        %w{descendant::* !i}
+      ].each do |config|
+        tokens = %w{text() .}.map{|s| %|normalize-space(#{s})| }
+        @condition_should_equal[[:*], config, './descendant::*[(%s) or (%s)]' % tokens]
+      end
+    end
+
+    should 'return expr that reflect all inner text condition if match attrs is {:+ => ..., ...}' do
+      [
+        {:axial_node => 'descendant::*', :include_inner_text => true},
+        {:axial_node => 'descendant::*', :include_inner_text => false},
+        %w{descendant::* i},
+        %w{descendant::* !i},
+      ].each do |config|
+        @condition_should_equal[{:+ => 'text-x'}, config, './descendant::*[normalize-space(.)="text-x"]']
+      end
+    end
+
+    should 'return expr that reflect presence of all inner text if match attrs is [:+, ...]' do
+      [
+        {:axial_node => 'descendant::*', :include_inner_text => true},
+        {:axial_node => 'descendant::*', :include_inner_text => false},
+        %w{descendant::* i},
+        %w{descendant::* !i}
+      ].each do |config|
+        @condition_should_equal[[:+], config, './descendant::*[normalize-space(.)]']
+      end
+    end
+
+    should 'return expr that reflect direct text condition if match attrs is {:- => ..., ...}' do
+      [
+        {:axial_node => 'descendant::*', :include_inner_text => true},
+        {:axial_node => 'descendant::*', :include_inner_text => false},
+        %w{descendant::* i},
+        %w{descendant::* !i},
+      ].each do |config|
+        @condition_should_equal[{:- => 'text-x'}, config, './descendant::*[normalize-space(text())="text-x"]']
+      end
+    end
+
+    should 'return expr that reflect presence of direct text if match attrs is [:-, ...]' do
+      [
+        {:axial_node => 'descendant::*', :include_inner_text => true},
+        {:axial_node => 'descendant::*', :include_inner_text => false},
+        %w{descendant::* i},
+        %w{descendant::* !i},
+      ].each do |config|
+        @condition_should_equal[[:-], config, './descendant::*[normalize-space(text())]']
+      end
+    end
+
+    should 'return expr that reflect variable text condition if match attrs is {:~ => ..., ...}' do
+      [{:axial_node => 'descendant::*', :include_inner_text => true}, %w{descendant::* i}].each do |config|
+        @condition_should_equal[{:~ => 'text-x'}, config, './descendant::*[normalize-space(.)="text-x"]']
+      end
+      [{:axial_node => 'descendant::*', :include_inner_text => false}, %w{descendant::* !i}].each do |config|
+        @condition_should_equal[{:~ => 'text-x'}, config, './descendant::*[normalize-space(text())="text-x"]']
+      end
+    end
+
+    should 'return expr that reflect presence of variable text if match attrs is [:~, ...]' do
+      [{:axial_node => 'descendant::*', :include_inner_text => true}, %w{descendant::* i}].each do |config|
+        @condition_should_equal[[:~], config, './descendant::*[normalize-space(.)]']
+      end
+      [{:axial_node => 'descendant::*', :include_inner_text => false}, %w{descendant::* !i}].each do |config|
+        @condition_should_equal[[:~], config, './descendant::*[normalize-space(text())]']
       end
     end
 

@@ -32,8 +32,17 @@ module XPF
         end
 
         def text_or_attr_matcher(name, val, config)
-          name == :text ? config.text_matcher.new(val, config) :
-            config.attribute_matcher.new(name, val, config)
+          new_config = lambda do |flag|
+            Configuration.new(config.to_hash.merge(:include_inner_text => flag))
+          end
+          case name.to_s
+          when /^@/ then config.attribute_matcher.new(name, val, config)
+          when '~' then config.text_matcher.new(val, config)
+          when '+' then config.text_matcher.new(val, new_config[true])
+          when '-' then config.text_matcher.new(val, new_config[false])
+          when '*' then config.any_text_matcher.new(val, config)
+          else raise ArgumentError
+          end
         end
 
     end

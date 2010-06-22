@@ -16,5 +16,6 @@ end
 require 'xpf/matchers/matchable'
 require 'xpf/matchers/group'
 require 'xpf/matchers/text'
+require 'xpf/matchers/any_text'
 require 'xpf/matchers/literal'
 require 'xpf/matchers/attribute'
