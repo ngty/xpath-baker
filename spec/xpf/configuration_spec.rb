@@ -284,6 +284,7 @@ describe "XPF::Configuration" do
 
     {
       :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
+      :any_text_matcher => [[XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'], XPF::Matchers::AnyText],
       :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
       :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
       :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
@@ -404,6 +405,7 @@ describe "XPF::Configuration" do
 
     {
       :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
+      :any_text_matcher => [[XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'], XPF::Matchers::AnyText],
       :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
       :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
       :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
