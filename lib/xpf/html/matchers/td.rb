@@ -9,8 +9,8 @@ module XPF
             value.empty? ? nil : valid_condition
           end
 
-          def axed_cond(expr)
-            (@axed_cond ||= ('self::*' == config.axis) ? '%s' : "#{scope}#{config.axis}[%s]") % expr
+          def axial_cond(expr)
+            (@axial_cond ||= ('self::*' == config.axial_node) ? '%s' : "#{scope}#{config.axial_node}[%s]") % expr
           end
 
         end
@@ -20,7 +20,7 @@ module XPF
           include Matchable
 
           def condition
-            '%std[%s]' % [scope, axed_cond(nt)]
+            '%std[%s]' % [scope, axial_cond(nt)]
           end
 
         end
@@ -32,10 +32,10 @@ module XPF
           def valid_condition
             value.map do |field, val|
               # NOTE: Currently, content of <th/> cannot be axed. Even though it is very
-              # easy to do so by just having axed_cond(me(mt,field)), we are not sure if
+              # easy to do so by just having axial_cond(me(mt,field)), we are not sure if
               # it is useful at all.
               th = %\./ancestor::table[1]//th[%s][1]\ % me(mt, field)
-              '%std[count(%s/preceding-sibling::th)+1][%s][%s]' % [scope, th, th, axed_cond(me(mt,val))]
+              '%std[count(%s/preceding-sibling::th)+1][%s][%s]' % [scope, th, th, axial_cond(me(mt,val))]
             end.join('][')
           end
 
@@ -47,7 +47,7 @@ module XPF
 
           def valid_condition
             glue = config.match_ordering? ? ']/following-sibling::td[' : (']][%std['%scope)
-            '%std[%s]' % [scope, value.map{|val| axed_cond(me(mt,val)) }.join(glue)]
+            '%std[%s]' % [scope, value.map{|val| axial_cond(me(mt,val)) }.join(glue)]
           end
 
         end

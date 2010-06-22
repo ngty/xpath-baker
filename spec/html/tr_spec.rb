@@ -3,17 +3,17 @@ require 'xpf/html'
 
 describe "XPF::HTML <tr/> support" do
 
-  tr_axed_path = lambda do |text_comparison, cells, axis, match_ordering|
+  tr_axed_path = lambda do |text_comparison, cells, axial_node, match_ordering|
     test = lambda do |val|
       val.is_a?(Array) ? check_tokens(text_comparison, val.map{|v| %|"#{v}"| }, match_ordering) :
         %|#{text_comparison}="#{val}"|
     end
-    test_value = lambda{|val| (axis == 'self::*' ? '%s' : "./#{axis}[%s]") % test[val] }
+    test_value = lambda{|val| (axial_node == 'self::*' ? '%s' : "./#{axial_node}[%s]") % test[val] }
     test_field = lambda{|val| test[val] }
     '//tr[%s]' % (
       case cells
       when nil
-        './td[%s]' % (axis == 'self::*' ? '%s' : "./#{axis}[%s]") % text_comparison
+        './td[%s]' % (axial_node == 'self::*' ? '%s' : "./#{axial_node}[%s]") % text_comparison
       when Hash
         cells.map do |field, val|
           th = %|./ancestor::table[1]//th[#{test_field[field]}][1]|
@@ -151,22 +151,22 @@ describe "XPF::HTML <tr/> support" do
       [tr_path['normalize-space(.)', cells, false], %w{e3}],
     # >> [:cells] (NA)
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # {:axis => ... }
+    # {:axial_node => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # >> {:cells => {...}}
-    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axis => 'self::*'}] =>
+    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axial_node => 'self::*'}] =>
       [tr_axed_path['normalize-space(.)', cells, 'self::*', true], %w{}],
-    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axis => 'descendant::*'}] =>
+    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axial_node => 'descendant::*'}] =>
       [tr_axed_path['normalize-space(.)', cells, 'descendant::*', true], %w{e3}],
     # >> {:cells => [...]}
-    [{:cells => (cells = ['Tan'])}, {:axis => 'self::*'}] =>
+    [{:cells => (cells = ['Tan'])}, {:axial_node => 'self::*'}] =>
       [tr_axed_path['normalize-space(.)', cells, 'self::*', true], %w{}],
-    [{:cells => (cells = ['Tan'])}, {:axis => 'descendant::*'}] =>
+    [{:cells => (cells = ['Tan'])}, {:axial_node => 'descendant::*'}] =>
       [tr_axed_path['normalize-space(.)', cells, 'descendant::*', true], %w{e3}],
     # >> [:cells]
-    [[:cells], {:axis => 'self::*'}] =>
+    [[:cells], {:axial_node => 'self::*'}] =>
       [tr_axed_path['normalize-space(.)', nil, 'self::*', true], %w{e2 e3 e5 e6}],
-    [[:cells], {:axis => 'descendant::*'}] =>
+    [[:cells], {:axial_node => 'descendant::*'}] =>
       [tr_axed_path['normalize-space(.)', nil, 'descendant::*', true], %w{e2 e3 e6}],
   }.each do |(match_attrs, config), (expected_path, expected_ids)|
 

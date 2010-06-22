@@ -14,13 +14,13 @@ def xpf_multiple_match_attrs_args
       |,
       # Match Attrs & Config
       match_attrs = [
-        [[:text], {:axis => 'descendant::b'}],
+        [[:text], {:axial_node => 'descendant::b'}],
         [{:attr1 => 'x'},{}]
       ],
       config = {:position => 2},
       # Expectation Args
-      path = %|//%s[./descendant::b[normalize-space(.)]][./self::*[normalize-space(@attr1)="x"]][2]|,
-      ids = %w{e3}
+      path = %|//%s[./descendant::b[normalize-space(.)][2]][./self::*[normalize-space(@attr1)="x"][2]][2]|,
+      ids = %w{}
     ],
     [
       debug_line = __LINE__,
@@ -29,8 +29,40 @@ def xpf_multiple_match_attrs_args
       match_attrs.reverse,
       config,
       # Expectation Args
-      path = %|//%s[./self::*[normalize-space(@attr1)="x"]][./descendant::b[normalize-space(.)]][2]|,
-      ids = %w{e3}
+      path = %|//%s[./self::*[normalize-space(@attr1)="x"][2]][./descendant::b[normalize-space(.)][2]][2]|,
+      ids = %w{}
+    ],
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    # NOTE: 2 match groups + common config
+    # * match group x .. [[match_attrs], [config]]
+    # * match group y ... [{match_attrs}, []]
+    # ///////////////////////////////////////////////////////////////////////////////////////
+    [
+      debug_line = __LINE__,
+      content = %|
+        <%s id="e1" attr1="x"><b>X</b></%s>
+        <%s id="e2" attr1="x"><b> </b></%s>
+        <%s id="e3" attr1="x"><b>X</b></%s>
+      |,
+      # Match Attrs & Config
+      match_attrs = [
+        [[:text], %w{descendant::b}],
+        [{:attr1 => 'x'},[]]
+      ],
+      config = {:position => 2},
+      # Expectation Args
+      path = %|//%s[./descendant::b[normalize-space(.)][2]][./self::*[normalize-space(@attr1)="x"][2]][2]|,
+      ids = %w{}
+    ],
+    [
+      debug_line = __LINE__,
+      content,
+      # Match Attrs & Config
+      match_attrs.reverse,
+      config,
+      # Expectation Args
+      path = %|//%s[./self::*[normalize-space(@attr1)="x"][2]][./descendant::b[normalize-space(.)][2]][2]|,
+      ids = %w{}
     ],
     # ///////////////////////////////////////////////////////////////////////////////////////
     # NOTE: 2 match groups & common config
@@ -46,7 +78,7 @@ def xpf_multiple_match_attrs_args
       |,
       # Match Attrs & Config
       match_attrs = [
-        [[:text], {:axis => 'descendant::b'}],
+        [[:text], {:axial_node => 'descendant::b', :position => nil}],
         [{:attr1 => 'x'}]
       ],
       config = {:position => 1},
@@ -78,7 +110,7 @@ def xpf_multiple_match_attrs_args
       |,
       # Match Attrs & Config
       match_attrs = [
-        [[:text], {:axis => 'descendant::b'}],
+        [[:text], {:axial_node => 'descendant::b', :position => nil}],
         {:attr1 => 'x'}
       ],
       config = {:position => 1},
@@ -208,7 +240,7 @@ def xpf_single_match_attrs_generic_args
     :greedy             => booleans,
     :scope              => {'//' => '//body/', '//body/' => '//xoo/', '//xoo/' => '//'},
     :position           => {nil => 2, 2 => nil},
-    :axis               => {:self => :descendant, :ancestor => self, :descendant => :ancestor},
+    :axial_node               => {:self => :descendant, :ancestor => self, :descendant => :ancestor},
     # :attribute_matcher  => XPF::Matchers::Attribute,
     # :text_matcher       => XPF::Matchers::Text,
     # :literal_matcher    => XPF::Matchers::Literal,
@@ -251,31 +283,31 @@ def xpf_single_match_attrs_generic_args
     ] },
 
     # ///////////////////////////////////////////////////////////////////////////
-    # {:axis => ...}
+    # {:axial_node => ...}
     # ///////////////////////////////////////////////////////////////////////////
     # >> text
-    [__LINE__, {:text => 'A Bz'}, {:axis => :self}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:axial_node => :self}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [__LINE__, {:text => 'Bz'}, {:axis => :descendant}] => lambda{|e| [
+    [__LINE__, {:text => 'Bz'}, {:axial_node => :descendant}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::*[normalize-space(.)="Bz"]]|,
       expected_nodes = [' A  Bz ']
     ] },
-    [__LINE__, {:text => 'A Bz'}, {:axis => :ancestor}] => lambda{|e| [
+    [__LINE__, {:text => 'A Bz'}, {:axial_node => :ancestor}] => lambda{|e| [
       expected_path  = %|//#{e}[./ancestor::*[normalize-space(.)="A Bz"]]|,
       expected_nodes = []
     ] },
     # >> attr
-    [__LINE__, {:attr1 => 'AB BC'}, {:axis => :self}] => lambda{|e| [
+    [__LINE__, {:attr1 => 'AB BC'}, {:axial_node => :self}] => lambda{|e| [
       expected_path  = %|//#{e}[./self::*[normalize-space(@attr1)="AB BC"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [__LINE__, {:attr2 => 'XX'}, {:axis => :descendant}] => lambda{|e| [
+    [__LINE__, {:attr2 => 'XX'}, {:axial_node => :descendant}] => lambda{|e| [
       expected_path  = %|//#{e}[./descendant::*[normalize-space(@attr2)="XX"]]|,
       expected_nodes = [' A  Bz ', ' E  Fx ']
     ] },
-    [__LINE__, {:attr2 => 'XX'}, {:axis => :ancestor}] => lambda{|e| [
+    [__LINE__, {:attr2 => 'XX'}, {:axial_node => :ancestor}] => lambda{|e| [
       expected_path  = %|//#{e}[./ancestor::*[normalize-space(@attr2)="XX"]]|,
       expected_nodes = []
     ] },
@@ -527,7 +559,7 @@ def xpf_no_match_attrs_args
     :match_ordering     => [true, false],
     :normalize_space    => [true, false],
     :include_inner_text => [true, false],
-    :axis               => [:self, :descendant, :ancestor, :child, :parent],
+    :axial_node               => [:self, :descendant, :ancestor, :child, :parent],
     :attribute_matcher  => [XPF::Matchers::Attribute, Class.new{}], # no error thrown means OK
     :text_matcher       => [XPF::Matchers::Text, Class.new{}],      # no error thrown means OK
     :literal_matcher    => [XPF::Matchers::Literal, Class.new{}],   # no error thrown means OK
@@ -558,7 +590,7 @@ def xpf_default_config
     :include_inner_text => true,
     :scope              => '//',
     :position           => nil,
-    :axis               => :self,
+    :axial_node               => :self,
     :attribute_matcher  => XPF::Matchers::Attribute,
     :text_matcher       => XPF::Matchers::Text,
     :literal_matcher    => XPF::Matchers::Literal,
