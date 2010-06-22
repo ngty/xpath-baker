@@ -30,7 +30,7 @@ module XPF
         end
 
         def na
-          n("@#{name}")
+          n(name)
         end
 
         def nt

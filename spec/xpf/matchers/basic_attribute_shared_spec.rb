@@ -3,8 +3,8 @@ shared 'basic attribute matcher' do
   describe '> generating condition (w valid string value)' do
 
     before do
-      @name, @val = @name || 'attr-x', 'val-x'
-      @default = %|normalize-space(@#{@name})="#{@val}"|
+      @name, @val = @name || :@attr1, 'val1'
+      @default = %|normalize-space(#{@name})="#{@val}"|
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @val, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -16,7 +16,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      @condition_should_equal[{:normalize_space => false}, %|@#{@name}="#{@val}"|]
+      @condition_should_equal[{:normalize_space => false}, %|#{@name}="#{@val}"|]
     end
 
     should 'be case-sensitive when config[:case_sensitive] is true' do
@@ -24,13 +24,13 @@ shared 'basic attribute matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = [translate_casing("normalize-space(@#{@name})"), %|"#{@val.downcase}"|].join('=')
+      expected = [translate_casing("normalize-space(#{@name})"), %|"#{@val.downcase}"|].join('=')
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
     should 'elegantly handle quoting of value with double quote (")' do
       @val = 'val-"x"'
-      @condition_should_equal[{}, %|normalize-space(@#{@name})=concat("val-",'"',"x",'"',"")|]
+      @condition_should_equal[{}, %|normalize-space(#{@name})=concat("val-",'"',"x",'"',"")|]
     end
 
   end
@@ -38,8 +38,8 @@ shared 'basic attribute matcher' do
   describe '> generating condition (w valid single element array value)' do
 
     before do
-      @name, @val = @name || 'attr-x', %w{val-x1}
-      @default = check_tokens("normalize-space(@#{@name})", [%|"#{@val}"|])
+      @name, @val = @name || :@attr1, %w{val11}
+      @default = check_tokens("normalize-space(#{@name})", [%|"#{@val}"|])
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @val, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -51,7 +51,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      expected = check_tokens("@#{@name}", [%|"#{@val}"|])
+      expected = check_tokens("#{@name}", [%|"#{@val}"|])
       @condition_should_equal[{:normalize_space => false}, expected]
     end
 
@@ -60,8 +60,8 @@ shared 'basic attribute matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      attr_expr = translate_casing("normalize-space(@#{@name})")
-      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), [%|"#{@val}"|])
+      attr_expr = translate_casing("normalize-space(#{@name})")
+      expected = check_tokens(translate_casing("normalize-space(#{@name})"), [%|"#{@val}"|])
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -70,8 +70,8 @@ shared 'basic attribute matcher' do
   describe '> generating condition (w valid multi elements array value)' do
 
     before do
-      @name, @vals = @name || 'attr-x', %w{val-x1 val-x2 val-x3}
-      @default = check_tokens("normalize-space(@#{@name})", @vals.map{|v| %|"#{v}"| })
+      @name, @vals = @name || :@attr1, %w{val11 val12 val13}
+      @default = check_tokens("normalize-space(#{@name})", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal = lambda do |config, expected|
         @attr_matcher.new(@name, @vals, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -83,7 +83,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      expected = check_tokens("@#{@name}", @vals.map{|v| %|"#{v}"| })
+      expected = check_tokens("#{@name}", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal[{:normalize_space => false}, expected]
     end
 
@@ -92,7 +92,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = check_tokens(translate_casing("normalize-space(@#{@name})"), @vals.map{|v| %|"#{v}"| })
+      expected = check_tokens(translate_casing("normalize-space(#{@name})"), @vals.map{|v| %|"#{v}"| })
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -101,7 +101,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not not honor ordering when config[:match_ordering] is false' do
-      expected = check_tokens("normalize-space(@#{@name})", @vals.map{|v| %|"#{v}"| }, false)
+      expected = check_tokens("normalize-space(#{@name})", @vals.map{|v| %|"#{v}"| }, false)
       @condition_should_equal[{:match_ordering => false}, expected]
     end
   end
@@ -109,8 +109,8 @@ shared 'basic attribute matcher' do
   describe '> generating condition (with invalid value NIL_VALUE)' do
 
     before do
-      @name, @val = @name || 'attr-x', XPF::Matchers::Matchable::NIL_VALUE
-      @default = %|normalize-space(@#{@name})|
+      @name, @val = @name || :@attr1, XPF::Matchers::Matchable::NIL_VALUE
+      @default = %|normalize-space(#{@name})|
       @condition_should_equal = lambda do |config, expected|
         XPF::Matchers::Attribute.new(@name, @val, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -122,7 +122,7 @@ shared 'basic attribute matcher' do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      @condition_should_equal[{:normalize_space => false}, %|@#{@name}|]
+      @condition_should_equal[{:normalize_space => false}, %|#{@name}|]
     end
 
   end

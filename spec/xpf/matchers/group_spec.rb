@@ -37,19 +37,19 @@ describe "XPF::Matchers::Group" do
 
     should "return expr that reflect prepending position if config[:position] is specified as '2^'" do
       [{:axial_node => 'descendant::x', :position => '2^'}, %w{descendant::x 2^}].each do |config|
-        @condition_should_equal[[:attr1], config, './descendant::x[2][normalize-space(@attr1)]']
+        @condition_should_equal[[:@attr1], config, './descendant::x[2][normalize-space(@attr1)]']
       end
     end
 
     should "return expr that reflect appending position if config[:position] is specified as '2'" do
       [{:axial_node => 'descendant::x', :position => 2}, %w{descendant::x 2}].each do |config|
-        @condition_should_equal[[:attr1], config, './descendant::x[normalize-space(@attr1)][2]']
+        @condition_should_equal[[:@attr1], config, './descendant::x[normalize-space(@attr1)][2]']
       end
     end
 
     should "return expr that reflect appending position if config[:position] is specified as '2$'" do
       [{:axial_node => 'descendant::x', :position => '2$'}, %w{descendant::x 2$}].each do |config|
-        @condition_should_equal[[:attr1], config, './descendant::x[normalize-space(@attr1)][2]']
+        @condition_should_equal[[:@attr1], config, './descendant::x[normalize-space(@attr1)][2]']
       end
     end
 
@@ -65,15 +65,15 @@ describe "XPF::Matchers::Group" do
       end
     end
 
-    should 'return expr that reflect attr condition if match attrs is {:attr => ..., ...}' do
+    should 'return expr that reflect attr condition if match attrs is {:attr1 => ..., ...}' do
       [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[{:attr => 'value-x'}, config, './descendant::*[normalize-space(@attr)="value-x"]']
+        @condition_should_equal[{:@attr1 => 'value-x'}, config, './descendant::*[normalize-space(@attr1)="value-x"]']
       end
     end
 
-    should 'return expr that reflect presence of attr if match attrs is [:attr, ...]' do
+    should 'return expr that reflect presence of attr if match attrs is [:attr1, ...]' do
       [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[[:attr], config, './descendant::*[normalize-space(@attr)]']
+        @condition_should_equal[[:@attr1], config, './descendant::*[normalize-space(@attr1)]']
       end
     end
 
