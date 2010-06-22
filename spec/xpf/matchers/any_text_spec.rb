@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
-describe 'XPF::Matchers::Text' do
+describe 'XPF::Matchers::AnyText' do
 
   before { @text_matcher = XPF::Matchers::AnyText }
 
