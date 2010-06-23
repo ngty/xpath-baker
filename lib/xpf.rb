@@ -70,6 +70,11 @@ module XPF
       Configuration.normalize(config)
     end
 
+    def method_missing(element, *args)
+      declare_support_for(element => {})
+      send(element, *args)
+    end
+
     protected
 
       attr_reader :supported_elements
