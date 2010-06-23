@@ -409,9 +409,9 @@ module XPF
           VALID_VALS = %w{
             ancestor ancestor-or-self attribute child descendant descendant-or-self
             following following-sibling namespace parent preceding preceding-sibling self
-          }.inject([]) do |memo, val|
-            memo + [val.gsub('-','_').to_sym, val, "#{val}::*", /^#{val}::\w+$/]
-          end
+          }.map do |val|
+            [val.gsub('-','_').to_sym, val, "#{val}::*", /^#{val}::\w+$/]
+          end.flatten(1)
 
           ERROR = InvalidConfigSettingValueError.new(
             'Config setting :axial_node must match any of the following: %s or %s !!' %
