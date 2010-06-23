@@ -29,6 +29,17 @@ describe "XPF::Configuration" do
     'preceding::'           => 'preceding::*',          'preceding::x'          => 'preceding::x',
     'preceding-sibling::'   => 'preceding-sibling::*',  'preceding-sibling::x'  => 'preceding-sibling::x',
     'self::'                => 'self::*',               'self::x'               => 'self::x',
+    'ancestor::*'           => 'ancestor::*',
+    'ancestor-or-self::*'   => 'ancestor-or-self::*',
+    'child::*'              => 'child::*',
+    'descendant::*'         => 'descendant::*',
+    'descendant-or-self::*' => 'descendant-or-self::*',
+    'following::*'          => 'following::*',
+    'following-sibling::*'  => 'following-sibling::*',
+    'parent::*'             => 'parent::*',
+    'preceding::*'          => 'preceding::*',
+    'preceding-sibling::*'  => 'preceding-sibling::*',
+    'self::*'               => 'self::*',
   }
 
   valid_position_args = {
