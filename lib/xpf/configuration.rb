@@ -306,17 +306,17 @@ module XPF
 
       # TODO: Add DOC
       def axial_node=(expr)
-        @axial_node = AxialNode.convert(expr.to_s)
+        @axial_node = convert_unless_xpified(expr, AxialNode)
       end
 
       # TODO: Add DOC
       def position=(expr)
-        @position = Position.convert(expr.to_s)
+        @position = convert_unless_xpified(expr, Position)
       end
 
       # TODO: Add DOC
       def scope=(expr)
-        @scope = Scope.convert(expr.to_s)
+        @scope = convert_unless_xpified(expr, Scope)
       end
 
       # TODO: Add DOC
@@ -386,9 +386,19 @@ module XPF
             klass.to_s.split('::').inject(Object){|src, const| src.const_get(const) }
         end
 
+        def convert_unless_xpified(expr, klass)
+          expr.xpified? && expr rescue klass.convert(expr.to_s)
+        end
+
     end
 
     private
+
+      module Extensions
+        def xpified?
+          true
+        end
+      end
 
       module Scope #:nodoc:
         class << self
@@ -397,7 +407,7 @@ module XPF
             "Config setting :scope must start & end with '/' !!"
 
           def convert(str)
-            (str.start_with?('/') && str.end_with?('/')) ? str : raise(ERROR)
+            (str.start_with?('/') && str.end_with?('/')) ? str.extend(Extensions) : raise(ERROR)
           end
 
         end
@@ -420,10 +430,12 @@ module XPF
 
           def convert(str)
             frags = str.gsub('_','-').split('::').map(&:strip)
-            case expr = ((frags[1] || '').empty? ? [frags[0], '*'] : frags[0..1]).join('::')
-            when *VALID_VALS then expr
-            else raise ERROR
-            end
+            (
+              case expr = ((frags[1] || '').empty? ? [frags[0], '*'] : frags[0..1]).join('::')
+              when *VALID_VALS then expr
+              else raise ERROR
+              end
+            ).extend(Extensions)
           end
 
         end
@@ -441,17 +453,20 @@ module XPF
           def convert(str)
             negate = str.start_with?('!')
             quote = lambda{|expr| (negate ? '[not(%s)]' : '[%s]') % expr }
-            expr = case str
-              when '0', '' then nil
-              when /^!?([1-9]\d*)[\^\$]?$/ then (negate ? '[position()!=%s]' : '[%s]') % $1
-              when /^!?([1-9]\d*)~([1-9]\d*)[\^\$]?$/ then quote['position()>=%s and position()<=%s' % [$1,$2]]
-              when /^!?(>|>=|<|<=)([1-9]\d*)[\^\$]?$/ then quote['position()%s%s' % [$1,$2]]
-              else raise ERROR
-              end
-            expr && expr.extend(Extensions).init(str.end_with?('^'))
+            (
+              expr = case str
+                when '0', '' then nil
+                when /^!?([1-9]\d*)[\^\$]?$/ then (negate ? '[position()!=%s]' : '[%s]') % $1
+                when /^!?([1-9]\d*)~([1-9]\d*)[\^\$]?$/ then quote['position()>=%s and position()<=%s' % [$1,$2]]
+                when /^!?(>|>=|<|<=)([1-9]\d*)[\^\$]?$/ then quote['position()%s%s' % [$1,$2]]
+                else raise ERROR
+                end
+            ) && expr.extend(Extensions).init(str.end_with?('^'))
           end
 
           module Extensions
+
+            include Configuration::Extensions
 
             def init(is_start)
               @is_start = is_start
