@@ -19,6 +19,13 @@ def xpf_single_match_attrs_args
       configs = [{:include_inner_text => false}, {:include_inner_text => true}, %w{i}, %w{!i}],
       expected = [%|//%s[./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i1 i2 i3}]
     ], [
+      ## >> nil value (presence checking)
+      _debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"></%s>',
+      _match_attrs = [:+],
+      _configs = [{:include_inner_text => false}, {:include_inner_text => true}, %w{i}, %w{!i}],
+      _expected = [%|//%s[./self::*[.]]|, %w{i1 i2 i3}]
+    ], [
     # >> direct inner text ... {:include_inner_text => ...} has NO effect !!
       ## >> string value (equality checking)
       debug = __LINE__,
@@ -34,6 +41,13 @@ def xpf_single_match_attrs_args
       configs,
       expected = [%|//%s[./self::*[#{check_tokens('text()',%w{"BB"})}]]|, %w{i2 i3}]
     ], [
+      ## >> nil value (presence checking)
+      _debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"> </%s>',
+      _match_attrs = [:-],
+      _configs = [{:include_inner_text => false}, {:include_inner_text => true}, %w{i}, %w{!i}],
+      _expected = [%|//%s[./self::*[text()]]|, %w{i3}]
+    ], [
     # >> any inner text ... {:include_inner_text => ...} has NO effect !!
       ## >> string value (equality checking)
       debug = __LINE__,
@@ -48,6 +62,13 @@ def xpf_single_match_attrs_args
       match_attrs = {:* => 'AA BB'},
       configs,
       expected = ['//%s[./self::*[(text()="AA BB") or (.="AA BB")]]', %w{i1 i2}]
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"></%s>',
+      _match_attrs = [:*],
+      _configs = [{:include_inner_text => false}, {:include_inner_text => true}, %w{i}, %w{!i}],
+      _expected = [%|//%s[./self::*[(text()) or (.)]]|, %w{i1 i2 i3}]
     ], [
     # >> configurable inner text ... {:include_inner_text => ...} has effect !!
       ## >> string value (equality checking)
@@ -82,6 +103,33 @@ def xpf_single_match_attrs_args
       match_attrs = [match_attrs, %w{i}],
       configs = [%w{!i}],
       expected,
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{i}],
+      _configs = [%w{!i}],
+      _expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"> </%s>',
+      _match_attrs = [:~],
+      _configs = [{:include_inner_text => false}, %w{!i}],
+      _expected = [%|//%s[./self::*[text()]]|, %w{i3}],
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:include_inner_text => true}, %w{i}],
+      _expected = [%|//%s[./self::*[.]]|, %w{i1 i2 i3}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{i}],
+      _configs = [%w{!i}],
+      _expected,
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # {:case_sensitive => ...}
@@ -121,6 +169,13 @@ def xpf_single_match_attrs_args
       configs = [%w{c}],
       expected,
     ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"></%s>',
+      _match_attrs = [:*],
+      _configs = [{:case_sensitive => true}, {:case_sensitive => false}, %w{c}, %w{!c}],
+      _expected = ['//%s[./self::*[(text()) or (.)]]', %w{i1 i2 i3}]
+    ], [
     # >> all inner text
       ## >> string value (equality checking)
       debug = __LINE__,
@@ -154,6 +209,13 @@ def xpf_single_match_attrs_args
       match_attrs = [match_attrs, %w{!c}],
       configs = [%w{c}],
       expected
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"></%s>',
+      _match_attrs = [:+],
+      _configs = [{:case_sensitive => true}, {:case_sensitive => false}, %w{c}, %w{!c}],
+      _expected = ['//%s[./self::*[.]]', %w{i1 i2 i3}]
     ], [
     # >> element
       ## >> string value (equality checking)
@@ -189,6 +251,13 @@ def xpf_single_match_attrs_args
       configs = [%w{c}],
       expected,
     ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1> </e1></%s><%s id="i2"/><%s id="i3"><e1/></%s>',
+      _match_attrs = [:e1],
+      _configs = [{:case_sensitive => true}, {:case_sensitive => false}, %w{c}, %w{!c}],
+      _expected = ['//%s[./self::*[e1]]', %w{i1 i3}]
+    ], [
     # >> attribute
       ## >> string value (equality checking)
       debug = __LINE__,
@@ -222,6 +291,13 @@ def xpf_single_match_attrs_args
       match_attrs = [match_attrs, %w{!c}],
       configs = [%w{c}],
       expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1" a1="" /><%s id="i2"/>',
+      _match_attrs = [:@a1],
+      _configs = [{:case_sensitive => true}, {:case_sensitive => false}, %w{c}, %w{!c}],
+      _expected = ['//%s[./self::*[@a1]]', %w{i1}]
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # {:normalize_space => ...}
@@ -261,6 +337,26 @@ def xpf_single_match_attrs_args
       configs = [%w{n}],
       expected,
     ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"> </%s><%s id="i2">AA</%s>',
+      _match_attrs = [:*],
+      _configs = [{:normalize_space => true}, %w{n}],
+      _expected = ['//%s[./self::*[(normalize-space(text())) or (normalize-space(.))]]', %w{i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:normalize_space => false}, %w{!n}],
+      _expected = [%|//%s[./self::*[(text()) or (.)]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{!n}],
+      _configs = [%w{n}],
+      _expected,
+    ], [
     # >> all inner text
       ## >> string value (equality checking)
       debug = __LINE__,
@@ -294,6 +390,26 @@ def xpf_single_match_attrs_args
       match_attrs = [match_attrs, %w{!n}],
       configs = [%w{n}],
       expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"> </%s><%s id="i2">AA</%s>',
+      _match_attrs = [:+],
+      _configs = [{:normalize_space => true}, %w{n}],
+      _expected = ['//%s[./self::*[normalize-space(.)]]', %w{i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:normalize_space => false}, %w{!n}],
+      _expected = [%|//%s[./self::*[.]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{!n}],
+      _configs = [%w{n}],
+      _expected,
     ], [
     # >> element
       ## >> string value (equality checking)
@@ -329,6 +445,26 @@ def xpf_single_match_attrs_args
       configs = [%w{n}],
       expected,
     ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1/></%s><%s id="i2"><e1>AA BB</e1></%s>',
+      _match_attrs = [:e1],
+      _configs = [{:normalize_space => true}, %w{n}],
+      _expected = ['//%s[./self::*[normalize-space(e1)]]', %w{i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:normalize_space => false}, %w{!n}],
+      _expected = [%|//%s[./self::*[e1]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{!n}],
+      _configs = [%w{n}],
+      _expected,
+    ], [
     # >> attribute
       ## >> string value (equality checking)
       debug = __LINE__,
@@ -362,90 +498,26 @@ def xpf_single_match_attrs_args
       match_attrs = [match_attrs, %w{!n}],
       configs = [%w{n}],
       expected,
-    ],
-  # /////////////////////////////////////////////////////////////////////////////
-  # {:axial_node => ...}
-  # /////////////////////////////////////////////////////////////////////////////
-    [
-    # >> any inner text
+    ], [
+      ## >> nil value (presence checking)
       debug = __LINE__,
-      content = '<%s id="i1"><e0>AABB<e1>CC</e1></e0></%s><%s id="i2">AABB</%s>',
-      match_attrs = {:* => 'AABB'},
-      configs = [{:axial_node => :self}, %w{self}],
-      expected = ['//%s[./self::*[(text()="AABB") or (.="AABB")]]', %w{i2}]
+      _content = '<%s id="i1" a1="" /><%s id="i2" a1="AA BB" /><%s id="i3" />',
+      _match_attrs = [:@a1],
+      _configs = [{:normalize_space => true}, %w{n}],
+      _expected = ['//%s[./self::*[normalize-space(@a1)]]', %w{i2}]
     ], [
       debug = __LINE__,
-      content,
-      match_attrs,
-      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
-      expected = [%|//%s[./descendant-or-self::*[(text()="AABB") or (.="AABB")]]|, %w{i1 i2}]
+      _content,
+      _match_attrs,
+      _configs = [{:normalize_space => false}, %w{!n}],
+      _expected = ['//%s[./self::*[@a1]]', %w{i1 i2}]
     ], [
       ## >> this is how common config can be overridden !!
       debug = __LINE__,
-      content,
-      match_attrs = [match_attrs, %w{descendant-or-self}],
-      configs = [%w{self}],
-      expected,
-    ], [
-    # >> all inner text
-      debug = __LINE__,
-      content = '<e1>AA<%s id="i1">BB</%s></e1><%s id="i2">AABB</%s>',
-      match_attrs = {:+ => 'AABB'},
-      configs = [{:axial_node => :self}, %w{self}],
-      expected = ['//%s[./self::*[.="AABB"]]', %w{i2}]
-    ], [
-      debug = __LINE__,
-      content,
-      match_attrs,
-      configs = [{:axial_node => :ancestor_or_self}, %w{ancestor-or-self}],
-      expected = [%|//%s[./ancestor-or-self::*[.="AABB"]]|, %w{i1 i2}]
-    ], [
-      ## >> this is how common config can be overridden !!
-      debug = __LINE__,
-      content,
-      match_attrs = [match_attrs, %w{ancestor-or-self}],
-      configs = [{:axial_node => :self}, %w{self}],
-      expected,
-    ], [
-    # >> element
-      debug = __LINE__,
-      content = '<%s id="i1"><e0><e1>AABB</e1></e0></%s><%s id="i2"><e1>AABB</e1></%s>',
-      match_attrs = {:e1 => 'AABB'},
-      configs = [{:axial_node => :self}, %w{self}],
-      expected = ['//%s[./self::*[e1="AABB"]]', %w{i2}]
-    ], [
-      debug = __LINE__,
-      content,
-      match_attrs,
-      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
-      expected = [%|//%s[./descendant-or-self::*[e1="AABB"]]|, %w{i1 i2}]
-    ], [
-      ## >> this is how common config can be overridden !!
-      debug = __LINE__,
-      content,
-      match_attrs = [match_attrs, %w{descendant-or-self}],
-      configs = [{:axial_node => :self}, %w{self}],
-      expected,
-    ], [
-    # >> attribute
-      debug = __LINE__,
-      content = '<%s id="i1"><e1 a1="AABB"/></%s><%s id="i2" a1="AABB" />',
-      match_attrs = {:@a1 => 'AABB'},
-      configs = [{:axial_node => :self}, %w{self}],
-      expected = ['//%s[./self::*[@a1="AABB"]]', %w{i2}]
-    ], [
-      debug = __LINE__,
-      content,
-      match_attrs,
-      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
-      expected = [%|//%s[./descendant-or-self::*[@a1="AABB"]]|, %w{i1 i2}]
-    ], [
-      ## >> this is how common config can be overridden !!
-      debug = __LINE__,
-      content,
-      match_attrs = [match_attrs, %w{descendant-or-self}],
-      configs = [{:axial_node => :self}, %w{self}],
-      expected,
+      _content,
+      _match_attrs = [_match_attrs, %w{!n}],
+      _configs = [%w{n}],
+      _expected,
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # {:match_ordering => ...} (only applicable for tokens matching)
@@ -556,170 +628,689 @@ def xpf_single_match_attrs_args
       expected,
     ],
   # /////////////////////////////////////////////////////////////////////////////
-  # {:position => ...} (undesirably affecting match-attr generated predicate)
+  # {:axial_node => ...}
   # /////////////////////////////////////////////////////////////////////////////
     [
     # >> any inner text
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1">AABB</%s><%s id="i2">AABB</%s>',
-      match_attrs = {:* => 'AABB'},
-      configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[(text()="AABB") or (.="AABB")][2]][2]', %w{}]
+      content = '<%s id="i1"><e0>AA BB<e1>CC</e1></e0></%s><%s id="i2">AA BB</%s>',
+      match_attrs = {:* => 'AA BB'},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = ['//%s[./self::*[(text()="AA BB") or (.="AA BB")]]', %w{i2}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:position => 0}, %w{0}],
-      expected = [%|//%s[./self::*[(text()="AABB") or (.="AABB")]]|, %w{i1 i2}]
+      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      expected = [%|//%s[./descendant-or-self::*[(text()="AA BB") or (.="AA BB")]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:* => %w{BB}},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = [%|//%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{i2}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      expected = [%|//%s[./descendant-or-self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{i1 i2}]
     ], [
       ## >> this is how common config can be overridden !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{0}],
-      configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[(text()="AABB") or (.="AABB")]][2]', %w{i2}]
+      match_attrs = [match_attrs, %w{descendant-or-self}],
+      configs = [%w{self}],
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"/><%s id="i2"><e1/></%s>',
+      _match_attrs = [:*],
+      _configs = [{:axial_node => :self}, %w{self}],
+      _expected = ['//%s[./self::*[(text()) or (.)]]', %w{i1 i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:axial_node => :descendant}, %w{descendant}],
+      _expected = [%|//%s[./descendant::*[(text()) or (.)]]|, %w{i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{descendant}],
+      _configs = [%w{self}],
+      _expected,
     ], [
     # >> all inner text
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1"><e1>AABB</e1></%s><%s id="i2">AABB</%s>',
-      match_attrs = {:+ => 'AABB'},
-      configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[.="AABB"][2]][2]', %w{}]
+      content = '<e1>AA BB<%s id="i1"/></e1><%s id="i2">AA BB</%s>',
+      match_attrs = {:+ => 'AA BB'},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = ['//%s[./self::*[.="AA BB"]]', %w{i2}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:position => 0}, %w{0}],
-      expected = [%|//%s[./self::*[.="AABB"]]|, %w{i1 i2}]
+      configs = [{:axial_node => :ancestor_or_self}, %w{ancestor-or-self}],
+      expected = [%|//%s[./ancestor-or-self::*[.="AA BB"]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:+ => %w{BB}},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = [%|//%s[./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i2}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:axial_node => :ancestor_or_self}, %w{ancestor-or-self}],
+      expected = [%|//%s[./ancestor-or-self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i1 i2}]
     ], [
       ## >> this is how common config can be overridden !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{0}],
-      configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[.="AABB"]][2]', %w{i2}]
+      match_attrs = [match_attrs, %w{ancestor-or-self}],
+      configs = [{:axial_node => :self}, %w{self}],
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"/><%s id="i2"><e1/></%s>',
+      _match_attrs = [:+],
+      _configs = [{:axial_node => :self}, %w{self}],
+      _expected = ['//%s[./self::*[.]]', %w{i1 i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:axial_node => :descendant}, %w{descendant}],
+      _expected = [%|//%s[./descendant::*[.]]|, %w{i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{descendant}],
+      _configs = [%w{self}],
+      _expected,
     ], [
     # >> element
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1"><e1>AABB</e1></%s><%s id="i2"><e1>AABB</e1></%s>',
-      match_attrs = {:e1 => 'AABB'},
-      configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[e1="AABB"][2]][2]', %w{}]
+      content = '<%s id="i1"><e0><e1>AA BB</e1></e0></%s><%s id="i2"><e1>AA BB</e1></%s>',
+      match_attrs = {:e1 => 'AA BB'},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = ['//%s[./self::*[e1="AA BB"]]', %w{i2}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:position => 0}, %w{0}],
-      expected = [%|//%s[./self::*[e1="AABB"]]|, %w{i1 i2}]
+      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      expected = [%|//%s[./descendant-or-self::*[e1="AA BB"]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:e1 => %w{BB}},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = [%|//%s[./self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{i2}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      expected = [%|//%s[./descendant-or-self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{i1 i2}]
     ], [
       ## >> this is how common config can be overridden !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{0}],
-      configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[e1="AABB"]][2]', %w{i2}]
+      match_attrs = [match_attrs, %w{descendant-or-self}],
+      configs = [{:axial_node => :self}, %w{self}],
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e0><e1/></e0></%s><%s id="i2"><e1/></%s>',
+      _match_attrs = [:e1],
+      _configs = [{:axial_node => :self}, %w{self}],
+      _expected = ['//%s[./self::*[e1]]', %w{i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      _expected = [%|//%s[./descendant-or-self::*[e1]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{descendant-or-self}],
+      _configs = [%w{self}],
+      _expected,
     ], [
     # >> attribute
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1" a1="AABB"/><%s id="i2" a1="AABB" />',
-      match_attrs = {:@a1 => 'AABB'},
+      content = '<%s id="i1"><e1 a1="AA BB"/></%s><%s id="i2" a1="AA BB" />',
+      match_attrs = {:@a1 => 'AA BB'},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = ['//%s[./self::*[@a1="AA BB"]]', %w{i2}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      expected = [%|//%s[./descendant-or-self::*[@a1="AA BB"]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:@a1 => %w{BB}},
+      configs = [{:axial_node => :self}, %w{self}],
+      expected = [%|//%s[./self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{i2}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      expected = [%|//%s[./descendant-or-self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{descendant-or-self}],
+      configs = [{:axial_node => :self}, %w{self}],
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1 a1="AA BB"/></%s><%s id="i2" a1="AA BB" />',
+      _match_attrs = [:@a1],
+      _configs = [{:axial_node => :self}, %w{self}],
+      _expected = ['//%s[./self::*[@a1]]', %w{i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:axial_node => :descendant_or_self}, %w{descendant-or-self}],
+      _expected = [%|//%s[./descendant-or-self::*[@a1]]|, %w{i1 i2}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{descendant-or-self}],
+      _configs = [%w{self}],
+      _expected,
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # {:position => ...}
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+    # >> any inner text
+      ## >> string value (equality checking)
+      debug = __LINE__,
+      content = '<%s id="i1">AA BB</%s><%s id="i2">AA BB</%s>',
+      match_attrs = {:* => 'AA BB'},
       configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[@a1="AABB"][2]][2]', %w{}]
+      expected = ['//%s[./self::*[(text()="AA BB") or (.="AA BB")][2]][2]', %w{}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
       configs = [{:position => 0}, %w{0}],
-      expected = [%|//%s[./self::*[@a1="AABB"]]|, %w{i1 i2}]
+      expected = [%|//%s[./self::*[(text()="AA BB") or (.="AA BB")]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:* => %w{BB}},
+      configs = [{:position => 2}, %w{2}],
+      expected = [%|//%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})][2]][2]|, %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{0}],
+      configs = [%w{2}],
+      expected = [%|//%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]][2]|, %w{i2}]
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"/><%s id="i2"/>',
+      _match_attrs = [:*],
+      _configs = [{:position => 2}, %w{2}],
+      _expected = ['//%s[./self::*[(text()) or (.)][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:position => 0}, %w{0}],
+      _expected = [%|//%s[./self::*[(text()) or (.)]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{0}],
+      _configs = [%w{2}],
+      _expected = [%|//%s[./self::*[(text()) or (.)]][2]|, %w{i2}]
+    ], [
+    # >> all inner text
+      ## >> string value (equality checking)
+      debug = __LINE__,
+      content = '<%s id="i1"><e1>AA BB</e1></%s><%s id="i2">AA BB</%s>',
+      match_attrs = {:+ => 'AA BB'},
+      configs = [{:position => 2}, %w{2}],
+      expected = ['//%s[./self::*[.="AA BB"][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[.="AA BB"]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:+ => %w{BB}},
+      configs = [{:position => 2}, %w{2}],
+      expected = [%|//%s[./self::*[#{check_tokens('.',%w{"BB"})}][2]][2]|, %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{0}],
+      configs = [%w{2}],
+      expected = [%|//%s[./self::*[#{check_tokens('.',%w{"BB"})}]][2]|, %w{i2}]
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"/><%s id="i2"/>',
+      _match_attrs = [:+],
+      _configs = [{:position => 2}, %w{2}],
+      _expected = ['//%s[./self::*[.][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:position => 0}, %w{0}],
+      _expected = [%|//%s[./self::*[.]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{0}],
+      _configs = [%w{2}],
+      _expected = [%|//%s[./self::*[.]][2]|, %w{i2}]
+    ], [
+    # >> element
+      ## >> string value (equality checking)
+      debug = __LINE__,
+      content = '<%s id="i1"><e1>AA BB</e1></%s><%s id="i2"><e1>AA BB</e1></%s>',
+      match_attrs = {:e1 => 'AA BB'},
+      configs = [{:position => 2}, %w{2}],
+      expected = ['//%s[./self::*[e1="AA BB"][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[e1="AA BB"]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:e1 => %w{BB}},
+      configs = [{:position => 2}, %w{2}],
+      expected = [%|//%s[./self::*[#{check_tokens('e1',%w{"BB"})}][2]][2]|, %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{i1 i2}]
     ], [
       ## >> this is how common config can be overridden !!
       debug = __LINE__,
       content,
       match_attrs = [match_attrs, %w{0}],
       configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[@a1="AABB"]][2]', %w{i2}]
+      expected = [%|//%s[./self::*[#{check_tokens('e1',%w{"BB"})}]][2]|, %w{i2}]
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1"><e1/></%s><%s id="i2"><e1/></%s>',
+      _match_attrs = [:e1],
+      _configs = [{:position => 2}, %w{2}],
+      _expected = ['//%s[./self::*[e1][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:position => 0}, %w{0}],
+      _expected = [%|//%s[./self::*[e1]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{0}],
+      _configs = [%w{2}],
+      _expected = [%|//%s[./self::*[e1]][2]|, %w{i2}]
+    ], [
+    # >> attribute
+      ## >> string value (equality checking)
+      debug = __LINE__,
+      content = '<%s id="i1" a1="AA BB"/><%s id="i2" a1="AA BB" />',
+      match_attrs = {:@a1 => 'AA BB'},
+      configs = [{:position => 2}, %w{2}],
+      expected = ['//%s[./self::*[@a1="AA BB"][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[@a1="AA BB"]]|, %w{i1 i2}]
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:@a1 => %w{BB}},
+      configs = [{:position => 2}, %w{2}],
+      expected = [%|//%s[./self::*[#{check_tokens('@a1',%w{"BB"})}][2]][2]|, %w{}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:position => 0}, %w{0}],
+      expected = [%|//%s[./self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{0}],
+      configs = [{:position => 2}, %w{2}],
+      expected = [%|//%s[./self::*[#{check_tokens('@a1',%w{"BB"})}]][2]|, %w{i2}]
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      _content = '<%s id="i1" a1=""/><%s id="i2" a1="AA" />',
+      _match_attrs = [:@a1],
+      _configs = [{:position => 2}, %w{2}],
+      _expected = ['//%s[./self::*[@a1][2]][2]', %w{}]
+    ], [
+      debug = __LINE__,
+      _content,
+      _match_attrs,
+      _configs = [{:position => 0}, %w{0}],
+      _expected = [%|//%s[./self::*[@a1]]|, %w{i1 i2}]
+    ], [
+      ## >> this is how common config can be overridden !!
+      debug = __LINE__,
+      _content,
+      _match_attrs = [_match_attrs, %w{0}],
+      _configs = [%w{2}],
+      _expected = [%|//%s[./self::*[@a1]][2]|, %w{i2}]
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # {:scope => ...} (won't affect any match-attr generated predicate)
   # /////////////////////////////////////////////////////////////////////////////
     [
     # >> any inner text
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1">AABB</%s><%s id="i2">AABB</%s>',
-      match_attrs = {:* => 'AABB'},
-      configs = [{:scope => '/root/'}, %w{/root/}],
-      expected = ['/root/%s[./self::*[(text()="AABB") or (.="AABB")]]', %w{i1 i2}]
+      content = '<%s id="i1">AA BB</%s>',
+      match_attrs = {:* => 'AA BB'},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = ['//root/%s[./self::*[(text()="AA BB") or (.="AA BB")]]', %w{i1}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:scope => '/awe/some/'}, %w{/awe/some/}],
-      expected = [%|/awe/some/%s[./self::*[(text()="AABB") or (.="AABB")]]|, %w{}]
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = ['//awe/some/%s[./self::*[(text()="AA BB") or (.="AA BB")]]', %w{}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{/root/}],
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:* => %w{BB}},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:*],
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[(text()) or (.)]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[(text()) or (.)]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
       configs,
       expected,
     ], [
     # >> all inner text
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1"><e1>AABB</e1></%s><%s id="i2">AABB</%s>',
-      match_attrs = {:+ => 'AABB'},
-      configs = [{:scope => '/root/'}, %w{/root/}],
-      expected = ['/root/%s[./self::*[.="AABB"]]', %w{i1 i2}]
+      content = '<%s id="i1">AA BB</%s>',
+      match_attrs = {:+ => 'AA BB'},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = ['//root/%s[./self::*[.="AA BB"]]', %w{i1}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:scope => '/awe/some/'}, %w{/awe/some/}],
-      expected = [%|/awe/some/%s[./self::*[.="AABB"]]|, %w{}]
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = ['//awe/some/%s[./self::*[.="AA BB"]]', %w{}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{/root/}],
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:+ => %w{BB}},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:+],
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[.]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[.]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
       configs,
       expected,
     ], [
     # >> element
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1"><e1>AABB</e1></%s><%s id="i2"><e1>AABB</e1></%s>',
-      match_attrs = {:e1 => 'AABB'},
-      configs = [{:scope => '/root/'}, %w{/root/}],
-      expected = ['/root/%s[./self::*[e1="AABB"]]', %w{i1 i2}]
+      content = '<%s id="i1"><e1>AA BB</e1></%s>',
+      match_attrs = {:e1 => 'AA BB'},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = ['//root/%s[./self::*[e1="AA BB"]]', %w{i1}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:scope => '/awe/some/'}, %w{/awe/some/}],
-      expected = [%|/awe/some/%s[./self::*[e1="AABB"]]|, %w{}]
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = ['//awe/some/%s[./self::*[e1="AA BB"]]', %w{}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{/root/}],
+      match_attrs = [match_attrs, %w{//root/}],
       configs,
       expected,
     ], [
-    # >> attribute
+      ## >> array value (token matching)
       debug = __LINE__,
-      content = '<%s id="i1" a1="AABB"/><%s id="i2" a1="AABB" />',
-      match_attrs = {:@a1 => 'AABB'},
-      configs = [{:scope => '/root/'}, %w{/root/}],
-      expected = ['/root/%s[./self::*[@a1="AABB"]]', %w{i1 i2}]
+      content,
+      match_attrs = {:e1 => %w{BB}},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{i1}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
-      configs = [{:scope => '/awe/some/'}, %w{/awe/some/}],
-      expected = [%|/awe/some/%s[./self::*[@a1="AABB"]]|, %w{}]
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{}]
     ], [
-      ## >> this is how common config can be overridden !!
+      ## >> overriding common config has no effect !!
       debug = __LINE__,
       content,
-      match_attrs = [match_attrs, %w{/root/}],
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+    ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:e1],
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[e1]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[e1]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+    # >> attribute
+      ## >> string value (equality checking)
+      debug = __LINE__,
+      content = '<%s id="i1" a1="AA BB"/>',
+      match_attrs = {:@a1 => 'AA BB'},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = ['//root/%s[./self::*[@a1="AA BB"]]', %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = ['//awe/some/%s[./self::*[@a1="AA BB"]]', %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:@a1 => %w{BB}},
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
+      configs,
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:@a1],
+      configs = [{:scope => '//root/'}, %w{//root/}],
+      expected = [%|//root/%s[./self::*[@a1]]|, %w{i1}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:scope => '//awe/some/'}, %w{//awe/some/}],
+      expected = [%|//awe/some/%s[./self::*[@a1]]|, %w{}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{//root/}],
       configs,
       expected,
     ],
@@ -728,17 +1319,58 @@ def xpf_single_match_attrs_args
   # /////////////////////////////////////////////////////////////////////////////
     [
     # >> any inner text
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1">AABB<%s id="i3"></%s></%s><%s id="i2">AABB</%s>',
-      match_attrs = {:* => 'AABB'},
+      content = '<%s id="i1"><%s id="i3">AA BB</%s></%s><%s id="i2">AA BB</%s>',
+      match_attrs = {:* => 'AA BB'},
       configs = [{:greedy => true}, %w{g}],
-      expected = ['//%s[./self::*[(text()="AABB") or (.="AABB")]]', %w{i1 i2}]
+      expected = ['//%s[./self::*[(text()="AA BB") or (.="AA BB")]]', %w{i1 i2 i3}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
       configs = [{:greedy => false}, %w{!g}],
-      expected = [%|//%s[not(.//%s)][./self::*[(text()="AABB") or (.="AABB")]]|, %w{i2}]
+      expected = ['//%s[not(.//%s)][./self::*[(text()="AA BB") or (.="AA BB")]]', %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:* => %w{BB}},
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[(#{check_tokens('text()',%w{"BB"})}) or (#{check_tokens('.',%w{"BB"})})]]|, %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:*],
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[(text()) or (.)]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[(text()) or (.)]]|, %w{i2 i3}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
@@ -748,17 +1380,58 @@ def xpf_single_match_attrs_args
       expected,
     ], [
     # >> all inner text
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1"><%s id="i3">AABB</%s></%s><%s id="i2">AABB</%s>',
-      match_attrs = {:+ => 'AABB'},
+      content = '<%s id="i1"><%s id="i3">AA BB</%s></%s><%s id="i2">AA BB</%s>',
+      match_attrs = {:+ => 'AA BB'},
       configs = [{:greedy => true}, %w{g}],
-      expected = ['//%s[./self::*[.="AABB"]]', %w{i1 i2 i3}]
+      expected = ['//%s[./self::*[.="AA BB"]]', %w{i1 i2 i3}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
       configs = [{:greedy => false}, %w{!g}],
-      expected = [%|//%s[not(.//%s)][./self::*[.="AABB"]]|, %w{i2 i3}]
+      expected = ['//%s[not(.//%s)][./self::*[.="AA BB"]]', %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:+ => %w{BB}},
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[#{check_tokens('.',%w{"BB"})}]]|, %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:+],
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[.]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[.]]|, %w{i2 i3}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
@@ -768,17 +1441,58 @@ def xpf_single_match_attrs_args
       expected,
     ], [
     # >> element
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1"><e1>AABB</e1><%s id="i3"><e1>AABB</e1></%s></%s><%s id="i2"><e1>AABB</e1></%s>',
-      match_attrs = {:e1 => 'AABB'},
+      content = '<%s id="i1"><e1>AA BB</e1><%s id="i3"><e1>AA BB</e1></%s></%s><%s id="i2"><e1>AA BB</e1></%s>',
+      match_attrs = {:e1 => 'AA BB'},
       configs = [{:greedy => true}, %w{g}],
-      expected = ['//%s[./self::*[e1="AABB"]]', %w{i1 i2 i3}]
+      expected = ['//%s[./self::*[e1="AA BB"]]', %w{i1 i2 i3}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
       configs = [{:greedy => false}, %w{!g}],
-      expected = [%|//%s[not(.//%s)][./self::*[e1="AABB"]]|, %w{i2 i3}]
+      expected = ['//%s[not(.//%s)][./self::*[e1="AA BB"]]', %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:e1 => %w{BB}},
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[#{check_tokens('e1',%w{"BB"})}]]|, %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+    ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:e1],
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[e1]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[e1]]|, %w{i2 i3}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
@@ -788,17 +1502,58 @@ def xpf_single_match_attrs_args
       expected,
     ], [
     # >> attribute
+      ## >> string value (equality checking)
       debug = __LINE__,
-      content = '<%s id="i1" a1="AABB"><%s id="i3" a1="AABB" /><%s id="i2" a1="AABB" />',
-      match_attrs = {:@a1 => 'AABB'},
+      content = '<%s id="i1" a1="AA BB"><%s id="i3" a1="AA BB"/></%s><%s id="i2" a1="AA BB"/>',
+      match_attrs = {:@a1 => 'AA BB'},
       configs = [{:greedy => true}, %w{g}],
-      expected = ['//%s[./self::*[@a1="AABB"]]', %w{i1 i2 i3}]
+      expected = ['//%s[./self::*[@a1="AA BB"]]', %w{i1 i2 i3}]
     ], [
       debug = __LINE__,
       content,
       match_attrs,
       configs = [{:greedy => false}, %w{!g}],
-      expected = [%|//%s[not(.//%s)][./self::*[@a1="AABB"]]|, %w{i2 i3}]
+      expected = ['//%s[not(.//%s)][./self::*[@a1="AA BB"]]', %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> array value (token matching)
+      debug = __LINE__,
+      content,
+      match_attrs = {:@a1 => %w{BB}},
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[#{check_tokens('@a1',%w{"BB"})}]]|, %w{i2 i3}]
+    ], [
+      ## >> overriding common config has no effect !!
+      debug = __LINE__,
+      content,
+      match_attrs = [match_attrs, %w{g}],
+      configs,
+      expected,
+    ], [
+      ## >> nil value (presence checking)
+      debug = __LINE__,
+      content,
+      match_attrs = [:@a1],
+      configs = [{:greedy => true}, %w{g}],
+      expected = [%|//%s[./self::*[@a1]]|, %w{i1 i2 i3}]
+    ], [
+      debug = __LINE__,
+      content,
+      match_attrs,
+      configs = [{:greedy => false}, %w{!g}],
+      expected = [%|//%s[not(.//%s)][./self::*[@a1]]|, %w{i2 i3}]
     ], [
       ## >> overriding common config has no effect !!
       debug = __LINE__,
