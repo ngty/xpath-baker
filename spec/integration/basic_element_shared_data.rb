@@ -56,7 +56,7 @@ def xpf_multiple_match_attrs_args
       |,
       match_attrs = [{:e1 => 'cc', :@a1 => 'ee'}, {:- => 'aa'}],
       configs = [{:position => 2}, %w{2}],
-      expected = ['//%s[./self::*[e1="cc"][@a1="ee"][2]][./self::*[text()="aa"][2]][2]', %w{}]
+      expected = ['//%s[./self::*[@a1="ee"][e1="cc"][2]][./self::*[text()="aa"][2]][2]', %w{}]
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # >> {match_attrs}, [{match_attrs}, {config}], {config}|[config]
@@ -66,7 +66,7 @@ def xpf_multiple_match_attrs_args
       content,
       match_attrs = [{:e1 => 'cc', :@a1 => 'ee'}, [{:- => 'aa'}, {:position => 0}]],
       configs,
-      expected = ['//%s[./self::*[e1="cc"][@a1="ee"][2]][./self::*[text()="aa"]][2]', %w{}]
+      expected = ['//%s[./self::*[@a1="ee"][e1="cc"][2]][./self::*[text()="aa"]][2]', %w{}]
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # >> [{match_attrs}, [config]], {match_attrs}, {config}|[config]
@@ -76,7 +76,7 @@ def xpf_multiple_match_attrs_args
       content,
       match_attrs = [[{:e1 => 'cc', :@a1 => 'ee'}, %w{0}], {:- => 'aa'}],
       configs,
-      expected = ['//%s[./self::*[e1="cc"][@a1="ee"]][./self::*[text()="aa"][2]][2]', %w{}]
+      expected = ['//%s[./self::*[@a1="ee"][e1="cc"]][./self::*[text()="aa"][2]][2]', %w{}]
     ],
   # /////////////////////////////////////////////////////////////////////////////
   # >> {match_attrs}, {match_attrs}
@@ -86,7 +86,7 @@ def xpf_multiple_match_attrs_args
       content,
       match_attrs = [{:e1 => 'cc', :@a1 => 'ee'}, {:- => 'aa'}],
       configs = [[]],
-      expected = ['//%s[./self::*[e1="cc"][@a1="ee"]][./self::*[text()="aa"]]', %w{i1}]
+      expected = ['//%s[./self::*[@a1="ee"][e1="cc"]][./self::*[text()="aa"]]', %w{i1}]
     ],
   ].map do |debug, content, match_attrs, configs, expected|
     configs.map do |config|
