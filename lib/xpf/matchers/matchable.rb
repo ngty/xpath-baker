@@ -9,7 +9,13 @@ module XPF
       protected
 
         def me(expr, val)
-          !val.is_a?(Array) ? %|#{expr}=#{mv(val)}| : t(expr, val.map{|_val| mv(_val) })
+          (config.comparison.negate? ? 'not(%s)' : '%s') % (
+            if val.is_a?(Array)
+              t(expr, val.map{|_val| mv(_val) })
+            else
+              [expr, config.comparison, mv(val)].join('')
+            end
+          )
         end
 
         def mv(val)

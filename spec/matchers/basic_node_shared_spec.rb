@@ -28,6 +28,24 @@ shared 'basic node matcher' do
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
+    should 'apply comparison as specified by config[:comparison]' do
+      {
+        '!'   => 'not(normalize-space(%s)=%s)',
+        '='   => 'normalize-space(%s)=%s',
+        '!='  => 'not(normalize-space(%s)=%s)',
+        '>'   => 'normalize-space(%s)>%s',
+        '!>'  => 'not(normalize-space(%s)>%s)',
+        '<'   => 'normalize-space(%s)<%s',
+        '!<'  => 'not(normalize-space(%s)<%s)',
+        '>='  => 'normalize-space(%s)>=%s',
+        '!>=' => 'not(normalize-space(%s)>=%s)',
+        '<='  => 'normalize-space(%s)<=%s',
+        '!<=' => 'not(normalize-space(%s)<=%s)',
+      }.each do |op, expected|
+        @condition_should_equal[{:comparison => op}, expected % [@name, %|"#{@val}"|]]
+      end
+    end
+
     should 'elegantly handle quoting of value with double quote (")' do
       @val = 'val-"x"'
       @condition_should_equal[{}, %|normalize-space(#{@name})=concat("val-",'"',"x",'"',"")|]
@@ -65,6 +83,18 @@ shared 'basic node matcher' do
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
+    should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
   end
 
   describe '> generating condition (w valid multi elements array value)' do
@@ -96,6 +126,18 @@ shared 'basic node matcher' do
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
+    should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
     should 'honor ordering when config[:match_ordering] is true' do
       @condition_should_equal[{:match_ordering => true}, @default]
     end
@@ -104,6 +146,7 @@ shared 'basic node matcher' do
       expected = check_tokens("normalize-space(#{@name})", @vals.map{|v| %|"#{v}"| }, false)
       @condition_should_equal[{:match_ordering => false}, expected]
     end
+
   end
 
   describe '> generating condition (with invalid value NIL_VALUE)' do
@@ -114,6 +157,18 @@ shared 'basic node matcher' do
       @condition_should_equal = lambda do |config, expected|
         @node_matcher.new(@name, @val, XPF::Configuration.new(config)).
           condition.should.equal(expected)
+      end
+    end
+
+    should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
       end
     end
 

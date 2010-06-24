@@ -169,6 +169,29 @@ describe "XPF::Matchers::Group" do
       end
     end
 
+    should "return expr that reflect config[:comparison] only at predicate level" do
+      {
+        '!'   => 'not(normalize-space(%s)=%s)',
+        '='   => 'normalize-space(%s)=%s',
+        '!='  => 'not(normalize-space(%s)=%s)',
+        '>'   => 'normalize-space(%s)>%s',
+        '!>'  => 'not(normalize-space(%s)>%s)',
+        '<'   => 'normalize-space(%s)<%s',
+        '!<'  => 'not(normalize-space(%s)<%s)',
+        '>='  => 'normalize-space(%s)>=%s',
+        '!>=' => 'not(normalize-space(%s)>=%s)',
+        '<='  => 'normalize-space(%s)<=%s',
+        '!<=' => 'not(normalize-space(%s)<=%s)',
+      }.each do |op, expected|
+        [{:comparison => op}, [op]].each do |config|
+          @condition_should_equal[
+            {:@attr1 => 'value-x'}, config,
+            './self::*[%s]' % expected % ['@attr1', %|"value-x"|]
+          ]
+        end
+      end
+    end
+
   end
 
 end

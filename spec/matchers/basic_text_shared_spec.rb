@@ -35,6 +35,24 @@ shared 'a basic text matcher' do
       @condition_should_equal[{:include_inner_text => false}, %|normalize-space(text())="#{@val}"|]
     end
 
+    should 'apply comparison as specified by config[:comparison]' do
+      {
+        '!'   => 'not(normalize-space(%s)=%s)',
+        '='   => 'normalize-space(%s)=%s',
+        '!='  => 'not(normalize-space(%s)=%s)',
+        '>'   => 'normalize-space(%s)>%s',
+        '!>'  => 'not(normalize-space(%s)>%s)',
+        '<'   => 'normalize-space(%s)<%s',
+        '!<'  => 'not(normalize-space(%s)<%s)',
+        '>='  => 'normalize-space(%s)>=%s',
+        '!>=' => 'not(normalize-space(%s)>=%s)',
+        '<='  => 'normalize-space(%s)<=%s',
+        '!<=' => 'not(normalize-space(%s)<=%s)',
+      }.each do |op, expected|
+        @condition_should_equal[{:comparison => op}, expected % ['.', %|"#{@val}"|]]
+      end
+    end
+
     should 'elegantly handle quoting of value with double quote (")' do
       @val = 'text-"x"'
       @condition_should_equal[{}, %|normalize-space(.)=concat("text-",'"',"x",'"',"")|]
@@ -70,6 +88,18 @@ shared 'a basic text matcher' do
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
+    should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
   end
 
   describe '> generating condition (w valid multi elements array value)' do
@@ -100,6 +130,18 @@ shared 'a basic text matcher' do
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
+    should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
     should 'honor ordering when config[:match_ordering] is true' do
       @condition_should_equal[{:match_ordering => true}, @default]
     end
@@ -118,6 +160,18 @@ shared 'a basic text matcher' do
       @default = %|normalize-space(.)|
       @condition_should_equal = lambda do |config, expected|
         @text_matcher.new(@val, XPF::Configuration.new(config)).condition.should.equal(expected)
+      end
+    end
+
+    should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
       end
     end
 
