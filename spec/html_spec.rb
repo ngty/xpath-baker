@@ -15,10 +15,10 @@ describe 'XPF::HTML' do
 #        message.should.equal('Mode has already been declared as :another !!')
 #    end
 #
-#    should 'set XPF::MODE as :html' do
-#      require 'xpf/html'
-#      XPF::MODE.should.equal :html
-#    end
+    should 'set XPF::MODE as :html' do
+      require 'xpf/html'
+      XPF::MODE.should.equal :html
+    end
 
   end
 
