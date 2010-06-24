@@ -6,7 +6,6 @@ module XPF
   declare_mode_as :html
 
   declare_support_for \
-    :table => {},
     :tr    => {:group_matcher => HTML::Matchers::TR::Group}
 
 end
