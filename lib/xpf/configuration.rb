@@ -510,14 +510,12 @@ module XPF
           def convert(str)
             (
               expr = case str
-                when '!', 'not' then '!'
-                when '!=', 'neq', 'not_equal'  then '!='
-                when '=', 'eq', 'equal' then '='
+                when 'not', '!', /^n?(eq)$/, /^!?(=)$/, /^(not_)?equal$/ then '='
                 when /^!?>(=)?$/, /^n?gt(e)?$/, /^(?:not_)?greater_than(_or_equal)?$/ then '>%s' % ($1 ? '=' : '')
                 when /^!?<(=)?$/, /^n?lt(e)?$/, /^(?:not_)?less_than(_or_equal)?$/ then '<%s' % ($1 ? '=' : '')
                 else raise ERROR
                 end
-            ) && expr.extend(Extensions).init(!%w{!= neq not_equal}.include?(str) && str =~ /^(!|n)/)
+            ) && expr.extend(Extensions).init(!!(str =~ /^(n|!)/))
           end
 
           module Extensions
@@ -530,7 +528,7 @@ module XPF
             end
 
             def negate?
-              !!@is_negate
+              @is_negate
             end
 
           end

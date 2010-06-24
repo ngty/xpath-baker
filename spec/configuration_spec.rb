@@ -43,9 +43,9 @@ describe "XPF::Configuration" do
   }
 
   valid_comparison_args = {
-    '!'   => ['!', {:negate? => true}],    :not  => ['!', {:negate? => true}],
     '='   => ['=', {:negate? => false}],   :eq   => ['=', {:negate? => false}],
-    '!='  => ['!=', {:negate? => false}],  :neq  => ['!=', {:negate? => false}],
+    '!'   => ['=', {:negate? => true}],    :not  => ['=', {:negate? => true}],
+    '!='  => ['=', {:negate? => true}],    :neq  => ['=', {:negate? => true}],
     '>'   => ['>', {:negate? => false}],   :gt   => ['>', {:negate? => false}],
     '!>'  => ['>', {:negate? => true}],    :ngt  => ['>', {:negate? => true}],
     '<'   => ['<', {:negate? => false}],   :lt   => ['<', {:negate? => false}],
@@ -55,7 +55,7 @@ describe "XPF::Configuration" do
     '<='  => ['<=', {:negate? => false}],  :lte  => ['<=', {:negate? => false}],
     '!<=' => ['<=', {:negate? => true}],   :nlte => ['<=', {:negate? => true}],
     :equal                     => ['=', {:negate? => false}],
-    :not_equal                 => ['!=', {:negate? => false}],
+    :not_equal                 => ['=', {:negate? => true}],
     :greater_than              => ['>', {:negate? => false}],
     :not_greater_than          => ['>', {:negate? => true}],
     :less_than                 => ['<', {:negate? => false}],
@@ -165,6 +165,7 @@ describe "XPF::Configuration" do
       XPF.configure do |config|
         valid_comparison_args.each do |val, (expected, test_meths)|
           config.comparison = val
+        puts "before #{val} / #{expected} / #{config.comparison}"
           config.comparison.should.equal(expected)
           test_meths.each{|meth, val| config.comparison.send(meth).should.equal(val) }
         end
