@@ -43,6 +43,7 @@ describe "XPF::Configuration" do
   }
 
   valid_comparison_args = {
+    '!'   => ['!', {:negate? => true}],    :not  => ['!', {:negate? => true}],
     '='   => ['=', {:negate? => false}],   :eq   => ['=', {:negate? => false}],
     '!='  => ['!=', {:negate? => false}],  :neq  => ['!=', {:negate? => false}],
     '>'   => ['>', {:negate? => false}],   :gt   => ['>', {:negate? => false}],
@@ -191,13 +192,13 @@ describe "XPF::Configuration" do
       :scope              => ['boo', '/boo', '//boo', "start & end with '/'"],
       :comparison         => [
         '=!', 'not_eql', 'not_eq', 'aa', 'match any of the following: %s or %s' % [%w{
-          = != > !> < !< >= !>= <= !<= eq neq gt ngt gte ngte lt nlt lte nlte equal not_equal
+          = != > !> < !< >= !>= <= !<= ! eq neq gt ngt gte ngte lt nlt lte nlte not equal not_equal
           greater_than not_greater_than greater_than_or_equal not_greater_than_or_equal
           less_than not_less_than less_than_or_equal
         }.join(', '), 'not_less_than_or_equal']
       ],
       :position           => [
-        '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
+        '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2',
         'match any of the following: %s or %s' % [
           '(1) nil or any integer (0 & nil are taken as no position specified)',
@@ -364,7 +365,7 @@ describe "XPF::Configuration" do
 
     should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be normalized' do
       [
-        '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
+        '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
         'awe/some', '//awe/some', 'awe/some', 'x', '!x'
       ].each do |val|
@@ -496,7 +497,7 @@ describe "XPF::Configuration" do
 
     should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
       [
-        '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
+        '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
         'awe/some', '//awe/some', 'awe/some', 'x', '!x'
       ].each do |val|

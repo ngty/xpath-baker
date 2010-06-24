@@ -497,7 +497,7 @@ module XPF
         class << self
 
           VALID_VALS = %w{
-            = != > !> < !< >= !>= <= !<= eq neq gt ngt gte ngte lt nlt lte nlte equal not_equal
+            = != > !> < !< >= !>= <= !<= ! eq neq gt ngt gte ngte lt nlt lte nlte not equal not_equal
             greater_than not_greater_than greater_than_or_equal not_greater_than_or_equal
             less_than not_less_than less_than_or_equal not_less_than_or_equal
           }
@@ -510,6 +510,7 @@ module XPF
           def convert(str)
             (
               expr = case str
+                when '!', 'not' then '!'
                 when '!=', 'neq', 'not_equal'  then '!='
                 when '=', 'eq', 'equal' then '='
                 when /^!?>(=)?$/, /^n?gt(e)?$/, /^(?:not_)?greater_than(_or_equal)?$/ then '>%s' % ($1 ? '=' : '')
