@@ -187,8 +187,8 @@ describe "XPF::HTML <tr/> support" do
   end
 
   # NOTE: These are all we need for 'a basic html element' shared spec.
-  require File.join(File.dirname(__FILE__), 'basic_element_shared_spec')
+  require File.join(File.dirname(__FILE__), '..', 'generic_integration', 'basic_element_shared_spec')
   before { @element = :tr }
-  behaves_like 'a basic html element'
+  behaves_like 'a basic element'
 
 end
