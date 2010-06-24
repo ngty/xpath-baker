@@ -10,7 +10,7 @@ module XPF
       end
 
       def condition
-        mc(matchers.map(&:condition))
+        mc(matchers.map(&:condition).sort)
       end
 
       protected
