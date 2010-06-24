@@ -3,7 +3,6 @@ require File.join(File.dirname(__FILE__), 'basic_element_shared_data')
 shared 'a basic element' do
 
   before do
-    @elements = [@element] * 50
     @xpf_global_configure = lambda do |settings|
       XPF.configure do |config|
         xpf_default_config.merge(settings).each {|k,v| config.send(:"#{k}=",v) }
@@ -15,31 +14,35 @@ shared 'a basic element' do
     XPF.configure(:reset)
   end
 
-  xpf_single_match_attrs_args.each do |(debug, get_ids, match_attrs, config, expected)|
+  [xpf_single_match_attrs_args,xpf_multiple_match_attrs_args].flatten(1).
+    each do |(debug, get_ids, match_attrs, config, expected)|
 
-    before do
-      @xpf_global_configure[{}]
-    end
+      args = config.empty? ? match_attrs : (match_attrs + [config])
 
-    describe "> match attrs as %s, & config as %s [#%s]" % [
-        match_attrs.inspect, config.inspect, debug
-      ] do
+      describe "> match attrs as %s, & %s [#%s]" % [
+          match_attrs.map(&:inspect).join(' & '),
+          config.empty? ? "no common config" : "common config as #{config.inspect}",
+          debug
+        ] do
 
-      should "return xpath as described" do
-        each_xpf do |x|
-          x.send(@element, match_attrs, config).should.equal(expected[@element,0])
+        before do
+          @xpf_global_configure[{}]
         end
-      end
 
-      should "return xpath that match intended node(s)" do
-        each_xpf do |x|
-          get_ids[@element, x.send(@element, match_attrs, config)].
-            should.equal(expected[@element,1])
+        should "return xpath as described" do
+          each_xpf do |x|
+            x.send(@element, *args).should.equal(expected[@element,0])
+          end
         end
-      end
 
+        should "return xpath that match intended node(s)" do
+          each_xpf do |x|
+            get_ids[@element, x.send(@element, *args)].should.equal(expected[@element,1])
+          end
+        end
+
+      end
     end
-  end
 
   xpf_no_match_attrs_args.each do |debug, get_ids, config, ignored_config, expected|
 

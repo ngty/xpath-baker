@@ -1,3 +1,100 @@
+def xpf_multiple_match_attrs_args
+  [
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> [match_attrs], [match_attrs], {config}|[config]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content = %|
+        <%s id="i1" a1="~"><e1/><e3/></%s>
+        <%s id="i2" a2="~"><e1/><e3/></%s>
+        <%s id="i3" a1="~"><e2/><e3/></%s>
+      |,
+      match_attrs = [[:e1, :e3], [:@a1]],
+      configs = [{:position => 2}, %w{2}],
+      expected = ['//%s[./self::*[e1][e3][2]][./self::*[@a1][2]][2]', %w{}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> [match_attrs], [[match_attrs], {config}], {config}|[config]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content,
+      match_attrs = [[:e1, :e3], [[:@a1], {:position => 0}]],
+      configs,
+      expected = ['//%s[./self::*[e1][e3][2]][./self::*[@a1]][2]', %w{}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> [[match_attrs], [config]], [match_attrs], {config}|[config]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content,
+      match_attrs = [[[:e1, :e3], %w{0}], [:@a1]],
+      configs,
+      expected = ['//%s[./self::*[e1][e3]][./self::*[@a1][2]][2]', %w{}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> [match_attrs], [match_attrs]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content,
+      match_attrs = [[:e1, :e3], [:@a1]],
+      configs = [[]],
+      expected = ['//%s[./self::*[e1][e3]][./self::*[@a1]]', %w{i1}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> {match_attrs}, {match_attrs}, {config}|[config]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content = %|
+        <%s id="i1" a1="ee">aa<e1>cc</e1></%s>
+        <%s id="i2" a2="ee">bb<e1>cc</e1></%s>
+        <%s id="i3" a1="ee">aa<e1>dd</e1></%s>
+      |,
+      match_attrs = [{:e1 => 'cc', :@a1 => 'ee'}, {:- => 'aa'}],
+      configs = [{:position => 2}, %w{2}],
+      expected = ['//%s[./self::*[e1="cc"][@a1="ee"][2]][./self::*[text()="aa"][2]][2]', %w{}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> {match_attrs}, [{match_attrs}, {config}], {config}|[config]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content,
+      match_attrs = [{:e1 => 'cc', :@a1 => 'ee'}, [{:- => 'aa'}, {:position => 0}]],
+      configs,
+      expected = ['//%s[./self::*[e1="cc"][@a1="ee"][2]][./self::*[text()="aa"]][2]', %w{}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> [{match_attrs}, [config]], {match_attrs}, {config}|[config]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content,
+      match_attrs = [[{:e1 => 'cc', :@a1 => 'ee'}, %w{0}], {:- => 'aa'}],
+      configs,
+      expected = ['//%s[./self::*[e1="cc"][@a1="ee"]][./self::*[text()="aa"][2]][2]', %w{}]
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> {match_attrs}, {match_attrs}
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+      debug = __LINE__,
+      content,
+      match_attrs = [{:e1 => 'cc', :@a1 => 'ee'}, {:- => 'aa'}],
+      configs = [[]],
+      expected = ['//%s[./self::*[e1="cc"][@a1="ee"]][./self::*[text()="aa"]]', %w{i1}]
+    ],
+  ].map do |debug, content, match_attrs, configs, expected|
+    configs.map do |config|
+      [debug, xpf_ids_proc(content), match_attrs, config, xpf_expected_proc(expected)]
+    end
+  end.flatten(1)
+end
+
 def xpf_single_match_attrs_args
   [
   # /////////////////////////////////////////////////////////////////////////////
@@ -1564,7 +1661,7 @@ def xpf_single_match_attrs_args
     ],
   ].map do |debug, content, match_attrs, configs, expected|
     configs.map do |config|
-      [debug, xpf_ids_proc(content), match_attrs, config, xpf_expected_proc(expected)]
+      [debug, xpf_ids_proc(content), [match_attrs], config, xpf_expected_proc(expected)]
     end
   end.flatten(1)
 end
