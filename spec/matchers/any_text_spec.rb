@@ -19,7 +19,8 @@ describe 'XPF::Matchers::AnyText' do
     end
 
     should 'not have space normalized when config[:normalize_space] is false' do
-      @condition_should_equal[{:normalize_space => false}, %|(text()="#{@val}") or (.="#{@val}")|]
+      tokens = [%|text()="#{@val}"|, %|.="#{@val}"|]
+      @condition_should_equal[{:normalize_space => false}, '(%s) or (%s)' % tokens]
     end
 
     should 'be case-sensitive when config[:case_sensitive] is true' do
@@ -33,6 +34,27 @@ describe 'XPF::Matchers::AnyText' do
 
     should 'include inner text when config[:include_inner_text] is true' do
       @condition_should_equal[{:include_inner_text => true}, @default]
+    end
+
+    should 'apply comparison as specified by config[:comparison]' do
+      {
+        '!'   => 'not((%s=%s) or (%s=%s))',
+        '='   => '(%s=%s) or (%s=%s)',
+        '!='  => 'not((%s=%s) or (%s=%s))',
+        '>'   => '(%s>%s) or (%s>%s)',
+        '!>'  => 'not((%s>%s) or (%s>%s))',
+        '<'   => '(%s<%s) or (%s<%s)',
+        '!<'  => 'not((%s<%s) or (%s<%s))',
+        '>='  => '(%s>=%s) or (%s>=%s)',
+        '!>=' => 'not((%s>=%s) or (%s>=%s))',
+        '<='  => '(%s<=%s) or (%s<=%s)',
+        '!<=' => 'not((%s<=%s) or (%s<=%s))',
+      }.each do |op, expected|
+        @condition_should_equal[
+          {:comparison => op},
+          expected % ['normalize-space(text())', %|"#{@val}"|, 'normalize-space(.)', %|"#{@val}"|]
+        ]
+      end
     end
 
     should 'elegantly handle quoting of value with double quote (")' do
@@ -75,6 +97,18 @@ describe 'XPF::Matchers::AnyText' do
     should 'ignore config[:include_inner_text]' do
       @condition_should_equal[{:include_inner_text => true}, @default]
       @condition_should_equal[{:include_inner_text => false}, @default]
+    end
+
+    should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
+      end
     end
 
   end
@@ -124,6 +158,18 @@ describe 'XPF::Matchers::AnyText' do
       @condition_should_equal[{:include_inner_text => false}, @default]
     end
 
+    should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
   end
 
   describe '> generating condition (with invalid value NIL_VALUE)' do
@@ -133,6 +179,18 @@ describe 'XPF::Matchers::AnyText' do
       @default = '(%s) or (%s)' % %w{text() .}.map{|s| %|normalize-space(#{s})| }
       @condition_should_equal = lambda do |config, expected|
         @text_matcher.new(@val, XPF::Configuration.new(config)).condition.should.equal(expected)
+      end
+    end
+
+    should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
+      %w{! != !> !>= !< !<=}.each do |op|
+        @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
+      end
+    end
+
+    should 'ignore all other specified config[:comparison]' do
+      %w{= > >= < <=}.each do |op|
+        @condition_should_equal[{:comparison => op}, @default]
       end
     end
 

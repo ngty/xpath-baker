@@ -8,8 +8,8 @@ module XPF
 
       protected
 
-        def me(expr, val)
-          (config.comparison.negate? ? 'not(%s)' : '%s') % (
+        def me(expr, val, skip_negate=false)
+          (!skip_negate && config.comparison.negate? ? 'not(%s)' : '%s') % (
             if val.is_a?(Array)
               t(expr, val.map{|_val| mv(_val) })
             else
