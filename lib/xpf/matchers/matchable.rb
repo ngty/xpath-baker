@@ -32,7 +32,7 @@ module XPF
 
         def mc(conditions)
           ('self::*' == config.axial_node && conditions.empty?) ? nil :
-            f('./%s' % config.axial_node, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
+            f('%s' % config.axial_node, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
         end
 
         def nn
