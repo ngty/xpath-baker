@@ -194,6 +194,7 @@ module XPF
       :match_ordering     => true,       # o, !o
       :normalize_space    => true,       # n, !n
       :include_inner_text => true,       # i, !i
+      :comparison         => '=',        # =, >, <, >=, <=
       :scope              => '//',       # //some/thing
       :position           => nil,        # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
       :axial_node         => 'self::*',  # descendant-or-self::a, descendant_or_self::a
@@ -227,9 +228,10 @@ module XPF
         /::Group$/     => lambda{|klass| {:group_matcher => classify(klass)} }
       },
       :test_fail => {
-        :Scope     => lambda{|val| {:scope => val} },
-        :AxialNode => lambda{|val| {:axial_node => val} },
-        :Position  => lambda{|val| {:position => val} },
+        :Scope      => lambda{|val| {:scope => val} },
+        :AxialNode  => lambda{|val| {:axial_node => val} },
+        :Position   => lambda{|val| {:position => val} },
+        :Comparison => lambda{|val| {:comparison => val} }
       }
     }
 
@@ -317,6 +319,11 @@ module XPF
       # TODO: Add DOC
       def scope=(expr)
         @scope = convert_unless_xpified(expr, Scope)
+      end
+
+      # TODO: Add DOC
+      def comparison=(expr)
+        @comparison = convert_unless_xpified(expr, Comparison)
       end
 
       # TODO: Add DOC
@@ -479,6 +486,50 @@ module XPF
 
             def end?
               !@is_start
+            end
+
+          end
+
+        end
+      end
+
+      module Comparison #:nodoc:
+        class << self
+
+          VALID_VALS = %w{
+            = != > !> < !< >= !>= <= !<= eq neq gt ngt gte ngte lt nlt lte nlte equal not_equal
+            greater_than not_greater_than greater_than_or_equal not_greater_than_or_equal
+            less_than not_less_than less_than_or_equal not_less_than_or_equal
+          }
+
+          ERROR = InvalidConfigSettingValueError.new(
+            'Config setting :comparison must match any of the following: %s or %s !!' %
+              [VALID_VALS[0..-2].join(', '), VALID_VALS[-1]]
+          )
+
+          def convert(str)
+            (
+              expr = case str
+                when '!=', 'neq', 'not_equal'  then '!='
+                when '=', 'eq', 'equal' then '='
+                when /^!?>(=)?$/, /^n?gt(e)?$/, /^(?:not_)?greater_than(_or_equal)?$/ then '>%s' % ($1 ? '=' : '')
+                when /^!?<(=)?$/, /^n?lt(e)?$/, /^(?:not_)?less_than(_or_equal)?$/ then '<%s' % ($1 ? '=' : '')
+                else raise ERROR
+                end
+            ) && expr.extend(Extensions).init(!%w{!= neq not_equal}.include?(str) && str =~ /^(!|n)/)
+          end
+
+          module Extensions
+
+            include Configuration::Extensions
+
+            def init(is_negate)
+              @is_negate = is_negate
+              self
+            end
+
+            def negate?
+              !!@is_negate
             end
 
           end

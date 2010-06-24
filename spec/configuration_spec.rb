@@ -42,6 +42,29 @@ describe "XPF::Configuration" do
     'self::*'               => 'self::*',
   }
 
+  valid_comparison_args = {
+    '='   => ['=', {:negate? => false}],   :eq   => ['=', {:negate? => false}],
+    '!='  => ['!=', {:negate? => false}],  :neq  => ['!=', {:negate? => false}],
+    '>'   => ['>', {:negate? => false}],   :gt   => ['>', {:negate? => false}],
+    '!>'  => ['>', {:negate? => true}],    :ngt  => ['>', {:negate? => true}],
+    '<'   => ['<', {:negate? => false}],   :lt   => ['<', {:negate? => false}],
+    '!<'  => ['<', {:negate? => true}],    :nlt  => ['<', {:negate? => true}],
+    '>='  => ['>=', {:negate? => false}],  :gte  => ['>=', {:negate? => false}],
+    '!>=' => ['>=', {:negate? => true}],   :ngte => ['>=', {:negate? => true}],
+    '<='  => ['<=', {:negate? => false}],  :lte  => ['<=', {:negate? => false}],
+    '!<=' => ['<=', {:negate? => true}],   :nlte => ['<=', {:negate? => true}],
+    :equal                     => ['=', {:negate? => false}],
+    :not_equal                 => ['!=', {:negate? => false}],
+    :greater_than              => ['>', {:negate? => false}],
+    :not_greater_than          => ['>', {:negate? => true}],
+    :less_than                 => ['<', {:negate? => false}],
+    :not_less_than             => ['<', {:negate? => true}],
+    :greater_than_or_equal     => ['>=', {:negate? => false}],
+    :not_greater_than_or_equal => ['>=', {:negate? => true}],
+    :less_than_or_equal        => ['<=', {:negate? => false}],
+    :not_less_than_or_equal    => ['<=', {:negate? => true}],
+  }
+
   valid_position_args = {
     0       => [nil, {}],
     2       => ['[2]', {:start? => false, :end? => true}],
@@ -87,6 +110,7 @@ describe "XPF::Configuration" do
   describe '> default' do
     {
       :greedy             => [true, 'true'],
+      :comparison         => ['=', '='],
       :case_sensitive     => [true, 'true'],
       :match_ordering     => [true, 'true'],
       :include_inner_text => [true, 'true'],
@@ -136,6 +160,16 @@ describe "XPF::Configuration" do
       end
     end
 
+    should 'be able to change :comparison' do
+      XPF.configure do |config|
+        valid_comparison_args.each do |val, (expected, test_meths)|
+          config.comparison = val
+          config.comparison.should.equal(expected)
+          test_meths.each{|meth, val| config.comparison.send(meth).should.equal(val) }
+        end
+      end
+    end
+
     should 'be able to change :axial_node' do
       XPF.configure do |config|
         valid_axial_node_args.each do |val, expected|
@@ -155,6 +189,13 @@ describe "XPF::Configuration" do
       :include_inner_text => ['aa', 0, 1, 'be boolean true/false'],
       :normalize_space    => ['aa', 0, 1, 'be boolean true/false'],
       :scope              => ['boo', '/boo', '//boo', "start & end with '/'"],
+      :comparison         => [
+        '=!', 'not_eql', 'not_eq', 'aa', 'match any of the following: %s or %s' % [%w{
+          = != > !> < !< >= !>= <= !<= eq neq gt ngt gte ngte lt nlt lte nlte equal not_equal
+          greater_than not_greater_than greater_than_or_equal not_greater_than_or_equal
+          less_than not_less_than less_than_or_equal
+        }.join(', '), 'not_less_than_or_equal']
+      ],
       :position           => [
         '$', '!$', '^', '!^', '!', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2',
@@ -203,6 +244,7 @@ describe "XPF::Configuration" do
       :include_inner_text => [true, val = false, val],
       :normalize_space    => [true, val = false, val],
       :scope              => ['//', val = '/', val],
+      :comparison         => ['=', val = '=', val],
       :position           => [nil, 10, '[10]'],
       :axial_node         => ['self::*', val = 'following::*', val],
       :attribute_matcher  => [XPF::Matchers::Attribute, val = Class.new{ A = 1 }, val],
@@ -311,6 +353,12 @@ describe "XPF::Configuration" do
     should 'be able to normalize :position setting' do
       valid_position_args.keys.each do |val|
         XPF::Configuration.normalize([val]).should.equal({:position => val.to_s})
+      end
+    end
+
+    should 'be able to normalize :comparison setting' do
+      valid_comparison_args.keys.reject{|key| key.is_a?(Symbol) }.each do |val|
+        XPF::Configuration.normalize([val]).should.equal({:comparison => val})
       end
     end
 
@@ -435,6 +483,14 @@ describe "XPF::Configuration" do
         position = XPF::Configuration.new([val]).to_hash[:position]
         position.should.equal(expected[0])
         expected[1].each{|meth, _val| position.send(meth).should.equal(_val) }
+      end
+    end
+
+    should 'be able to extract & assign :comparison setting' do
+      valid_comparison_args.reject{|key,val| key.is_a?(Symbol) }.each do |val, expected|
+        comparison = XPF::Configuration.new([val]).to_hash[:comparison]
+        comparison.should.equal(expected[0])
+        expected[1].each{|meth, _val| comparison.send(meth).should.equal(_val) }
       end
     end
 
