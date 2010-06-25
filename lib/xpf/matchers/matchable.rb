@@ -4,7 +4,10 @@ module XPF
 
       LOWERCASE_CHARS = ('a'..'z').to_a * ''
       UPPERCASE_CHARS = ('A'..'Z').to_a * ''
-      NIL_VALUE = Struct.new('NIL_VALUE')
+
+      class << (NIL_VALUE = Struct.new('NIL_VALUE'))
+        def to_s ; 'XPF_NIL_VALUE' ; end
+      end
 
       protected
 
@@ -31,8 +34,11 @@ module XPF
         end
 
         def mc(conditions)
-          ('self::*' == config.axial_node && conditions.empty?) ? nil :
-            f('%s' % config.axial_node, conditions.empty? ? nil : ('[%s]' % conditions.join('][')))
+          if conditions.empty?
+            config.axial_node == 'self::*' ? nil : config.axial_node
+          else
+            '%s[%s]' % [config.axial_node, conditions.sort.join('][')]
+          end
         end
 
         def nn
@@ -64,21 +70,6 @@ module XPF
           config.normalize_space? ? %\normalize-space(#{str})\ : "#{str}"
         end
 
-        def f(axial_node, conditions) #:nodoc:
-          '%s%s%s' % (
-            if (pos = config.position).nil?
-              [axial_node, conditions, nil]
-            else
-              pos.start? ? [axial_node, pos, conditions] : [axial_node, conditions, pos]
-            end
-          )
-        end
-
-        # def v(expr, default_val) #:nodoc:
-        #   expr = (send(expr) rescue expr) if expr.is_a?(Symbol)
-        #   expr || default_val
-        # end
-
         def t(expr, tokens) #:nodoc:
           tokens.map{|tk| t1(expr,tk) }.concat(
             !config.match_ordering? ? [] : (
@@ -102,6 +93,21 @@ module XPF
             'contains(substring-after(%s,%s),concat(" ",%s))' % [expr, prev_token, curr_token]
           ]
         end
+
+        # def f(axial_node, conditions) #:nodoc:
+        #   '%s%s%s' % (
+        #     if (pos = config.position).nil?
+        #       [axial_node, conditions, nil]
+        #     else
+        #       pos.start? ? [axial_node, pos, conditions] : [axial_node, conditions, pos]
+        #     end
+        #   )
+        # end
+
+        # def v(expr, default_val) #:nodoc:
+        #   expr = (send(expr) rescue expr) if expr.is_a?(Symbol)
+        #   expr || default_val
+        # end
 
     end
   end

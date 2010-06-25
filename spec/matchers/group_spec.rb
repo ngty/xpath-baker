@@ -2,6 +2,20 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 describe "XPF::Matchers::Group" do
 
+  before do
+    XPF.configure(:reset) do |config|
+      config.element_matcher = XPF::Spec::Matchers::X::Element
+      config.attribute_matcher = XPF::Spec::Matchers::X::Attribute
+      config.text_matcher = XPF::Spec::Matchers::X::Text
+      config.any_text_matcher = XPF::Spec::Matchers::X::AnyText
+      config.literal_matcher = XPF::Spec::Matchers::X::Literal
+    end
+  end
+
+  after do
+    XPF.configure(:reset)
+  end
+
   describe '> generating condition' do
 
     before do
@@ -11,187 +25,87 @@ describe "XPF::Matchers::Group" do
       end
     end
 
-    should "return nil if match attrs is empty & :axial_node is 'self::*'" do
-      [{:axial_node => 'self::*'}, %w{self::*}].each do |config|
-        @condition_should_equal[{}, config, nil]
+    should "return nil if match attrs is empty & :axial_node describes 'self' or 'self::*'" do
+      [{:axial_node => 'self::*'}, {:axial_node => :self}, %w{self::*}, %w{self}].each do |config|
+        [[], {}].each{|match_attrs| @condition_should_equal[match_attrs, config, nil] }
       end
     end
 
-    should "return nil if match attrs is empty & :axial_node is :self" do
-      [{:axial_node => :self}, %w{self}].each do |config|
-        @condition_should_equal[{}, config, nil]
-      end
-    end
-
-    should "return axial_node expr if match attrs is empty & :axial_node is 'self::?' (with '?' not as '*')" do
+    should "return expr that reflect ONLY axial node if match attrs is empty & :axial_node is 'self::x'" do
       [{:axial_node => 'self::x'}, %w{self::x}].each do |config|
-        @condition_should_equal[{}, config, 'self::x']
+        [[], {}].each{|match_attrs| @condition_should_equal[match_attrs, config, 'self::x'] }
       end
     end
 
-    should 'return expr that reflect ONLY axial_node if specified match attrs is empty' do
-      [{:axial_node => 'attribute::x'}, %w{attribute::x}].each do |config|
-        @condition_should_equal[{}, config, 'attribute::x']
-      end
-    end
-
-    should "return expr that reflect prepending position if config[:position] is specified as '2^'" do
-      [{:axial_node => 'descendant::x', :position => '2^'}, %w{descendant::x 2^}].each do |config|
-        @condition_should_equal[[:@attr1], config, 'descendant::x[2][normalize-space(@attr1)]']
-      end
-    end
-
-    should "return expr that reflect appending position if config[:position] is specified as '2'" do
-      [{:axial_node => 'descendant::x', :position => 2}, %w{descendant::x 2}].each do |config|
-        @condition_should_equal[[:@attr1], config, 'descendant::x[normalize-space(@attr1)][2]']
-      end
-    end
-
-    should "return expr that reflect appending position if config[:position] is specified as '2$'" do
-      [{:axial_node => 'descendant::x', :position => '2$'}, %w{descendant::x 2$}].each do |config|
-        @condition_should_equal[[:@attr1], config, 'descendant::x[normalize-space(@attr1)][2]']
-      end
-    end
-
-    should 'return expr that reflect either direct or all inner text condition if match attrs is {:* => ..., ...}' do
-      [
-        {:axial_node => 'descendant::*', :include_inner_text => true},
-        {:axial_node => 'descendant::*', :include_inner_text => false},
-        %w{descendant::* i},
-        %w{descendant::* !i},
-      ].each do |config|
-        tokens = %w{text() .}.map{|s| %|normalize-space(#{s})="text-x"| }
-        @condition_should_equal[{:* => 'text-x'}, config, 'descendant::*[(%s) or (%s)]' % tokens]
-      end
-    end
-
-    should 'return expr that reflect presence of either direct or all inner text if match attrs is [:*, ...]' do
-      [
-        {:axial_node => 'descendant::*', :include_inner_text => true},
-        {:axial_node => 'descendant::*', :include_inner_text => false},
-        %w{descendant::* i},
-        %w{descendant::* !i}
-      ].each do |config|
-        tokens = %w{text() .}.map{|s| %|normalize-space(#{s})| }
-        @condition_should_equal[[:*], config, 'descendant::*[(%s) or (%s)]' % tokens]
-      end
-    end
-
-    should 'return expr that reflect all inner text condition if match attrs is {:+ => ..., ...}' do
-      [
-        {:axial_node => 'descendant::*', :include_inner_text => true},
-        {:axial_node => 'descendant::*', :include_inner_text => false},
-        %w{descendant::* i},
-        %w{descendant::* !i},
-      ].each do |config|
-        @condition_should_equal[{:+ => 'text-x'}, config, 'descendant::*[normalize-space(.)="text-x"]']
-      end
-    end
-
-    should 'return expr that reflect presence of all inner text if match attrs is [:+, ...]' do
-      [
-        {:axial_node => 'descendant::*', :include_inner_text => true},
-        {:axial_node => 'descendant::*', :include_inner_text => false},
-        %w{descendant::* i},
-        %w{descendant::* !i}
-      ].each do |config|
-        @condition_should_equal[[:+], config, 'descendant::*[normalize-space(.)]']
-      end
-    end
-
-    should 'return expr that reflect direct text condition if match attrs is {:- => ..., ...}' do
-      [
-        {:axial_node => 'descendant::*', :include_inner_text => true},
-        {:axial_node => 'descendant::*', :include_inner_text => false},
-        %w{descendant::* i},
-        %w{descendant::* !i},
-      ].each do |config|
-        @condition_should_equal[{:- => 'text-x'}, config, 'descendant::*[normalize-space(text())="text-x"]']
-      end
-    end
-
-    should 'return expr that reflect presence of direct text if match attrs is [:-, ...]' do
-      [
-        {:axial_node => 'descendant::*', :include_inner_text => true},
-        {:axial_node => 'descendant::*', :include_inner_text => false},
-        %w{descendant::* i},
-        %w{descendant::* !i},
-      ].each do |config|
-        @condition_should_equal[[:-], config, 'descendant::*[normalize-space(text())]']
-      end
-    end
-
-    should 'return expr that reflect variable text condition if match attrs is {:~ => ..., ...}' do
-      [{:axial_node => 'descendant::*', :include_inner_text => true}, %w{descendant::* i}].each do |config|
-        @condition_should_equal[{:~ => 'text-x'}, config, 'descendant::*[normalize-space(.)="text-x"]']
-      end
-      [{:axial_node => 'descendant::*', :include_inner_text => false}, %w{descendant::* !i}].each do |config|
-        @condition_should_equal[{:~ => 'text-x'}, config, 'descendant::*[normalize-space(text())="text-x"]']
-      end
-    end
-
-    should 'return expr that reflect presence of variable text if match attrs is [:~, ...]' do
-      [{:axial_node => 'descendant::*', :include_inner_text => true}, %w{descendant::* i}].each do |config|
-        @condition_should_equal[[:~], config, 'descendant::*[normalize-space(.)]']
-      end
-      [{:axial_node => 'descendant::*', :include_inner_text => false}, %w{descendant::* !i}].each do |config|
-        @condition_should_equal[[:~], config, 'descendant::*[normalize-space(text())]']
-      end
-    end
-
-    should 'return expr that reflect attr condition if match attrs is {:@attr1 => ..., ...}' do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[{:@attr1 => 'value-x'}, config, 'descendant::*[normalize-space(@attr1)="value-x"]']
-      end
-    end
-
-    should 'return expr that reflect presence of attr if match attrs is [:@attr1, ...]' do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[[:@attr1], config, 'descendant::*[normalize-space(@attr1)]']
-      end
-    end
-
-    should 'return expr that reflect element condition if match attrs is {:element1 => ..., ...}' do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[{:element1 => 'value-x'}, config, 'descendant::*[normalize-space(element1)="value-x"]']
-      end
-    end
-
-    should 'return expr that reflect presence of element if match attrs is [:element1, ...]' do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[[:element1], config, 'descendant::*[normalize-space(element1)]']
-      end
-    end
-
-    should "return expr that reflect expr as literal if match attrs is ['position()=99', ...]" do
-      [{:axial_node => 'descendant::*'}, %w{descendant::*}].each do |config|
-        @condition_should_equal[['position()=99'], config, 'descendant::*[position()=99]']
-      end
-    end
-
-    should "return expr that reflect config[:comparison] only at predicate level" do
-      {
-        '!'   => 'not(normalize-space(%s)=%s)',
-        '='   => 'normalize-space(%s)=%s',
-        '!='  => 'not(normalize-space(%s)=%s)',
-        '>'   => 'normalize-space(%s)>%s',
-        '!>'  => 'not(normalize-space(%s)>%s)',
-        '<'   => 'normalize-space(%s)<%s',
-        '!<'  => 'not(normalize-space(%s)<%s)',
-        '>='  => 'normalize-space(%s)>=%s',
-        '!>=' => 'not(normalize-space(%s)>=%s)',
-        '<='  => 'normalize-space(%s)<=%s',
-        '!<=' => 'not(normalize-space(%s)<=%s)',
-      }.each do |op, expected|
-        [{:comparison => op}, [op]].each do |config|
-          @condition_should_equal[
-            {:@attr1 => 'value-x'}, config,
-            'self::*[%s]' % expected % ['@attr1', %|"value-x"|]
-          ]
+    %w{
+      ancestor ancestor-or-self attribute child descendant descendant-or-self
+      following following-sibling namespace parent preceding preceding-sibling
+    }.each do |axis|
+      should "return expr that reflect ONLY axial_node if match attrs is empty & axial_node is '#{axis}::?'" do
+        [axis, "#{axis}::*", axis.gsub('-','_').to_sym].each do |axial_node|
+          [{:axial_node => axial_node}, %W{#{axial_node}}].each do |config|
+            [[], {}].each{|match_attrs| @condition_should_equal[match_attrs, config, "#{axis}::*"] }
+          end
         end
       end
     end
 
+    array_match_attrs, expected_array_conds =
+      [:e1, :@a1, 'l1', :*, :+, :-, :~], lambda do |config|
+        replacement_args = lambda do |extra_config|
+          [XPF::Matchers::Matchable::NIL_VALUE.to_s, diff_config(merge_config(config, extra_config)).to_s]
+        end
+        'self::*%s' %
+          [
+            '[((x:anytext:%s,%s))]' % replacement_args[{}],
+            '[((x:attribute:@a1,%s,%s))]' % replacement_args[{}],
+            '[((x:element:e1,%s,%s))]' % replacement_args[{}],
+            '[((x:literal:l1,%s))]' % replacement_args[{}][1],
+            '[((x:text:%s,%s))]' % replacement_args[{:include_inner_text => false}],
+            '[((x:text:%s,%s))]' % replacement_args[{:include_inner_text => true}],
+            '[((x:text:%s,%s))]' % replacement_args[{}],
+          ].sort.join('')
+      end
+
+    hash_match_attrs, expected_hash_conds = {
+      :e1 => 'val-e1', :@a1 => 'val-a1', :* => 'val-:*',
+      :+ => 'val-:+', :- => 'val-:-', :~ => 'val-:~'
+    }, lambda do |config|
+      replacement_args = lambda do |val, extra_config|
+        [val, diff_config(merge_config(config, extra_config)).to_s]
+      end
+      'self::*%s' %
+        [
+          '[((x:anytext:%s,%s))]' % replacement_args['val-:*', {}],
+          '[((x:attribute:@a1,%s,%s))]' % replacement_args['val-a1', {}],
+          '[((x:element:e1,%s,%s))]' % replacement_args['val-e1', {}],
+          '[((x:text:%s,%s))]' % replacement_args['val-:-', {:include_inner_text => false}],
+          '[((x:text:%s,%s))]' % replacement_args['val-:+', {:include_inner_text => true}],
+          '[((x:text:%s,%s))]' % replacement_args['val-:~', {}],
+        ].sort.join('')
+    end
+
+    {
+      :scope => [{:scope => val1 = '//awe/some/'}, {:scope => val2 = '//wonderous/'}, [val1], [val2]],
+      :greedy => [{:greedy => false}, {:greedy => true}, %w{g}, %w{!g}],
+      :match_ordering => [{:match_ordering => true}, {:match_ordering => false}, %w{o}, %w{!o}],
+      :position => [{:position => 0}, {:position => 10}, %w{0}, %w{10}],
+      :case_sensitive => [{:case_sensitive => true}, {:case_sensitive => false}, %w{c}, %w{!c}],
+      :include_inner_text => [{:include_inner_text => true}, {:include_inner_text => false}, %w{i}, %w{!i}],
+      :normalize_space => [{:normalize_space => true}, {:normalize_space => false}, %w{n}, %w{!n}],
+      :comparison => [{:comparison => '!='}, {:comparison => '>='}, %w{!=}, %w{=}]
+    }.each do |setting, configs|
+      should "return expr ignoring any specified :#{setting}" do
+        configs.each do |config|
+          {
+            array_match_attrs => expected_array_conds[config],
+            hash_match_attrs => expected_hash_conds[config]
+          }.each do |match_attrs, expected|
+            @condition_should_equal[match_attrs, config, expected]
+          end
+        end
+      end
+    end
   end
 
 end
