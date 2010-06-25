@@ -19,9 +19,11 @@ describe "XPF::Matchers::Group" do
   describe '> generating condition' do
 
     before do
+      @condition = lambda do |match_attrs, config|
+        XPF::Matchers::Group.new(match_attrs, XPF::Configuration.new(config)).condition
+      end
       @condition_should_equal = lambda do |match_attrs, config, expected|
-        XPF::Matchers::Group.new(match_attrs, XPF::Configuration.new(config)).
-          condition.should.equal(expected)
+        @condition[match_attrs, config].should.equal(expected)
       end
     end
 
@@ -50,38 +52,58 @@ describe "XPF::Matchers::Group" do
       end
     end
 
-    array_match_attrs, expected_array_conds =
-      [:e1, :@a1, 'l1', :*, :+, :-, :~], lambda do |config|
-        replacement_args = lambda do |extra_config|
-          [XPF::Matchers::Matchable::NIL_VALUE.to_s, diff_config(merge_config(config, extra_config)).to_s]
-        end
-        'self::*%s' %
-          [
-            '[((x:anytext:%s,%s))]' % replacement_args[{}],
-            '[((x:attribute:@a1,%s,%s))]' % replacement_args[{}],
-            '[((x:element:e1,%s,%s))]' % replacement_args[{}],
-            '[((x:literal:l1,%s))]' % replacement_args[{}][1],
-            '[((x:text:%s,%s))]' % replacement_args[{:include_inner_text => false}],
-            '[((x:text:%s,%s))]' % replacement_args[{:include_inner_text => true}],
-            '[((x:text:%s,%s))]' % replacement_args[{}],
-          ].sort.join('')
-      end
+    array_match_attrs = [:e1, :@a1, 'l1', :*, :+, :-, :~]
+    hash_match_attrs = {:e1 => 've1', :@a1 => 'va1', :* => 'v:*', :+ => 'v:+', :- => 'v:-', :~ => 'v:~'}
 
-    hash_match_attrs, expected_hash_conds = {
-      :e1 => 'val-e1', :@a1 => 'val-a1', :* => 'val-:*',
-      :+ => 'val-:+', :- => 'val-:-', :~ => 'val-:~'
-    }, lambda do |config|
-      replacement_args = lambda do |val, extra_config|
-        [val, diff_config(merge_config(config, extra_config)).to_s]
+    {
+      :text_matcher => [XPF::Spec::Matchers::Y::Text, %w{y:text:XPF_NIL_VALUE}, %w{y:text:v:+ y:text:v:- y:text:v:~}],
+      :any_text_matcher => [XPF::Spec::Matchers::Y::AnyText, %w{y:anytext:XPF_NIL_VALUE}, %w{y:anytext:v:*}],
+      :element_matcher => [XPF::Spec::Matchers::Y::Element, %w{y:element:e1,XPF_NIL_VALUE}, %w{y:element:e1,ve1}],
+      :attribute_matcher => [XPF::Spec::Matchers::Y::Attribute, %w{y:attribute:@a1,XPF_NIL_VALUE}, %w{y:attribute:@a1,va1}],
+      :literal_matcher => [XPF::Spec::Matchers::Y::Literal, %w{y:literal:l1}, %w{}]
+    }.each do |setting, (klass, expected_array_conds, expected_hash_conds)|
+      should "return expr that reflect specified :#{setting}" do
+        [{setting => klass}, [klass.to_s], [klass]].each do |config|
+          {array_match_attrs => expected_array_conds, hash_match_attrs => expected_hash_conds}.
+            each do |match_attrs, expected_conds|
+              expected_conds.each do |expected_cond|
+                @condition[match_attrs, {}].should.not.match(/#{expected_cond}/)
+                @condition[match_attrs, config].should.match(/#{expected_cond}/)
+              end
+            end
+        end
       end
+    end
+
+    replacement_args = lambda do |val, config1, config2|
+      [
+        val || XPF::Matchers::Matchable::NIL_VALUE.to_s,
+        diff_config(merge_config(config1, config2)).to_s
+      ]
+    end
+
+    expected_array_conds = lambda do |config|
       'self::*%s' %
         [
-          '[((x:anytext:%s,%s))]' % replacement_args['val-:*', {}],
-          '[((x:attribute:@a1,%s,%s))]' % replacement_args['val-a1', {}],
-          '[((x:element:e1,%s,%s))]' % replacement_args['val-e1', {}],
-          '[((x:text:%s,%s))]' % replacement_args['val-:-', {:include_inner_text => false}],
-          '[((x:text:%s,%s))]' % replacement_args['val-:+', {:include_inner_text => true}],
-          '[((x:text:%s,%s))]' % replacement_args['val-:~', {}],
+          '[((x:anytext:%s,%s))]' % replacement_args[nil, config, {}],
+          '[((x:attribute:@a1,%s,%s))]' % replacement_args[nil, config, {}],
+          '[((x:element:e1,%s,%s))]' % replacement_args[nil, config, {}],
+          '[((x:literal:l1,%s))]' % replacement_args[nil, config, {}][1],
+          '[((x:text:%s,%s))]' % replacement_args[nil, config, {:include_inner_text => false}],
+          '[((x:text:%s,%s))]' % replacement_args[nil, config, {:include_inner_text => true}],
+          '[((x:text:%s,%s))]' % replacement_args[nil, config, {}],
+        ].sort.join('')
+    end
+
+    expected_hash_conds = lambda do |config|
+      'self::*%s' %
+        [
+          '[((x:anytext:%s,%s))]' % replacement_args['v:*', config, {}],
+          '[((x:attribute:@a1,%s,%s))]' % replacement_args['va1', config, {}],
+          '[((x:element:e1,%s,%s))]' % replacement_args['ve1', config, {}],
+          '[((x:text:%s,%s))]' % replacement_args['v:-', config, {:include_inner_text => false}],
+          '[((x:text:%s,%s))]' % replacement_args['v:+', config, {:include_inner_text => true}],
+          '[((x:text:%s,%s))]' % replacement_args['v:~', config, {}],
         ].sort.join('')
     end
 
@@ -106,6 +128,7 @@ describe "XPF::Matchers::Group" do
         end
       end
     end
+
   end
 
 end
