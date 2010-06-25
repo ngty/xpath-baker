@@ -3,7 +3,7 @@ require 'xpf/html'
 
 describe "XPF::HTML <tr/> support" do
 
-  tr_axed_path = lambda do |text_comparison, cells, axial_node, match_ordering|
+  tr_axed_path = lambda do |text_comparison, tds, axial_node, match_ordering|
     test = lambda do |val|
       val.is_a?(Array) ? check_tokens(text_comparison, val.map{|v| %|"#{v}"| }, match_ordering) :
         %|#{text_comparison}="#{val}"|
@@ -11,29 +11,29 @@ describe "XPF::HTML <tr/> support" do
     test_value = lambda{|val| (axial_node == 'self::*' ? '%s' : "./#{axial_node}[%s]") % test[val] }
     test_field = lambda{|val| test[val] }
     '//tr[%s]' % (
-      case cells
+      case tds
       when nil
         './td[%s]' % (axial_node == 'self::*' ? '%s' : "./#{axial_node}[%s]") % text_comparison
       when Hash
-        cells.map do |field, val|
+        tds.map do |field, val|
           th = %|./ancestor::table[1]//th[#{test_field[field]}][1]|
           %\./td[count(#{th}/preceding-sibling::th)+1][#{th}][#{test_value[val]}]\
         end.join('][')
       else
-        !match_ordering ? (cells.map {|val| './td[%s]' % test_value[val] }.join('][')) :
-          ('./td[%s]' % cells.map {|val| test_value[val] }.join(']/following-sibling::td['))
+        !match_ordering ? (tds.map {|val| './td[%s]' % test_value[val] }.join('][')) :
+          ('./td[%s]' % tds.map {|val| test_value[val] }.join(']/following-sibling::td['))
       end
     )
   end
 
-  tr_path = lambda do |text_comparison, cells, match_ordering|
-    tr_axed_path[text_comparison, cells, 'self::*', match_ordering]
+  tr_path = lambda do |text_comparison, tds, match_ordering|
+    tr_axed_path[text_comparison, tds, 'self::*', match_ordering]
   end
 
-  downcase = lambda do |cells|
-    cells.is_a?(Hash) ?
-      cells.inject({}){|memo, (field,val)| memo.merge(field.downcase => val.downcase) } :
-      cells.map{|val| val.downcase }
+  downcase = lambda do |tds|
+    tds.is_a?(Hash) ?
+      tds.inject({}){|memo, (field,val)| memo.merge(field.downcase => val.downcase) } :
+      tds.map{|val| val.downcase }
   end
 
   ids = lambda do |path|
@@ -57,116 +57,116 @@ describe "XPF::HTML <tr/> support" do
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:normalize_space => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:cells => {...}}
-    [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => true}] =>
-      [tr_path['normalize-space(.)', cells, nil], %w{e3}],
-    [{:cells => (cells = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => true}] =>
-      [tr_path['normalize-space(.)', cells, nil], %w{}],
-    [{:cells => (cells = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => false}] =>
-      [tr_path['.', cells, nil], %w{e3}],
-    [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => false}] =>
-      [tr_path['.', cells, nil], %w{}],
-    # >> {:cells => [...]}
-    [{:cells => (cells = ['2', 'John Tan'])}, {:normalize_space => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = ['2 ', 'John  Tan '])}, {:normalize_space => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = ['2 ', 'John  Tan '])}, {:normalize_space => false}] =>
-      [tr_path['.', cells, true], %w{e3}],
-    [{:cells => (cells = ['2', 'John Tan'])}, {:normalize_space => false}] =>
-      [tr_path['.', cells, true], %w{}],
-    # >> [:cells]
-    [[:cells], {:normalize_space => true}] =>
+    # >> {:tds => {...}}
+    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => true}] =>
+      [tr_path['normalize-space(.)', tds, nil], %w{e3}],
+    [{:tds => (tds = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => true}] =>
+      [tr_path['normalize-space(.)', tds, nil], %w{}],
+    [{:tds => (tds = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => false}] =>
+      [tr_path['.', tds, nil], %w{e3}],
+    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => false}] =>
+      [tr_path['.', tds, nil], %w{}],
+    # >> {:tds => [...]}
+    [{:tds => (tds = ['2', 'John Tan'])}, {:normalize_space => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{e3}],
+    [{:tds => (tds = ['2 ', 'John  Tan '])}, {:normalize_space => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{}],
+    [{:tds => (tds = ['2 ', 'John  Tan '])}, {:normalize_space => false}] =>
+      [tr_path['.', tds, true], %w{e3}],
+    [{:tds => (tds = ['2', 'John Tan'])}, {:normalize_space => false}] =>
+      [tr_path['.', tds, true], %w{}],
+    # >> [:tds]
+    [[:tds], {:normalize_space => true}] =>
       [tr_path['normalize-space(.)', nil, nil], %w{e2 e3 e5 e6}],
-    [[:cells], {:normalize_space => false}] =>
+    [[:tds], {:normalize_space => false}] =>
       [tr_path['.', nil, nil], %w{e2 e3 e4 e5 e6}],
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:include_inner_text => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:cells => {...}}
-    [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:include_inner_text => true}] =>
-      [tr_path['normalize-space(.)', cells, nil], %w{e3}],
-    [{:cells => (cells = {'#' => '2', 'Full' => 'John'})}, {:include_inner_text => true}] =>
-      [tr_path['normalize-space(.)', cells, nil], %w{}],
-    [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:include_inner_text => false}] =>
-      [tr_path['normalize-space(text())', cells, nil], %w{}],
-    [{:cells => (cells = {'#' => '2', 'Full' => 'John'})}, {:include_inner_text => false}] =>
-      [tr_path['normalize-space(text())', cells, nil], %w{e3}],
-    # >> {:cells => [...]}
-    [{:cells => (cells = ['2', 'John Tan'])}, {:include_inner_text => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = ['2', 'John'])}, {:include_inner_text => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = ['2', 'John Tan'])}, {:include_inner_text => false}] =>
-      [tr_path['normalize-space(text())', cells, true], %w{}],
-    [{:cells => (cells = ['2', 'John'])}, {:include_inner_text => false}] =>
-      [tr_path['normalize-space(text())', cells, true], %w{e3}],
-    # >> [:cells]
-    [[:cells], {:include_inner_text => true}] =>
+    # >> {:tds => {...}}
+    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:include_inner_text => true}] =>
+      [tr_path['normalize-space(.)', tds, nil], %w{e3}],
+    [{:tds => (tds = {'#' => '2', 'Full' => 'John'})}, {:include_inner_text => true}] =>
+      [tr_path['normalize-space(.)', tds, nil], %w{}],
+    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:include_inner_text => false}] =>
+      [tr_path['normalize-space(text())', tds, nil], %w{}],
+    [{:tds => (tds = {'#' => '2', 'Full' => 'John'})}, {:include_inner_text => false}] =>
+      [tr_path['normalize-space(text())', tds, nil], %w{e3}],
+    # >> {:tds => [...]}
+    [{:tds => (tds = ['2', 'John Tan'])}, {:include_inner_text => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{e3}],
+    [{:tds => (tds = ['2', 'John'])}, {:include_inner_text => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{}],
+    [{:tds => (tds = ['2', 'John Tan'])}, {:include_inner_text => false}] =>
+      [tr_path['normalize-space(text())', tds, true], %w{}],
+    [{:tds => (tds = ['2', 'John'])}, {:include_inner_text => false}] =>
+      [tr_path['normalize-space(text())', tds, true], %w{e3}],
+    # >> [:tds]
+    [[:tds], {:include_inner_text => true}] =>
       [tr_path['normalize-space(.)', nil, nil], %w{e2 e3 e5 e6}],
-    [[:cells], {:include_inner_text => false}] =>
+    [[:tds], {:include_inner_text => false}] =>
       [tr_path['normalize-space(text())', nil, nil], %w{e2 e3 e5}],
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:case_sensitive => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:cells => {...}}
-    [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:case_sensitive => true}] =>
-      [tr_path['normalize-space(.)', cells, nil], %w{e3}],
-    [{:cells => (cells = {'#' => '2', 'full name' => 'john tan'})}, {:case_sensitive => true}] =>
-      [tr_path['normalize-space(.)', cells, nil], %w{}],
-    [{:cells => (cells = {'#' => '2', 'full name' => 'john tan'})}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing('normalize-space(.)'), downcase[cells], nil], %w{e3}],
-    [{:cells => (cells = {'#' => '2', 'Full Name' => 'John Tan'})}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing('normalize-space(.)'), downcase[cells], nil], %w{e3}],
-    # >> {:cells => [...]}
-    [{:cells => (cells = ['2', 'John Tan'])}, {:case_sensitive => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = ['2', 'john tan'])}, {:case_sensitive => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = ['2', 'john tan'])}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing('normalize-space(.)'), downcase[cells], true], %w{e3}],
-    [{:cells => (cells = ['2', 'John Tan'])}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing('normalize-space(.)'), downcase[cells], true], %w{e3}],
-    # >> [:cells] (NA)
+    # >> {:tds => {...}}
+    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:case_sensitive => true}] =>
+      [tr_path['normalize-space(.)', tds, nil], %w{e3}],
+    [{:tds => (tds = {'#' => '2', 'full name' => 'john tan'})}, {:case_sensitive => true}] =>
+      [tr_path['normalize-space(.)', tds, nil], %w{}],
+    [{:tds => (tds = {'#' => '2', 'full name' => 'john tan'})}, {:case_sensitive => false}] =>
+      [tr_path[translate_casing('normalize-space(.)'), downcase[tds], nil], %w{e3}],
+    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:case_sensitive => false}] =>
+      [tr_path[translate_casing('normalize-space(.)'), downcase[tds], nil], %w{e3}],
+    # >> {:tds => [...]}
+    [{:tds => (tds = ['2', 'John Tan'])}, {:case_sensitive => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{e3}],
+    [{:tds => (tds = ['2', 'john tan'])}, {:case_sensitive => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{}],
+    [{:tds => (tds = ['2', 'john tan'])}, {:case_sensitive => false}] =>
+      [tr_path[translate_casing('normalize-space(.)'), downcase[tds], true], %w{e3}],
+    [{:tds => (tds = ['2', 'John Tan'])}, {:case_sensitive => false}] =>
+      [tr_path[translate_casing('normalize-space(.)'), downcase[tds], true], %w{e3}],
+    # >> [:tds] (NA)
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:match_ordering => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:cells => {...}}
-    [{:cells => (cells = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => false}] =>
-      [tr_path['normalize-space(.)', cells, false], %w{e3}],
-    [{:cells => (cells = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => false}] =>
-      [tr_path['normalize-space(.)', cells, false], %w{e3}],
-    # >> {:cells => [...]}
-    [{:cells => (cells = ['2', %w{John Tan}])}, {:match_ordering => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{e3}],
-    [{:cells => (cells = [%w{John Tan}, '2'])}, {:match_ordering => true}] =>
-      [tr_path['normalize-space(.)', cells, true], %w{}],
-    [{:cells => (cells = ['2', %w{Tan John}])}, {:match_ordering => false}] =>
-      [tr_path['normalize-space(.)', cells, false], %w{e3}],
-    [{:cells => (cells = [%w{Tan John}, '2'])}, {:match_ordering => false}] =>
-      [tr_path['normalize-space(.)', cells, false], %w{e3}],
-    # >> [:cells] (NA)
+    # >> {:tds => {...}}
+    [{:tds => (tds = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{e3}],
+    [{:tds => (tds = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{}],
+    [{:tds => (tds = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => false}] =>
+      [tr_path['normalize-space(.)', tds, false], %w{e3}],
+    [{:tds => (tds = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => false}] =>
+      [tr_path['normalize-space(.)', tds, false], %w{e3}],
+    # >> {:tds => [...]}
+    [{:tds => (tds = ['2', %w{John Tan}])}, {:match_ordering => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{e3}],
+    [{:tds => (tds = [%w{John Tan}, '2'])}, {:match_ordering => true}] =>
+      [tr_path['normalize-space(.)', tds, true], %w{}],
+    [{:tds => (tds = ['2', %w{Tan John}])}, {:match_ordering => false}] =>
+      [tr_path['normalize-space(.)', tds, false], %w{e3}],
+    [{:tds => (tds = [%w{Tan John}, '2'])}, {:match_ordering => false}] =>
+      [tr_path['normalize-space(.)', tds, false], %w{e3}],
+    # >> [:tds] (NA)
     # ///////////////////////////////////////////////////////////////////////////////////////////
     # {:axial_node => ... }
     # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:cells => {...}}
-    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axial_node => 'self::*'}] =>
-      [tr_axed_path['normalize-space(.)', cells, 'self::*', true], %w{}],
-    [{:cells => (cells = {'Full Name' => 'Tan'})}, {:axial_node => 'descendant::*'}] =>
-      [tr_axed_path['normalize-space(.)', cells, 'descendant::*', true], %w{e3}],
-    # >> {:cells => [...]}
-    [{:cells => (cells = ['Tan'])}, {:axial_node => 'self::*'}] =>
-      [tr_axed_path['normalize-space(.)', cells, 'self::*', true], %w{}],
-    [{:cells => (cells = ['Tan'])}, {:axial_node => 'descendant::*'}] =>
-      [tr_axed_path['normalize-space(.)', cells, 'descendant::*', true], %w{e3}],
-    # >> [:cells]
-    [[:cells], {:axial_node => 'self::*'}] =>
+    # >> {:tds => {...}}
+    [{:tds => (tds = {'Full Name' => 'Tan'})}, {:axial_node => 'self::*'}] =>
+      [tr_axed_path['normalize-space(.)', tds, 'self::*', true], %w{}],
+    [{:tds => (tds = {'Full Name' => 'Tan'})}, {:axial_node => 'descendant::*'}] =>
+      [tr_axed_path['normalize-space(.)', tds, 'descendant::*', true], %w{e3}],
+    # >> {:tds => [...]}
+    [{:tds => (tds = ['Tan'])}, {:axial_node => 'self::*'}] =>
+      [tr_axed_path['normalize-space(.)', tds, 'self::*', true], %w{}],
+    [{:tds => (tds = ['Tan'])}, {:axial_node => 'descendant::*'}] =>
+      [tr_axed_path['normalize-space(.)', tds, 'descendant::*', true], %w{e3}],
+    # >> [:tds]
+    [[:tds], {:axial_node => 'self::*'}] =>
       [tr_axed_path['normalize-space(.)', nil, 'self::*', true], %w{e2 e3 e5 e6}],
-    [[:cells], {:axial_node => 'descendant::*'}] =>
+    [[:tds], {:axial_node => 'descendant::*'}] =>
       [tr_axed_path['normalize-space(.)', nil, 'descendant::*', true], %w{e2 e3 e6}],
   }.each do |(match_attrs, config), (expected_path, expected_ids)|
 

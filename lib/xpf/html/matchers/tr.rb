@@ -6,18 +6,18 @@ module XPF
         class Group < CM::Group
 
           def condition
-            cell_matchers, other_matchers = typed_matchers
+            td_matchers, other_matchers = typed_matchers
             [
-              cell_matchers && ('%s' % cell_matchers.map(&:condition).join('][')),
+              td_matchers && ('%s' % td_matchers.map(&:condition).join('][')),
               other_matchers && mc(other_matchers.map(&:condition)),
             ].compact.join('')
           end
 
           def text_or_attr_matcher(name, val, config)
-            name != :cells ? super : (
+            name != :tds ? super : (
               klass = val == nil_value ? :'Nil' : :"#{val.class.to_s}"
               HM::TD.const_get(klass).new('./', val, config) rescue \
-                raise InvalidMatchAttrError.new('Match attribute :cells must be a Hash or Array !!')
+                raise InvalidMatchAttrError.new('Match attribute :tds must be a Hash or Array !!')
             )
           end
 
