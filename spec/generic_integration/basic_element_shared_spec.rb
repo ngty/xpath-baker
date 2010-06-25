@@ -14,7 +14,7 @@ shared 'a basic element' do
     XPF.configure(:reset)
   end
 
-  [xpf_single_match_attrs_args,xpf_multiple_match_attrs_args].flatten(1).
+  [xpf_single_match_attrs_args, xpf_multiple_match_attrs_args].flatten(1).
     each do |(debug, get_ids, match_attrs, config, expected)|
 
       args = config.empty? ? match_attrs : (match_attrs + [config])
@@ -44,7 +44,7 @@ shared 'a basic element' do
       end
     end
 
-  xpf_no_match_attrs_args.each do |debug, get_ids, config, ignored_config, expected|
+  xpf_no_match_attrs_args.each do |debug, get_ids, config, expected|
 
     if config.is_a?(Hash)
       describe "> no match attrs nor config specified (w global config as #{config.inspect}) (##{debug})" do
@@ -52,15 +52,6 @@ shared 'a basic element' do
         should "return xpath as described" do
           @xpf_global_configure[config]
           each_xpf {|x| x.send(@element).should.equal(expected[@element,0]) }
-        end
-
-        should "always return xpath as described (ignoring changes in other config settings)" do
-          ignored_config.each do |setting, vals|
-            vals.each do |val|
-              @xpf_global_configure[config.merge(setting => val)]
-              each_xpf {|x| x.send(@element).should.equal(expected[@element,0]) }
-            end
-          end
         end
 
         should "return xpath that match intended node(s)" do
@@ -83,18 +74,6 @@ shared 'a basic element' do
 
       should "return xpath as described" do
         each_xpf {|x| x.send(@element, config).should.equal(expected[@element,0]) }
-      end
-
-      if config.is_a?(Hash)
-        should "always return xpath as described (ignoring changes in other config settings)" do
-          ignored_config.each do |setting, vals|
-            vals.each do |val|
-              each_xpf do |x|
-                x.send(@element, config.merge(setting => val)).should.equal(expected[@element,0])
-              end
-            end
-          end
-        end
       end
 
       should "return xpath that match intended node(s)" do
