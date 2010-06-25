@@ -14,7 +14,8 @@ module XPF
         (klass = Class.new(XPF::Matchers::Matcher(*attrs))).send(:define_method, :condition) do
           '((%s:%s:%s))' % [
             self.class.to_s.downcase.split('::')[-2..-1],
-            attrs.map{|attr| diffentiable_val(self.send(attr)) }.join(',')
+            respond_to?(:matchers) && matchers.empty? ? nil :
+              attrs.map{|attr| diffentiable_val(self.send(attr)) }.join(',')
           ].flatten
         end
         klass
