@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'ignore_settings_shared_data')
+
 shared 'basic node matcher' do
 
   describe '> generating condition (w valid string value)' do
@@ -51,6 +53,15 @@ shared 'basic node matcher' do
       @condition_should_equal[{}, %|normalize-space(#{@name})=concat("val-",'"',"x",'"',"")|]
     end
 
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :include_inner_text, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
+    end
+
   end
 
   describe '> generating condition (w valid single element array value)' do
@@ -92,6 +103,15 @@ shared 'basic node matcher' do
     should 'ignore all other specified config[:comparison]' do
       %w{= > >= < <=}.each do |op|
         @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :include_inner_text, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
       end
     end
 
@@ -147,6 +167,15 @@ shared 'basic node matcher' do
       @condition_should_equal[{:match_ordering => false}, expected]
     end
 
+    xpf_immune_settings_args(
+      :greedy, :include_inner_text, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
+    end
+
   end
 
   describe '> generating condition (with invalid value NIL_VALUE)' do
@@ -178,6 +207,16 @@ shared 'basic node matcher' do
 
     should 'not have space normalized when config[:normalize_space] is false' do
       @condition_should_equal[{:normalize_space => false}, %|#{@name}|]
+    end
+
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :include_inner_text, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher,
+      :case_sensitive
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
     end
 
   end

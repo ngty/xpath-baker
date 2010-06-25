@@ -27,7 +27,8 @@ module XPF
         :Attribute => [:name, :value, :config],
         :Text => [:value, :config],
         :AnyText => [:value, :config],
-        :Literal => [:value, :config]
+        :Literal => [:value, :config],
+        :Group => [:matchers, :config]
       }.each do |name, attrs|
         [X,Y].each{|mod| mod.const_set(name, new_klass(*attrs)) }
       end

@@ -1,3 +1,5 @@
+require File.join(File.dirname(__FILE__), 'ignore_settings_shared_data')
+
 shared 'a basic text matcher' do
 
   describe '> generating condition (with valid string value)' do
@@ -58,6 +60,15 @@ shared 'a basic text matcher' do
       @condition_should_equal[{}, %|normalize-space(.)=concat("text-",'"',"x",'"',"")|]
     end
 
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
+    end
+
   end
 
   describe '> generating condition (w valid single element array value)' do
@@ -97,6 +108,15 @@ shared 'a basic text matcher' do
     should 'ignore all other specified config[:comparison]' do
       %w{= > >= < <=}.each do |op|
         @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
       end
     end
 
@@ -151,6 +171,15 @@ shared 'a basic text matcher' do
       @condition_should_equal[{:match_ordering => false}, expected]
     end
 
+    xpf_immune_settings_args(
+      :greedy, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
+    end
+
   end
 
   describe '> generating condition (with invalid value NIL_VALUE)' do
@@ -189,6 +218,16 @@ shared 'a basic text matcher' do
 
     should 'not include inner text when config[:include_inner_text] is false' do
       @condition_should_equal[{:include_inner_text => false}, %|normalize-space(text())|]
+    end
+
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :scope, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher,
+      :case_sensitive
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
     end
 
   end

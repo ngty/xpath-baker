@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require File.join(File.dirname(__FILE__), 'ignore_settings_shared_data')
 
 describe "XPF::Matchers::Group" do
 
@@ -107,17 +108,11 @@ describe "XPF::Matchers::Group" do
         ].sort.join('')
     end
 
-    {
-      :scope => [{:scope => val1 = '//awe/some/'}, {:scope => val2 = '//wonderous/'}, [val1], [val2]],
-      :greedy => [{:greedy => false}, {:greedy => true}, %w{g}, %w{!g}],
-      :match_ordering => [{:match_ordering => true}, {:match_ordering => false}, %w{o}, %w{!o}],
-      :position => [{:position => 0}, {:position => 10}, %w{0}, %w{10}],
-      :case_sensitive => [{:case_sensitive => true}, {:case_sensitive => false}, %w{c}, %w{!c}],
-      :include_inner_text => [{:include_inner_text => true}, {:include_inner_text => false}, %w{i}, %w{!i}],
-      :normalize_space => [{:normalize_space => true}, {:normalize_space => false}, %w{n}, %w{!n}],
-      :comparison => [{:comparison => '!='}, {:comparison => '>='}, %w{!=}, %w{=}]
-    }.each do |setting, configs|
-      should "return expr ignoring any specified :#{setting}" do
+    xpf_immune_settings_args(
+      :scope, :greedy, :match_ordering, :position, :case_sensitive, :include_inner_text,
+      :normalize_space, :comparison
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
         configs.each do |config|
           {
             array_match_attrs => expected_array_conds[config],

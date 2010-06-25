@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require File.join(File.dirname(__FILE__), 'ignore_settings_shared_data')
 
 describe 'XPF::Matchers::AnyText' do
 
@@ -63,9 +64,13 @@ describe 'XPF::Matchers::AnyText' do
       @condition_should_equal[{}, '(%s) or (%s)' % tokens]
     end
 
-    should 'ignore config[:include_inner_text]' do
-      @condition_should_equal[{:include_inner_text => true}, @default]
-      @condition_should_equal[{:include_inner_text => false}, @default]
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :scope, :include_inner_text, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
     end
 
   end
@@ -94,11 +99,6 @@ describe 'XPF::Matchers::AnyText' do
       @condition_should_equal[{:case_sensitive => false}, '(%s) or (%s)' % tokens]
     end
 
-    should 'ignore config[:include_inner_text]' do
-      @condition_should_equal[{:include_inner_text => true}, @default]
-      @condition_should_equal[{:include_inner_text => false}, @default]
-    end
-
     should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
       %w{! != !> !>= !< !<=}.each do |op|
         @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
@@ -108,6 +108,15 @@ describe 'XPF::Matchers::AnyText' do
     should 'ignore all other specified config[:comparison]' do
       %w{= > >= < <=}.each do |op|
         @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
+    xpf_immune_settings_args(
+      :greedy, :match_ordering, :scope, :include_inner_text, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
       end
     end
 
@@ -153,11 +162,6 @@ describe 'XPF::Matchers::AnyText' do
       @condition_should_equal[{:match_ordering => false}, '(%s) or (%s)' % tokens]
     end
 
-    should 'ignore config[:include_inner_text]' do
-      @condition_should_equal[{:include_inner_text => true}, @default]
-      @condition_should_equal[{:include_inner_text => false}, @default]
-    end
-
     should "apply negation when config[:comparison] is any of: !, !=, !>, !<, !>=, !<=" do
       %w{! != !> !>= !< !<=}.each do |op|
         @condition_should_equal[{:comparison => op}, %|not(#{@default})|]
@@ -167,6 +171,15 @@ describe 'XPF::Matchers::AnyText' do
     should 'ignore all other specified config[:comparison]' do
       %w{= > >= < <=}.each do |op|
         @condition_should_equal[{:comparison => op}, @default]
+      end
+    end
+
+    xpf_immune_settings_args(
+      :greedy, :scope, :include_inner_text, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
       end
     end
 
@@ -202,9 +215,14 @@ describe 'XPF::Matchers::AnyText' do
       @condition_should_equal[{:normalize_space => false}, '(%s) or (%s)' % %w{text() . }]
     end
 
-    should 'ignore config[:include_inner_text]' do
-      @condition_should_equal[{:include_inner_text => true}, @default]
-      @condition_should_equal[{:include_inner_text => false}, @default]
+    xpf_immune_settings_args(
+      :greedy, :scope, :match_ordering, :include_inner_text, :position, :axial_node, :element_matcher,
+      :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher,
+      :case_sensitive
+    ).each do |setting, configs|
+      should "ignore config[:#{setting}]" do
+        configs.each{|config| @condition_should_equal[config, @default] }
+      end
     end
 
   end
