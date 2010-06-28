@@ -51,7 +51,7 @@ module XPF
           include Matchable
 
           def valid_condition
-            glue = config.match_ordering? ? ']/following-sibling::td[' : ']][child::td['
+            glue = config.match_ordering? ? ']/following-sibling::td[' : ']/../td['
             'child::td[%s]' % [value.map{|val| axial_cond(comparison(val)) }.join(glue)]
           end
 
