@@ -16,7 +16,7 @@ module XPF
           def text_or_attr_matcher(name, val, config)
             name != :tds ? super : (
               klass = val == nil_value ? :'Nil' : :"#{val.class.to_s}"
-              HM::TD.const_get(klass).new('./', val, config) rescue \
+              HM::TD.const_get(klass).new(val, config) rescue \
                 raise InvalidMatchAttrError.new('Match attribute :tds must be a Hash or Array !!')
             )
           end

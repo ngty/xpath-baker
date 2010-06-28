@@ -10,22 +10,26 @@ module XPF
           end
 
           def axial_cond(expr)
-            (@axial_cond ||= ('self::*' == config.axial_node) ? '%s' : "#{scope}#{config.axial_node}[%s]") % expr
+            (@axial_cond ||= ('self::*' == config.axial_node) ? '%s' : "#{config.axial_node}[%s]") % expr
+          end
+
+          def comparison(val)
+            CM::AnyText.new(val, config).condition
           end
 
         end
 
-        class Nil < CM::Matcher(:scope, :value, :config)
+        class Nil < CM::Matcher(:value, :config)
 
           include Matchable
 
           def condition
-            '%std[%s]' % [scope, axial_cond(nt)]
+            'child::td[%s]' % axial_cond(comparison(value))
           end
 
         end
 
-        class Hash < CM::Matcher(:scope, :value, :config)
+        class Hash < CM::Matcher(:value, :config)
 
           include Matchable
 
@@ -34,20 +38,21 @@ module XPF
               # NOTE: Currently, content of <th/> cannot be axed. Even though it is very
               # easy to do so by just having axial_cond(me(mt,field)), we are not sure if
               # it is useful at all.
-              th = %\./ancestor::table[1]//th[%s][1]\ % me(mt, field)
-              '%std[count(%s/preceding-sibling::th)+1][%s][%s]' % [scope, th, th, axial_cond(me(mt,val))]
+              th = %\ancestor::table[1]//th[%s][1]\ % axial_cond(comparison(field))
+              td = axial_cond(comparison(val))
+              'child::td[count(%s/preceding-sibling::th)+1][%s][%s]' % [th, th, td]
             end.join('][')
           end
 
         end
 
-        class Array < CM::Matcher(:scope, :value, :config)
+        class Array < CM::Matcher(:value, :config)
 
           include Matchable
 
           def valid_condition
-            glue = config.match_ordering? ? ']/following-sibling::td[' : (']][%std['%scope)
-            '%std[%s]' % [scope, value.map{|val| axial_cond(me(mt,val)) }.join(glue)]
+            glue = config.match_ordering? ? ']/following-sibling::td[' : ']][child::td['
+            'child::td[%s]' % [value.map{|val| axial_cond(comparison(val)) }.join(glue)]
           end
 
         end

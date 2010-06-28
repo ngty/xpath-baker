@@ -54,7 +54,11 @@ end
 
 def translate_casing(expr)
   uc, lc = [('A'..'Z'), ('a'..'z')].map {|r| r.to_a.join('') }
-  %|translate(#{expr},"#{uc}","#{lc}")|
+  if expr.is_a?(Array)
+    expr.map{|e| translate_casing(e) }
+  else
+    %|translate(#{expr},"#{uc}","#{lc}")|
+  end
 end
 
 def each_xpf(&blk)
