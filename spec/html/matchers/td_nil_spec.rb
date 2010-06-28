@@ -18,7 +18,7 @@ describe "XPF::HTML::Matchers::TD::Nil" do
   describe '> generating condition' do
 
     before do
-      @default = 'child::td[(text()) or (.)]'
+      @default = './td[(text()) or (.)]'
       @condition_should_equal = lambda do |config, expected|
         XPF::HTML::Matchers::TD::Nil.new('dummy', XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -27,7 +27,7 @@ describe "XPF::HTML::Matchers::TD::Nil" do
 
     should 'return expr reflecting specified config[:normalize_space]' do
       {
-        true => 'child::td[(%s)]' % %w{text() .}.map{|e| %|normalize-space(#{e})| }.join(') or ('),
+        true => './td[(%s)]' % %w{text() .}.map{|e| %|normalize-space(#{e})| }.join(') or ('),
         false => @default
       }.each do |val, expected|
         @condition_should_equal[{:normalize_space => val}, expected]
@@ -37,14 +37,14 @@ describe "XPF::HTML::Matchers::TD::Nil" do
     should 'return expr reflecting specified config[:axial_node]' do
       {
         :self => @default,
-        :descendant => 'child::td[descendant::*[(text()) or (.)]]'
+        :descendant => './td[descendant::*[(text()) or (.)]]'
       }.each do |axial_node, expected|
         @condition_should_equal[{:axial_node => axial_node}, expected]
       end
     end
 
     should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
-      expected = 'child::td[not((text()) or (.))]'
+      expected = './td[not((text()) or (.))]'
       %w{! != !> !>= !< !<=}.each do |op|
         @condition_should_equal[{:comparison => op}, expected]
       end

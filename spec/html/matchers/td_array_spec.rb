@@ -20,7 +20,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     before do
       @values = %w{AWE SOME}
-      @default = 'child::td[%s]/../td[%s]' % @values.map{|val| %|(text()="#{val}") or (.="#{val}")| }
+      @default = './td[%s]/../td[%s]' % @values.map{|val| %|(text()="#{val}") or (.="#{val}")| }
       @condition_should_equal = lambda do |config, expected|
         XPF::HTML::Matchers::TD::Array.new(@values, XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -29,7 +29,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:normalize_space]' do
       {
-        true => 'child::td[%s]/../td[%s]' %
+        true => './td[%s]/../td[%s]' %
           @values.map{|val| %|(normalize-space(text())="#{val}") or (normalize-space(.)="#{val}")| },
         false => @default
       }.each do |val, expected|
@@ -39,7 +39,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:case_sensitive]' do
       {
-        false => 'child::td[%s]/../td[%s]' % @values.
+        false => './td[%s]/../td[%s]' % @values.
           map{|val| '(%s) or (%s)' % %w{text() .}.map{|e| %|#{translate_casing(e)}="#{val.downcase}"| } },
         true => @default
       }.each do |val, expected|
@@ -49,7 +49,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:match_ordering]' do
       {
-        true => 'child::td[%s]/following-sibling::td[%s]' %
+        true => './td[%s]/following-sibling::td[%s]' %
           @values.map{|val| %|(text()="#{val}") or (.="#{val}")| },
         false => @default
       }.each do |val, expected|
@@ -60,7 +60,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
     should 'return expr reflecting specified config[:axial_node]' do
       {
         :self => @default,
-        :descendant => 'child::td[descendant::*[%s]]/../td[descendant::*[%s]]' %
+        :descendant => './td[descendant::*[%s]]/../td[descendant::*[%s]]' %
           @values.map{|val| %|(text()="#{val}") or (.="#{val}")| }
       }.each do |axial_node, expected|
         @condition_should_equal[{:axial_node => axial_node}, expected]
@@ -81,7 +81,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
         '<='   => '(%s<=%s) or (%s<=%s)',
         '!<='  => 'not((%s<=%s) or (%s<=%s))',
       }.each do |op, expected|
-        expected = 'child::td[%s]/../td[%s]' %
+        expected = './td[%s]/../td[%s]' %
           @values.map{|val| expected % ['text()', %|"#{val}"|, '.', %|"#{val}"|] }
         @condition_should_equal[{:comparison => op}, expected]
       end
@@ -105,7 +105,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     before do
       @values = [%w{AWE SOME}, %w{WONDER}]
-      @default = 'child::td[%s]/../td[%s]' % @values.
+      @default = './td[%s]/../td[%s]' % @values.
         map{|vals| '(%s) or (%s)' % %w{text() .}.map{|e| check_tokens(e, vals.map{|v| %|"#{v}"| }, false) } }
       @condition_should_equal = lambda do |config, expected|
         XPF::HTML::Matchers::TD::Array.new(@values, XPF::Configuration.new(config)).
@@ -115,7 +115,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:normalize_space]' do
       {
-        true => 'child::td[%s]/../td[%s]' % @values.map{|vals| '(%s) or (%s)' % %w{text() .}.
+        true => './td[%s]/../td[%s]' % @values.map{|vals| '(%s) or (%s)' % %w{text() .}.
           map{|e| check_tokens("normalize-space(#{e})", vals.map{|v| %|"#{v}"| }, false) }},
         false => @default
       }.each do |val, expected|
@@ -125,7 +125,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:case_sensitive]' do
       {
-        false => 'child::td[%s]/../td[%s]' % @values.map{|vals| '(%s) or (%s)' % %w{text() .}.
+        false => './td[%s]/../td[%s]' % @values.map{|vals| '(%s) or (%s)' % %w{text() .}.
           map{|e| check_tokens(translate_casing(e), vals.map{|v| %|"#{v.downcase}"| }, false) }},
         true => @default
       }.each do |val, expected|
@@ -135,7 +135,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:match_ordering]' do
       {
-        true => 'child::td[%s]/following-sibling::td[%s]' % @values.map{|vals| '(%s) or (%s)' % %w{text() .}.
+        true => './td[%s]/following-sibling::td[%s]' % @values.map{|vals| '(%s) or (%s)' % %w{text() .}.
           map{|e| check_tokens(e, vals.map{|v| %|"#{v}"| }, true) }},
         false => @default
       }.each do |val, expected|
@@ -145,7 +145,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
     should 'return expr reflecting specified config[:axial_node]' do
       {
-        :descendant => 'child::td[descendant::*[%s]]/../td[descendant::*[%s]]' % @values.
+        :descendant => './td[descendant::*[%s]]/../td[descendant::*[%s]]' % @values.
           map{|vals| '(%s) or (%s)' % %w{text() .}.map{|e| check_tokens(e, vals.map{|v| %|"#{v}"| }, false) }},
         :self => @default,
       }.each do |axial_node, expected|
@@ -154,7 +154,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
     end
 
     should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
-      expected = 'child::td[not(%s)]/../td[not(%s)]' % @values.
+      expected = './td[not(%s)]/../td[not(%s)]' % @values.
         map{|vals| '(%s) or (%s)' % %w{text() .}.map{|e| check_tokens(e, vals.map{|v| %|"#{v}"| }, false) }}
       %w{! != !> !>= !< !<=}.each do |op|
         @condition_should_equal[{:comparison => op}, expected]

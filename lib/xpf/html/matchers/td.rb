@@ -24,7 +24,7 @@ module XPF
           include Matchable
 
           def condition
-            'child::td[%s]' % axial_cond(comparison(nil_value))
+            './td[%s]' % axial_cond(comparison(nil_value))
           end
 
         end
@@ -40,7 +40,7 @@ module XPF
               # it is useful at all.
               th = %\ancestor::table[1]//th[%s][1]\ % axial_cond(comparison(field))
               td = axial_cond(comparison(val))
-              'child::td[count(%s/preceding-sibling::th)+1][%s][%s]' % [th, th, td]
+              './td[count(%s/preceding-sibling::th)+1][%s][%s]' % [th, th, td]
             end.join('][')
           end
 
@@ -52,7 +52,7 @@ module XPF
 
           def valid_condition
             glue = config.match_ordering? ? ']/following-sibling::td[' : ']/../td['
-            'child::td[%s]' % [value.map{|val| axial_cond(comparison(val)) }.join(glue)]
+            './td[%s]' % [value.map{|val| axial_cond(comparison(val)) }.join(glue)]
           end
 
         end
