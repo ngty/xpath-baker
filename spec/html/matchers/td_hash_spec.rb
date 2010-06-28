@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
+require File.join(File.dirname(__FILE__), 'spec_helpers')
 require 'xpf/html'
 
 describe "XPF::HTML::Matchers::TD::Hash" do
@@ -16,24 +17,18 @@ describe "XPF::HTML::Matchers::TD::Hash" do
     end
   end
 
-  token_comparison = lambda{|exprs, vals, sorted| '(%s) or (%s)' % exprs.map{|e| check_tokens(e, quote_vals(vals), sorted) }}
-  unsorted_token_comparison = lambda{|exprs, vals| token_comparison[exprs, vals, false] }
-  sorted_token_comparison = lambda{|exprs, vals| token_comparison[exprs, vals, true] }
-  string_comparison = lambda{|exprs, val| '(%s) or (%s)' % exprs.map{|e| %|#{e}="#{val}"| }}
-
-  nt, nd = %w{text() .}.map{|e| "normalize-space(#{e})" }
-  tt, td = %w{text() .}.map{|e| translate_casing(e) }
-
   after do
     XPF.configure(:reset)
   end
 
   describe '> generating condition (for string values)' do
 
+    extend XPF::Spec::Helpers::TD
+
     before do
       @values = {'#' => '1', 'Name' => 'John Tan'}
       @default = './td[%s]/../td[%s]' % @values.map do |field, val|
-        comparison = lambda{|v| string_comparison[%w{text() .}, v] }
+        comparison = lambda{|v| string_comparison(content_exprs, v) }
         th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
         'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
       end
@@ -43,7 +38,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         false => @default,
         true => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| string_comparison[[nt,nd], v] }
+          comparison = lambda{|v| string_comparison(normalized_content_exprs, v) }
           th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
         end,
@@ -56,7 +51,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         true => @default,
         false => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| string_comparison[[tt,td], v] }
+          comparison = lambda{|v| string_comparison(translated_content_exprs, v) }
           th = %|ancestor::table[1]//th[%s][1]| % comparison[field.downcase]
           'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val.downcase]]
         end,
@@ -69,7 +64,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         :self => @default,
         :descendant => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| string_comparison[%w{text() .}, v] }
+          comparison = lambda{|v| string_comparison(content_exprs, v) }
           th = %|ancestor::table[1]//th[descendant::*[%s]][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][descendant::*[%s]' % [th, th, comparison[val]]
         end
@@ -118,10 +113,12 @@ describe "XPF::HTML::Matchers::TD::Hash" do
 
   describe '> generating condition (for array values)' do
 
+    extend XPF::Spec::Helpers::TD
+
     before do
       @values = {%w{#} => %w{1}, %w{Full Name} => %w{John Tan}}
       @default = './td[%s]/../td[%s]' % @values.map do |field, val|
-        comparison = lambda{|v| unsorted_token_comparison[%w{text() .}, v] }
+        comparison = lambda{|v| unsorted_token_comparison(content_exprs, v) }
         th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
         'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
       end
@@ -131,7 +128,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         false => @default,
         true => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| unsorted_token_comparison[[nt,nd], v] }
+          comparison = lambda{|v| unsorted_token_comparison(normalized_content_exprs, v) }
           th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
         end
@@ -144,7 +141,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         true => @default,
         false => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| unsorted_token_comparison[[tt,td], v.map(&:downcase)] }
+          comparison = lambda{|v| unsorted_token_comparison(translated_content_exprs, v.map(&:downcase)) }
           th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
         end
@@ -157,7 +154,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         false => @default,
         true => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| sorted_token_comparison[%w{text() .}, v] }
+          comparison = lambda{|v| sorted_token_comparison(content_exprs, v) }
           th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
         end
@@ -170,7 +167,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         :self => @default,
         :descendant => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| unsorted_token_comparison[%w{text() .}, v] }
+          comparison = lambda{|v| unsorted_token_comparison(content_exprs, v) }
           th = %|ancestor::table[1]//th[descendant::*[%s]][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][descendant::*[%s]' % [th, th, comparison[val]]
         end
@@ -181,7 +178,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
 
     should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
       expected = './td[%s]/../td[%s]' % @values.map do |field, val|
-        comparison = lambda{|v| unsorted_token_comparison[%w{text() .}, v] }
+        comparison = lambda{|v| unsorted_token_comparison(content_exprs, v) }
         th = %|ancestor::table[1]//th[not(%s)][1]| % comparison[field]
         'count(%s/preceding-sibling::th)+1][%s][not(%s)' % [th, th, comparison[val]]
       end

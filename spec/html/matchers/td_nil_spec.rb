@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
+require File.join(File.dirname(__FILE__), 'spec_helpers')
 require 'xpf/html'
 
 describe "XPF::HTML::Matchers::TD::Nil" do
@@ -8,6 +9,10 @@ describe "XPF::HTML::Matchers::TD::Nil" do
       config.normalize_space = false
       config.case_sensitive = true
       config.axial_node = :self
+    end
+    @condition_should_equal = lambda do |config, expected|
+      XPF::HTML::Matchers::TD::Nil.new('dummy', XPF::Configuration.new(config)).
+        condition.should.equal(expected)
     end
   end
 
@@ -19,10 +24,6 @@ describe "XPF::HTML::Matchers::TD::Nil" do
 
     before do
       @default = './td[(text()) or (.)]'
-      @condition_should_equal = lambda do |config, expected|
-        XPF::HTML::Matchers::TD::Nil.new('dummy', XPF::Configuration.new(config)).
-          condition.should.equal(expected)
-      end
     end
 
     should 'return expr reflecting specified config[:normalize_space]' do
@@ -50,7 +51,7 @@ describe "XPF::HTML::Matchers::TD::Nil" do
       end
     end
 
-    should 'ignore all other specified config[:comparison]' do
+    should 'apply equality when config[:comparison] is any of: = > >= < <=' do
       %w{= > >= < <=}.each do |op|
         @condition_should_equal[{:comparison => op}, @default]
       end
