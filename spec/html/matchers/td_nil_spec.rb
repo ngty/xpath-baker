@@ -5,10 +5,9 @@ describe "XPF::HTML::Matchers::TD::Nil" do
 
   before do
     XPF.configure(:reset) do |config|
-      config.normalize_space = true
+      config.normalize_space = false
       config.case_sensitive = true
       config.axial_node = :self
-      config.match_ordering = true
     end
   end
 
@@ -19,7 +18,7 @@ describe "XPF::HTML::Matchers::TD::Nil" do
   describe '> generating condition' do
 
     before do
-      @default = 'child::td[(normalize-space(text())) or (normalize-space(.))]'
+      @default = 'child::td[(text()) or (.)]'
       @condition_should_equal = lambda do |config, expected|
         XPF::HTML::Matchers::TD::Nil.new('dummy', XPF::Configuration.new(config)).
           condition.should.equal(expected)
@@ -27,21 +26,25 @@ describe "XPF::HTML::Matchers::TD::Nil" do
     end
 
     should 'return expr reflecting specified config[:normalize_space]' do
-      @condition_should_equal[{:normalize_space => true}, @default]
-      @condition_should_equal[{:normalize_space => false}, 'child::td[(text()) or (.)]']
+      {
+        true => 'child::td[(%s)]' % %w{text() .}.map{|e| %|normalize-space(#{e})| }.join(') or ('),
+        false => @default
+      }.each do |val, expected|
+        @condition_should_equal[{:normalize_space => val}, expected]
+      end
     end
 
     should 'return expr reflecting specified config[:axial_node]' do
       {
         :self => @default,
-        :descendant => 'child::td[descendant::*[(normalize-space(text())) or (normalize-space(.))]]'
+        :descendant => 'child::td[descendant::*[(text()) or (.)]]'
       }.each do |axial_node, expected|
         @condition_should_equal[{:axial_node => axial_node}, expected]
       end
     end
 
     should "apply negation when config[:comparison] is any of: ! != !> !< !>= !<=" do
-      expected = 'child::td[not((normalize-space(text())) or (normalize-space(.)))]'
+      expected = 'child::td[not((text()) or (.))]'
       %w{! != !> !>= !< !<=}.each do |op|
         @condition_should_equal[{:comparison => op}, expected]
       end
