@@ -24,7 +24,7 @@ module XPF
           include Matchable
 
           def condition
-            'child::td[%s]' % axial_cond(comparison(value))
+            'child::td[%s]' % axial_cond(comparison(nil_value))
           end
 
         end
