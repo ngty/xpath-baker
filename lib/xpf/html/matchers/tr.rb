@@ -7,18 +7,12 @@ module XPF
 
           def condition
             td_matchers, other_matchers = typed_matchers
-            [
-              td_matchers && ('%s' % td_matchers.map(&:condition).join('][')),
-              other_matchers && mc(other_matchers.map(&:condition)),
-            ].compact.join('')
-          end
-
-          def text_or_attr_matcher(name, val, config)
-            name != :tds ? super : (
-              klass = val == nil_value ? :'Nil' : :"#{val.class.to_s}"
-              HM::TD.const_get(klass).new(val, config) rescue \
-                raise InvalidMatchAttrError.new('Match attribute :tds must be a Hash or Array !!')
-            )
+            (
+              conditions = [
+                td_matchers && ('%s' % td_matchers.map(&:condition).join('][')),
+                mc((other_matchers || []).map(&:condition)),
+              ].compact
+            ).empty? ? nil : conditions.join('][')
           end
 
           def typed_matchers
@@ -26,6 +20,16 @@ module XPF
               %w{Nil Hash Array}.any?{|klass| m.is_a?(HM::TD.const_get(klass)) }
             end
             [true, false].map{|key| _matchers[key] && _matchers[key] }
+          end
+
+          def typed_matcher(name, val, config)
+            name != :tds ? super : new_typed_matcher(val, config)
+          end
+
+          def new_typed_matcher(val, config)
+            klass = val == nil_value ? :'Nil' : :"#{val.class.to_s}"
+            HM::TD.const_get(klass).new(val, config) rescue \
+              raise InvalidMatchAttrError.new('Match attribute :tds must be a Hash or Array !!')
           end
 
         end
