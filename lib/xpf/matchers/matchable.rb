@@ -61,7 +61,7 @@ module XPF
         end
 
         def q(str) #:nodoc:
-          !str.include?('"') ? %\"#{str}"\ : (
+          !(str = "#{str}").include?('"') ? %\"#{str}"\ : (
             'concat(%s)' % str.split('"',-1).map {|s| %\"#{s}"\ }.join(%\,'"',\)
           )
         end
