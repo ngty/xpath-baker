@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), 'ignore_settings_shared_data')
-
 shared 'a basic text matcher' do
 
   describe '> generating condition (with valid string value)' do
@@ -60,7 +58,7 @@ shared 'a basic text matcher' do
       @condition_should_equal[{}, %|normalize-space(.)=concat("text-",'"',"x",'"',"")|]
     end
 
-    xpf_immune_settings_args(
+    valid_config_settings_args(
       :greedy, :match_ordering, :scope, :position, :axial_node, :element_matcher,
       :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
     ).each do |setting, configs|
@@ -111,7 +109,7 @@ shared 'a basic text matcher' do
       end
     end
 
-    xpf_immune_settings_args(
+    valid_config_settings_args(
       :greedy, :match_ordering, :scope, :position, :axial_node, :element_matcher,
       :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
     ).each do |setting, configs|
@@ -171,7 +169,7 @@ shared 'a basic text matcher' do
       @condition_should_equal[{:match_ordering => false}, expected]
     end
 
-    xpf_immune_settings_args(
+    valid_config_settings_args(
       :greedy, :scope, :position, :axial_node, :element_matcher,
       :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
     ).each do |setting, configs|
@@ -220,7 +218,7 @@ shared 'a basic text matcher' do
       @condition_should_equal[{:include_inner_text => false}, %|normalize-space(text())|]
     end
 
-    xpf_immune_settings_args(
+    valid_config_settings_args(
       :greedy, :match_ordering, :scope, :position, :axial_node, :element_matcher,
       :attribute_matcher, :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher,
       :case_sensitive

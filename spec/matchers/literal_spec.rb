@@ -1,5 +1,4 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
-require File.join(File.dirname(__FILE__), 'ignore_settings_shared_data')
 
 describe "XPF::Matchers::Literal" do
 
@@ -16,7 +15,7 @@ describe "XPF::Matchers::Literal" do
       @condition_should_equal[{}, @default]
     end
 
-    xpf_immune_settings_args(
+    valid_config_settings_args(
       :greedy, :match_ordering, :case_sensitive, :include_inner_text, :normalize_space,
       :comparison, :scope, :position, :axial_node, :element_matcher, :attribute_matcher,
       :text_matcher, :any_text_matcher, :literal_matcher, :group_matcher
