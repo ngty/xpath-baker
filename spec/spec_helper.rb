@@ -50,6 +50,10 @@ def diff_config(config1, config2=nil)
   (config1.to_hash.to_a - config2.to_hash.to_a).map(&:inspect) # .inject({}){|h,(k,v)| h.merge(k => v) }
 end
 
+def dump_config(config)
+  diff_config(config.is_a?(Hash) ? XPF::Configuration.new(config) : config)
+end
+
 def diffentiable_val(val)
   (val.respond_to?(:to_hash) ? diff_config(val) : val).to_s
 end
