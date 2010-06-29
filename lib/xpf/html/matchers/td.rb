@@ -34,14 +34,15 @@ module XPF
           include Matchable
 
           def valid_condition
-            value.map do |field, val|
-              # NOTE: Currently, content of <th/> cannot be axed. Even though it is very
-              # easy to do so by just having axial_cond(me(mt,field)), we are not sure if
-              # it is useful at all.
-              th = %\ancestor::table[1]//th[%s][1]\ % axial_cond(comparison(field))
-              td = axial_cond(comparison(val))
-              './td[count(%s/preceding-sibling::th)+1][%s][%s]' % [th, th, td]
-            end.join('][')
+            './td[%s]' %
+              value.map do |field, val|
+                # NOTE: Currently, content of <th/> cannot be axed. Even though it is very
+                # easy to do so by just having axial_cond(me(mt,field)), we are not sure if
+                # it is useful at all.
+                th = %\ancestor::table[1]//th[%s][1]\ % axial_cond(comparison(field))
+                td = axial_cond(comparison(val))
+                'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, td]
+              end.join(']/../td[')
           end
 
         end
