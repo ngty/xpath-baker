@@ -1,5 +1,6 @@
-require File.join(File.dirname(__FILE__), '..', 'spec_helper')
-require File.join(File.dirname(__FILE__), '..', 'html', 'matchers', 'spec_helpers')
+require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
+require File.join(File.dirname(__FILE__), '..', '..', 'matchers', 'html', 'spec_helpers')
+require File.join(File.dirname(__FILE__), '..', 'generic', 'basic_element_shared_spec')
 require 'xpf/html'
 
 describe "Generating xpath for html <tr/>" do
@@ -163,8 +164,6 @@ describe "Generating xpath for html <tr/>" do
 
   end
 
-  # NOTE: These are all we need for 'a basic html element' shared spec.
-  require File.join(File.dirname(__FILE__), '..', 'generic_integration', 'basic_element_shared_spec')
   before { @element = :tr }
   behaves_like 'a basic element'
 

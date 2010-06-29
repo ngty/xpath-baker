@@ -1,5 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
-require File.join(File.dirname(__FILE__), '..', '..', 'matchers', 'basic_group_shared_spec')
+require File.join(File.dirname(__FILE__), '..', 'generic', 'basic_group_shared_spec')
 require 'xpf/html'
 
 describe "XPF::HTML::Matchers::TR::Group" do
