@@ -21,17 +21,17 @@ module XPF
         end
 
         def convert_hash_to_matchers(match_attrs, config)
-          match_attrs.map {|name, val| text_or_attr_matcher(name, val, config) }
+          match_attrs.map {|name, val| typed_matcher(name, val, config) }
         end
 
         def convert_array_to_matchers(match_attrs, config)
           match_attrs.map do |name_or_val|
             name_or_val.is_a?(String) ? config.literal_matcher.new(name_or_val, config) :
-              text_or_attr_matcher(name_or_val, nil_value, config)
+              typed_matcher(name_or_val, nil_value, config)
           end
         end
 
-        def text_or_attr_matcher(name, val, config)
+        def typed_matcher(name, val, config)
           new_config = lambda do |flag|
             Configuration.new(config.to_hash.merge(:include_inner_text => flag))
           end
