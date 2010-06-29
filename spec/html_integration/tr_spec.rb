@@ -1,163 +1,162 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require File.join(File.dirname(__FILE__), '..', 'html', 'matchers', 'spec_helpers')
 require 'xpf/html'
 
-describe "XPF::HTML <tr/> support" do
+describe "Generating xpath for html <tr/>" do
 
-  # TODO: Part of the stuff probably fall under unit level.
+  extend XPF::Spec::Helpers::TD
 
-  tr_axed_path = lambda do |text_comparisons, tds, axial_node, match_ordering|
-    test = lambda do |val|
-      (axial_node == 'self::*' ? '(%s)' : "#{axial_node}[(%s)]") % (
-        val.is_a?(Array) ?
-          text_comparisons.map{|t| check_tokens(t, val.map{|v| %|"#{v}"| }, match_ordering) } :
-          text_comparisons.map{|t| %|#{t}="#{val}"| }
-      ).join(') or (')
+  before do
+    XPF.configure(:reset) do |config|
+      config.scope = '//'
+      config.normalize_space = false
+      config.case_sensitive = true
+      config.axial_node = :self
+      config.match_ordering = false
     end
-    '//tr[%s]' % (
-      case tds
-      when nil
-        'child::td[%s]' % (axial_node == 'self::*' ? '(%s)' : "#{axial_node}[(%s)]") %
-          text_comparisons.join(') or (')
-      when Hash
-        tds.map do |field, val|
-          th = %|ancestor::table[1]//th[#{test[field]}][1]|
-          %\child::td[count(#{th}/preceding-sibling::th)+1][#{th}][#{test[val]}]\
-        end.join('][')
-      else
-        !match_ordering ? (tds.map {|val| 'child::td[%s]' % test[val] }.join('][')) :
-          ('child::td[%s]' % tds.map {|val| test[val] }.join(']/following-sibling::td['))
+  end
+
+  after do
+    XPF.configure(:reset)
+  end
+
+  [
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> {:tds => {...}}
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+    # >> string value
+      debug = __LINE__,
+      content = %|
+        <tr id="i1"><th>#</th><th>Full Name</th></tr>
+        <tr id="i2"><td>1</td><td>Jane Loh</td></tr>
+        <tr id="i3"><td>2</td><td>John Tan</td></tr>
+      |,
+      match_attrs = {:tds => (tds = {'#' => 1, 'Full Name' => 'Jane Loh'})},
+      config = {},
+      expected_ids = %w{i2},
+      expected_path = (
+        comparison = lambda{|v| string_comparison(content_exprs, v) }
+        '//tr[./td[%s]/../td[%s]]' % tds.map do |field, val|
+          th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
+          'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
+        end
+      ),
+    ], [
+    # >> array value (sorted)
+      debug = __LINE__,
+      content,
+      match_attrs = {:tds => (tds = {%w{#} => %w{1}, %w{Name Full} => %w{Loh Jane}})},
+      config = {:match_ordering => true},
+      expected_ids = %w{},
+      expected_path = (
+        comparison = lambda{|v| sorted_token_comparison(content_exprs, v) }
+        '//tr[./td[%s]/../td[%s]]' % tds.map do |field, val|
+          th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
+          'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
+        end
+      ),
+    ], [
+    # >> array value (unsorted)
+      debug = __LINE__,
+      content,
+      match_attrs,
+      config = {:match_ordering => false},
+      expected_ids = %w{i2},
+      expected_path = (
+        comparison = lambda{|v| unsorted_token_comparison(content_exprs, v) }
+        '//tr[./td[%s]/../td[%s]]' % tds.map do |field, val|
+          th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
+          'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
+        end
+      ),
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> {:tds => [...]}
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+    # >> string value (sorted)
+      debug = __LINE__,
+      content = %|
+        <tr id="i1"><th>#</th><th>Full Name</th></tr>
+        <tr id="i2"><td>1</td><td>Jane Loh</td></tr>
+        <tr id="i3"><td>2</td><td>John Tan</td></tr>
+      |,
+      match_attrs = {:tds => (tds = ['Jane Loh', '1'])},
+      config = {:match_ordering => true},
+      expected_ids = %w{},
+      expected_path = (
+        '//tr[./td[%s]/following-sibling::td[%s]]' % tds.map do |val|
+          string_comparison(content_exprs, val)
+        end
+      ),
+    # >> string value (unsorted)
+      debug = __LINE__,
+      content,
+      match_attrs,
+      config = {:match_ordering => false},
+      expected_ids = %w{},
+      expected_path = (
+        '//tr[./td[%s]/../td[%s]]' % tds.map do |val|
+          string_comparison(content_exprs, val)
+        end
+      ),
+    ], [
+    # >> array value (sorted)
+      debug = __LINE__,
+      content,
+      match_attrs = {:tds => (tds = [%w{1}, %w{Loh Jane}])},
+      config = {:match_ordering => true},
+      expected_ids = %w{},
+      expected_path = (
+        '//tr[./td[%s]/following-sibling::td[%s]]' % tds.map do |val|
+          sorted_token_comparison(content_exprs, val)
+        end
+      ),
+    ], [
+    # >> array value (unsorted)
+      debug = __LINE__,
+      content,
+      match_attrs,
+      config = {:match_ordering => false},
+      expected_ids = %w{i2},
+      expected_path = (
+        '//tr[./td[%s]/../td[%s]]' % tds.map do |val|
+          unsorted_token_comparison(content_exprs, val)
+        end
+      ),
+    ],
+  # /////////////////////////////////////////////////////////////////////////////
+  # >> [:tds, ...]
+  # /////////////////////////////////////////////////////////////////////////////
+    [
+    # >> string value (sorted)
+      debug = __LINE__,
+      content = %|
+        <tr id="i1"><th>#</th><th>Full Name</th></tr>
+        <tr id="i2"><td>1</td><td>Jane Loh</td></tr>
+        <tr id="i3"></tr>
+      |,
+      match_attrs = [:tds],
+      config = {},
+      expected_ids = %w{i2},
+      expected_path = '//tr[./td[(text()) or (.)]]',
+    ],
+  ].each do |(debug, content, match_attrs, config, expected_ids, expected_path)|
+
+    describe '> match attrs as %s, & config as %s [#%s]' % [match_attrs.inspect, config.inspect, debug] do
+
+      get_ids = lambda do |path|
+        Nokogiri::HTML(%|<html><body><table>#{content}</table></body></html>|).
+          xpath(path).map{|node| node.attribute('id').to_s }
       end
-    )
-  end
-
-  tr_path = lambda do |text_comparisons, tds, match_ordering|
-    tr_axed_path[text_comparisons, tds, 'self::*', match_ordering]
-  end
-
-  downcase = lambda do |tds|
-    tds.is_a?(Hash) ?
-      tds.inject({}){|memo, (field,val)| memo.merge(field.downcase => val.downcase) } :
-      tds.map{|val| val.downcase }
-  end
-
-  ids = lambda do |path|
-    Nokogiri::HTML(%\
-      <html>
-        <body>
-          <table>
-            <tr id="e1"><th>#</th> <th>Full <span> Name</span></th>
-            <tr id="e2"><td> 1</td><td>Jane <span> Lee </span></td>
-            <tr id="e3"><td>2 </td><td>John <span> Tan </span></td>
-            <tr id="e4"><td>  </td><td>     <span>     </span></td>
-            <tr id="e5"><td>  </td><td>Pett <span>     </span></td>
-            <tr id="e6"><td>  </td><td>     <span> Fan </span></td>
-          </table>
-        </body>
-      </html>
-    \).xpath(path).map{|node| node.attribute('id').to_s }
-  end
-
-  {
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # {:normalize_space => ... }
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:tds => {...}}
-    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, nil], %w{e3}],
-    [{:tds => (tds = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, nil], %w{}],
-    [{:tds => (tds = {'#' => '2 ', 'Full  Name' => 'John  Tan '})}, {:normalize_space => false}] =>
-      [tr_path[%w{text() .}, tds, nil], %w{e3}],
-    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:normalize_space => false}] =>
-      [tr_path[%w{text() .}, tds, nil], %w{}],
-    # >> {:tds => [...]}
-    [{:tds => (tds = ['2', 'John Tan'])}, {:normalize_space => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{e3}],
-    [{:tds => (tds = ['2 ', 'John  Tan '])}, {:normalize_space => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{}],
-    [{:tds => (tds = ['2 ', 'John  Tan '])}, {:normalize_space => false}] =>
-      [tr_path[%w{text() .}, tds, true], %w{e3}],
-    [{:tds => (tds = ['2', 'John Tan'])}, {:normalize_space => false}] =>
-      [tr_path[%w{text() .}, tds, true], %w{}],
-    # >> [:tds]
-    [[:tds], {:normalize_space => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, nil, nil], %w{e2 e3 e5 e6}],
-    [[:tds], {:normalize_space => false}] =>
-      [tr_path[%w{text() .}, nil, nil], %w{e2 e3 e4 e5 e6}],
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # {:case_sensitive => ... }
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:tds => {...}}
-    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:case_sensitive => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, nil], %w{e3}],
-    [{:tds => (tds = {'#' => '2', 'full name' => 'john tan'})}, {:case_sensitive => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, nil], %w{}],
-    [{:tds => (tds = {'#' => '2', 'full name' => 'john tan'})}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing(%w{normalize-space(text()) normalize-space(.)}), downcase[tds], nil], %w{e3}],
-    [{:tds => (tds = {'#' => '2', 'Full Name' => 'John Tan'})}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing(%w{normalize-space(text()) normalize-space(.)}), downcase[tds], nil], %w{e3}],
-    # >> {:tds => [...]}
-    [{:tds => (tds = ['2', 'John Tan'])}, {:case_sensitive => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{e3}],
-    [{:tds => (tds = ['2', 'john tan'])}, {:case_sensitive => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{}],
-    [{:tds => (tds = ['2', 'john tan'])}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing(%w{normalize-space(text()) normalize-space(.)}), downcase[tds], true], %w{e3}],
-    [{:tds => (tds = ['2', 'John Tan'])}, {:case_sensitive => false}] =>
-      [tr_path[translate_casing(%w{normalize-space(text()) normalize-space(.)}), downcase[tds], true], %w{e3}],
-    # >> [:tds] (NA)
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # {:match_ordering => ... }
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:tds => {...}}
-    [{:tds => (tds = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{e3}],
-    [{:tds => (tds = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{}],
-    [{:tds => (tds = {'#' => '2', 'Full Name' => %w{John Tan}})}, {:match_ordering => false}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, false], %w{e3}],
-    [{:tds => (tds = {'#' => '2', %w{Name Full} => %w{Tan John}})}, {:match_ordering => false}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, false], %w{e3}],
-    # >> {:tds => [...]}
-    [{:tds => (tds = ['2', %w{John Tan}])}, {:match_ordering => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{e3}],
-    [{:tds => (tds = [%w{John Tan}, '2'])}, {:match_ordering => true}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, true], %w{}],
-    [{:tds => (tds = ['2', %w{Tan John}])}, {:match_ordering => false}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, false], %w{e3}],
-    [{:tds => (tds = [%w{Tan John}, '2'])}, {:match_ordering => false}] =>
-      [tr_path[%w{normalize-space(text()) normalize-space(.)}, tds, false], %w{e3}],
-    # >> [:tds] (NA)
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # {:axial_node => ... }
-    # ///////////////////////////////////////////////////////////////////////////////////////////
-    # >> {:tds => {...}}
-    [{:tds => (tds = {'Full Name' => 'Tan'})}, {:axial_node => 'self::*'}] =>
-      [tr_axed_path[%w{normalize-space(text()) normalize-space(.)}, tds, 'self::*', true], %w{}],
-    [{:tds => (tds = {'Full Name' => 'Tan'})}, {:axial_node => 'descendant-or-self::*'}] =>
-      [tr_axed_path[%w{normalize-space(text()) normalize-space(.)}, tds, 'descendant-or-self::*', true], %w{e3}],
-    # >> {:tds => [...]}
-    [{:tds => (tds = ['Tan'])}, {:axial_node => 'self::*'}] =>
-      [tr_axed_path[%w{normalize-space(text()) normalize-space(.)}, tds, 'self::*', true], %w{}],
-    [{:tds => (tds = ['Tan'])}, {:axial_node => 'descendant::*'}] =>
-      [tr_axed_path[%w{normalize-space(text()) normalize-space(.)}, tds, 'descendant::*', true], %w{e3}],
-    # >> [:tds]
-    [[:tds], {:axial_node => 'self::*'}] =>
-      [tr_axed_path[%w{normalize-space(text()) normalize-space(.)}, nil, 'self::*', true], %w{e2 e3 e5 e6}],
-    [[:tds], {:axial_node => 'descendant::*'}] =>
-      [tr_axed_path[%w{normalize-space(text()) normalize-space(.)}, nil, 'descendant::*', true], %w{e2 e3 e6}],
-  }.each do |(match_attrs, config), (expected_path, expected_ids)|
-
-    describe '> match attrs as %s, & w config as %s' % [match_attrs.inspect, config.inspect] do
-
-      before { XPF.configure(:reset) }
 
       should 'return xpath as described' do
         each_xpf {|xpf| xpf.send(:tr, match_attrs, config).should.equal(expected_path) }
       end
 
       should "return xpath that match intended node(s)" do
-        each_xpf {|xpf| ids[xpf.send(:tr, match_attrs, config)].should.equal(expected_ids) }
+        each_xpf {|xpf| get_ids[xpf.send(:tr, match_attrs, config)].should.equal(expected_ids) }
       end
 
     end
