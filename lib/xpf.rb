@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
+require 'reginald'
 require 'xpf/matchers'
 require 'xpf/configuration'
 require 'xpf/arguments'

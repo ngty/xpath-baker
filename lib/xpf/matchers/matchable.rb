@@ -1,4 +1,7 @@
 module XPF
+
+  class UnsupportedRegularExpression < Exception ; end
+
   module Matchers
     module Matchable
 
@@ -55,9 +58,13 @@ module XPF
 
       private
 
-        def c(str) #:nodoc:
-          config.case_sensitive? ? str :
-            %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
+        def c(str, flag=(unassigned = true; false)) #:nodoc:
+          translate = lambda{|s| %\translate(#{s},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\ }
+          if unassigned
+            config.case_sensitive? ? str : translate[str]
+          else
+            flag ? str : translate[str]
+          end
         end
 
         def q(str) #:nodoc:
@@ -94,20 +101,40 @@ module XPF
           ]
         end
 
-        # def f(axial_node, conditions) #:nodoc:
-        #   '%s%s%s' % (
-        #     if (pos = config.position).nil?
-        #       [axial_node, conditions, nil]
-        #     else
-        #       pos.start? ? [axial_node, pos, conditions] : [axial_node, conditions, pos]
-        #     end
-        #   )
-        # end
+        def r(expr, regexp)
+          require 'pp'
+          if (parsed = Reginald.parse(regexp)).literal?
+            'contains(%s,%s)' % [expr, q(parsed.to_s)]
+          else
+            condition = parsed.map do |unit|
+              send(:"r_#{unit.etype}", unit)# rescue raise UnsupportedRegularExpression
+            end.join(' and ')
+            count = (condition.size - condition.gsub('%s','').size) / 2
+            condition % ([c(expr, !parsed.casefold?)]*count)
+          end
+        end
 
-        # def v(expr, default_val) #:nodoc:
-        #   expr = (send(expr) rescue expr) if expr.is_a?(Symbol)
-        #   expr || default_val
-        # end
+        def r_string(entry)
+          val = q(entry.value)
+          val = val.downcase if entry.casefold?
+          if entry.start_of_line? && entry.end_of_line?
+            '%s=%s' % ['%s', val]
+          elsif entry.start_of_line?
+            'starts-with(%s,%s)' % ['%s', val]
+          elsif entry.end_of_line?
+            'substring(%s,string-length(%s)+1-string-length(%s))=%s' % ['%s', '%s', val, val]
+          else
+            'contains(%s,%s)' % ['%s', val]
+          end
+        end
+
+        def r_chars_set(entry)
+          val = entry.value(true)
+          qt = lambda{|s| q(entry.casefold? ? s.downcase : s) }
+          'contains(translate(%s,%s,%s),%s)' % [
+            '%s', qt[val], qt[val[0..0]*(val.size)], qt[val[0..0]]
+          ]
+        end
 
     end
   end

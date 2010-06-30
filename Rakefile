@@ -10,6 +10,7 @@ begin
     gem.email = "ngty77@gmail.com"
     gem.homepage = "http://github.com/ngty/xpf"
     gem.authors = ["NgTzeYang"]
+    gem.add_dependency 'reginald', '>= 0.2.2'
     gem.add_development_dependency "nokogiri", ">= 1.4.1"
     gem.add_development_dependency "bacon", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
