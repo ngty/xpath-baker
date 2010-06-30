@@ -1,6 +1,6 @@
 shared 'a basic text matcher' do
 
-  describe '> generating condition (with valid string value)' do
+  describe '> generating condition (with string value)' do
 
     before do
       @val = 'text-x'
@@ -69,7 +69,7 @@ shared 'a basic text matcher' do
 
   end
 
-  describe '> generating condition (w valid single element array value)' do
+  describe '> generating condition (w single element array value)' do
 
     before do
       @val = 'text-x'
@@ -120,7 +120,7 @@ shared 'a basic text matcher' do
 
   end
 
-  describe '> generating condition (w valid multi elements array value)' do
+  describe '> generating condition (w multi elements array value)' do
 
     before do
       @vals = %w{val-x1 val-x2 val-x3}
@@ -180,7 +180,7 @@ shared 'a basic text matcher' do
 
   end
 
-  describe '> generating condition (with invalid value NIL_VALUE)' do
+  describe '> generating condition (with value NIL_VALUE)' do
 
     before do
       @val = XPF::Matchers::Matchable::NIL_VALUE

@@ -1,6 +1,6 @@
 shared 'basic node matcher' do
 
-  describe '> generating condition (w valid string value)' do
+  describe '> generating condition (w string value)' do
 
     before do
       @name, @val = @name || :something, 'val1'
@@ -62,7 +62,7 @@ shared 'basic node matcher' do
 
   end
 
-  describe '> generating condition (w valid single element array value)' do
+  describe '> generating condition (w single element array value)' do
 
     before do
       @name, @val = @name || :something, %w{val11}
@@ -115,7 +115,7 @@ shared 'basic node matcher' do
 
   end
 
-  describe '> generating condition (w valid multi elements array value)' do
+  describe '> generating condition (w multi elements array value)' do
 
     before do
       @name, @vals = @name || :something, %w{val11 val12 val13}
@@ -176,7 +176,7 @@ shared 'basic node matcher' do
 
   end
 
-  describe '> generating condition (with invalid value NIL_VALUE)' do
+  describe '> generating condition (with value NIL_VALUE)' do
 
     before do
       @name, @val = @name || :something, XPF::Matchers::Matchable::NIL_VALUE
