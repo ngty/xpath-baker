@@ -71,14 +71,14 @@ module XPF
         end
 
         def t(expr, tokens) #:nodoc:
-          tokens.map{|tk| t1(expr,tk) }.concat(
+          tokens.map{|tk| t_condition(expr,tk) }.concat(
             !config.match_ordering? ? [] : (
               prev = tokens[0]
-              tokens[1..-1].map{|curr| (prev, condition = t2(expr, prev, curr))[1] }
+              tokens[1..-1].map{|curr| (prev, condition = t_order(expr, prev, curr))[1] }
           )).join(' and ')
         end
 
-        def t1(expr, token) #:nodoc:
+        def t_condition(expr, token) #:nodoc:
           '(%s)' % [
             %|%s=#{token}|,
             %|contains(%s,concat(" ",#{token}," "))|,
@@ -87,7 +87,7 @@ module XPF
           ].join(' or ') % ([expr]*5)
         end
 
-        def t2(expr, prev_token, curr_token) #:nodoc:
+        def t_order(expr, prev_token, curr_token) #:nodoc:
           [
             curr_token,
             'contains(substring-after(%s,%s),concat(" ",%s))' % [expr, prev_token, curr_token]
