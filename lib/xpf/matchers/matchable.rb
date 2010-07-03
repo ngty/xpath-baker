@@ -5,9 +5,6 @@ module XPF
   module Matchers
     module Matchable
 
-      LOWERCASE_CHARS = ('a'..'z').to_a * ''
-      UPPERCASE_CHARS = ('A'..'Z').to_a * ''
-
       class << (NIL_VALUE = Struct.new('NIL_VALUE'))
         def to_s ; 'XPF_NIL_VALUE' ; end
       end
@@ -58,19 +55,12 @@ module XPF
 
       private
 
-        def c(str, flag=(unassigned = true; false)) #:nodoc:
-          translate = lambda{|s| %\translate(#{s},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\ }
-          if unassigned
-            config.case_sensitive? ? str : translate[str]
-          else
-            flag ? str : translate[str]
-          end
+        def c(str) #:nodoc:
+          String.translate_casing(str, config.case_sensitive?)
         end
 
         def q(str) #:nodoc:
-          !(str = "#{str}").include?('"') ? %\"#{str}"\ : (
-            'concat(%s)' % str.split('"',-1).map {|s| %\"#{s}"\ }.join(%\,'"',\)
-          )
+          String.quote("#{str}")
         end
 
         def n(str) #:nodoc:
@@ -78,64 +68,108 @@ module XPF
         end
 
         def t(expr, tokens) #:nodoc:
-          tokens.map{|tk| t_condition(expr,tk) }.concat(
-            !config.match_ordering? ? [] : (
-              prev = tokens[0]
-              tokens[1..-1].map{|curr| (prev, condition = t_order(expr, prev, curr))[1] }
-          )).join(' and ')
+          config.match_ordering? ? SortedArray.conditions_for(expr, tokens) :
+            UnsortedArray.conditions_for(expr, tokens)
         end
 
-        def t_condition(expr, token) #:nodoc:
-          '(%s)' % [
-            %|%s=#{token}|,
-            %|contains(%s,concat(" ",#{token}," "))|,
-            %|starts-with(%s,concat(#{token}," "))|,
-            %|substring(%s,string-length(%s)+1-string-length(concat(" ",#{token})))=concat(" ",#{token})|,
-          ].join(' or ') % ([expr]*5)
+        def r(expr, regexp) #:nodoc:
+          Regexp.conditions_for(expr, regexp)
         end
 
-        def t_order(expr, prev_token, curr_token) #:nodoc:
-          [
-            curr_token,
-            'contains(substring-after(%s,%s),concat(" ",%s))' % [expr, prev_token, curr_token]
-          ]
-        end
+        module String #:nodoc:
 
-        def r(expr, regexp)
-          require 'pp'
-          if (parsed = Reginald.parse(regexp)).literal?
-            'contains(%s,%s)' % [expr, q(parsed.to_s)]
-          else
-            condition = parsed.map do |unit|
-              send(:"r_#{unit.etype}", unit)# rescue raise UnsupportedRegularExpression
-            end.join(' and ')
-            count = (condition.size - condition.gsub('%s','').size) / 2
-            condition % ([c(expr, !parsed.casefold?)]*count)
+          LOWERCASE_CHARS = ('a'..'z').to_a * ''
+          UPPERCASE_CHARS = ('A'..'Z').to_a * ''
+
+          class << self
+
+            def translate_casing(str, case_sensitive)
+              case_sensitive ? str : %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
+            end
+
+            def quote(str)
+              !str.include?('"') ? %\"#{str}"\ : (
+                'concat(%s)' % str.split('"',-1).map {|s| %\"#{s}"\ }.join(%\,'"',\)
+              )
+            end
+
           end
         end
 
-        def r_string(entry)
-          val = q(entry.value)
-          val = val.downcase if entry.casefold?
-          if entry.start_of_line? && entry.end_of_line?
-            '%s=%s' % ['%s', val]
-          elsif entry.start_of_line?
-            'starts-with(%s,%s)' % ['%s', val]
-          elsif entry.end_of_line?
-            'substring(%s,string-length(%s)+1-string-length(%s))=%s' % ['%s', '%s', val, val]
-          else
-            'contains(%s,%s)' % ['%s', val]
+        module SortedArray #:nodoc:
+          class << self
+            def conditions_for(expr, tokens)
+              conditions = [UnsortedArray.conditions_for(expr, tokens)]
+              tokens[1..-1].inject(tokens[0]) do |prev, curr|
+                conditions << 'contains(substring-after(%s,%s),concat(" ",%s))' % [expr, prev, curr]
+                curr
+              end
+              conditions.join(' and ')
+            end
           end
         end
 
-        def r_chars_set(entry)
-          val = entry.value(true)
-          qt = lambda{|s| q(entry.casefold? ? s.downcase : s) }
-          'contains(translate(%s,%s,%s),%s)' % [
-            '%s', qt[val], qt[val[0..0]*(val.size)], qt[val[0..0]]
-          ]
+        module UnsortedArray #:nodoc:
+          class << self
+            def conditions_for(expr, tokens)
+              tokens.map do |token|
+                '(%s)' % [
+                  %|%s=#{token}|,
+                  %|contains(%s,concat(" ",#{token}," "))|,
+                  %|starts-with(%s,concat(#{token}," "))|,
+                  %|substring(%s,string-length(%s)+1-string-length(concat(" ",#{token})))=concat(" ",#{token})|,
+                ].join(' or ') % ([expr]*5)
+              end.join(' and ')
+            end
+          end
+        end
+
+        module Regexp #:nodoc:
+          class << self
+
+            def conditions_for(expr, regexp)
+              require 'pp'
+              if (parsed = Reginald.parse(regexp)).literal?
+                'contains(%s,%s)' % [expr, qt(parsed.to_s, true)]
+              else
+                condition = parsed.map do |unit|
+                  send(:"r_#{unit.etype}", unit)# rescue raise UnsupportedRegularExpression
+                end.join(' and ')
+                count = (condition.size - condition.gsub('%s','').size) / 2
+                condition % ([String.translate_casing(expr, !parsed.casefold?)]*count)
+              end
+            end
+
+            def r_string(entry)
+              val = qt(entry.value, !entry.casefold?)
+              if entry.start_of_line? && entry.end_of_line?
+                '%s=%s' % ['%s', val]
+              elsif entry.start_of_line?
+                'starts-with(%s,%s)' % ['%s', val]
+              elsif entry.end_of_line?
+                'substring(%s,string-length(%s)+1-string-length(%s))=%s' % ['%s', '%s', val, val]
+              else
+                'contains(%s,%s)' % ['%s', val]
+              end
+            end
+
+            def r_chars_set(entry)
+              val = entry.value(true)
+              first = val[0..0]
+              qt = lambda{|s| qt(s, !entry.casefold?) }
+              'contains(translate(%s,%s,%s),%s)' % [
+                '%s', qt[val], qt[first*(val.size)], qt[first]
+              ]
+            end
+
+            def qt(str, case_sensitive)
+              String.quote(case_sensitive ? str : str.downcase)
+            end
+
+          end
         end
 
     end
+
   end
 end
