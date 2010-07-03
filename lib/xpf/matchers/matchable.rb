@@ -170,8 +170,12 @@ module XPF
             end
             expr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
             val = q(compare_against)
-            if entry.start_of_line?
+            if entry.start_of_line? && entry.end_of_line?
+              '%s=%s' % [expr, val]
+            elsif entry.start_of_line?
               'starts-with(%s,%s)' % [expr, val]
+            elsif entry.end_of_line?
+              'substring(%s,string-length(%s))=%s' % [expr, self.expr, val]
             else
               'contains(%s,%s)' % [expr, val]
             end
