@@ -123,6 +123,19 @@ describe 'XPF::Matchers regexp value matching' do
       expected = [%|contains(translate(.,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^[a-z]/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
+      regexp = /^[a-z]/,
+      expected = [%|starts-with(translate(.,"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^[a-z]/i,
+      expected = [%|starts-with(translate(.,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[A-Z]/
     # //////////////////////////////////////////////////////////////////////////////////////
       debug = __LINE__,
@@ -134,6 +147,19 @@ describe 'XPF::Matchers regexp value matching' do
       xml,
       regexp = /[A-Z]/i,
       expected = [%|contains(translate(.,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /[^A-Z]/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
+      regexp = /^[A-Z]/,
+      expected = [%|starts-with(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","AAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^[A-Z]/i,
+      expected = [%|starts-with(translate(.,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
     ]
   ].each do |(debug, xml, regexp, (expected_condition, expected_ids))|
     #next unless debug >= 115

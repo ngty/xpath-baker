@@ -168,9 +168,13 @@ module XPF
               translate_to = translate_to.downcase * 2
               compare_against.downcase!
             end
-            'contains(translate(%s,%s,%s),%s)' % [
-              '%s', q(translate_from), q(translate_to), q(compare_against)
-            ]
+            expr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
+            val = q(compare_against)
+            if entry.start_of_line?
+              'starts-with(%s,%s)' % [expr, val]
+            else
+              'contains(%s,%s)' % [expr, val]
+            end
           end
 
           def q(str)
