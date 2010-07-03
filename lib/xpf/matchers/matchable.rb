@@ -146,30 +146,32 @@ module XPF
           def for_string(entry)
             val = qc(entry.value, !entry.casefold?)
             expr, texpr = '%s', t('%s', !entry.casefold?)
-            (
-              if entry.start_of_line? && entry.end_of_line?
-                '%s=%s' % [texpr, val]
-              elsif entry.start_of_line?
-                'starts-with(%s,%s)' % [texpr, val]
-              elsif entry.end_of_line?
-                'substring(%s,string-length(%s)+1-string-length(%s))=%s' % [texpr, expr, val, val]
-              else
-                'contains(%s,%s)' % [texpr, val]
-              end
-            )
+
+            if entry.start_of_line? && entry.end_of_line?
+              '%s=%s' % [texpr, val]
+            elsif entry.start_of_line?
+              'starts-with(%s,%s)' % [texpr, val]
+            elsif entry.end_of_line?
+              'substring(%s,string-length(%s)+1-string-length(%s))=%s' % [texpr, expr, val, val]
+            else
+              'contains(%s,%s)' % [texpr, val]
+            end
           end
 
           def for_chars_set(entry)
             translate_from = entry.value(true)
             compare_against = translate_from[0..0]
             translate_to = compare_against * translate_from.size
+
             if entry.casefold?
               translate_from = translate_from.downcase + translate_from.upcase
               translate_to = translate_to.downcase * 2
               compare_against.downcase!
             end
+
             expr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
             val = q(compare_against)
+
             if entry.start_of_line? && entry.end_of_line?
               '%s=%s' % [expr, val]
             elsif entry.start_of_line?
