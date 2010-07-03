@@ -68,7 +68,7 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml,
       regexp = /World$/i,
-      expected = [%|substring(#{translate_casing('.')},string-length(#{translate_casing('.')})+1-string-length("world"))="world"|, %w{i1 i2}]
+      expected = [%|substring(#{translate_casing('.')},string-length(.)+1-string-length("world"))="world"|, %w{i1 i2}]
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /World\$/
@@ -120,7 +120,7 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml,
       regexp = /[a-z]/i,
-      expected = [%|contains(translate(#{translate_casing('.')},"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
+      expected = [%|contains(translate(.,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[A-Z]/
@@ -133,9 +133,10 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml,
       regexp = /[A-Z]/i,
-      expected = [%|contains(translate(#{translate_casing('.')},"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
+      expected = [%|contains(translate(.,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1 i2}],
     ]
   ].each do |(debug, xml, regexp, (expected_condition, expected_ids))|
+    #next unless debug >= 115
     should 'return expr reflecting "%s" [#%s]' % [regexp, debug] do
       condition_should_equal[regexp, expected_condition]
       matched_element_ids_should_equal[xml, expected_condition, expected_ids]
