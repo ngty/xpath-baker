@@ -80,7 +80,7 @@ module Reginald
       @array[0].casefold?
     end
 
-    def value
+    def expanded_value
       @array.map(&:value).join('')
     end
 
@@ -94,23 +94,21 @@ module Reginald
 
     include SupportsFlagging
 
-    def value(expanded=false)
-      unexpanded_val = super()
-      !expanded ? unexpanded_val : (
-        pattern, tokens = /([a-z]\-[a-z]|[A-Z]\-[A-Z]|[0-9]\-[0-9])/, []
-        while unexpanded_val =~ pattern && unexpanded_val.length >= 3
-          tokens.concat(unexpanded_val.match(/(.*?)#{pattern}?/)[1..-1].reject{|t| t.empty? })
-          unexpanded_val.sub!(tokens.join(''), '')
-        end
-        tokens << unexpanded_val unless unexpanded_val.empty?
-        tokens.inject('') do |expanded_val, token|
-          expanded_val + (
-            token !~ pattern ? '' : (
-              first, last = token.split('-')
-              (first .. last).to_a.join('')
-          ))
-        end
-      )
+    def expanded_value
+      pattern, tokens = /([a-z]\-[a-z]|[A-Z]\-[A-Z]|[0-9]\-[0-9])/, []
+      while value =~ pattern && value.length >= 3
+        new_tokens = value.match(/(.*?)#{pattern}?/)[1..-1].reject{|t| t.empty? }
+        tokens.concat(new_tokens)
+        value.sub!(new_tokens.join(''), '')
+      end
+      tokens << value unless value.empty?
+      tokens.inject('') do |expanded_val, token|
+        expanded_val + (
+          token !~ pattern ? token.sub('\\','') : (
+            first, last = token.split('-')
+            (first .. last).to_a.join('')
+        ))
+      end.split('').uniq.sort.join('')
     end
 
     def etype
