@@ -127,6 +127,7 @@ module XPF
         class Regexp < Value(:expr, :regexp) #:nodoc:
 
           def to_condition
+            @previous_match = nil
             insert_expr(
               if (parsed = Reginald.parse(regexp)).literal?
                 'contains(%s,%s)' % [t('%s', !parsed.casefold?), qc(parsed.to_s)]
@@ -143,11 +144,30 @@ module XPF
             conditions % ([expr]*count)
           end
 
+          def for_char(entry)
+            val = qc(entry.expanded_value, !entry.casefold?)
+            expr = t('%s', !entry.casefold?)
+
+            if (tokens = @previous_match.dup rescue nil)
+              @previous_match = [expr, val]
+              'starts-with(substring-after(%s,%s),%s)' % [tokens, val].flatten
+            elsif entry.start_of_line?
+              @previous_match = [expr, val]
+              'starts-with(%s,%s)' % [expr, val]
+            end
+          end
+
           def for_string(entry)
             val = qc(entry.expanded_value, !entry.casefold?)
             expr, texpr = '%s', t('%s', !entry.casefold?)
+            previous_tokens = @previous_match.dup rescue nil
+            @previous_match = [texpr, val]
 
-            if entry.start_of_line? && entry.end_of_line?
+            if previous_tokens
+              (entry.end_of_line? ? '%s=%s' : 'starts-with(%s,%s)') % [
+                'substring-after(%s,%s)' % previous_tokens, val
+              ]
+            elsif entry.start_of_line? && entry.end_of_line?
               '%s=%s' % [texpr, val]
             elsif entry.start_of_line?
               'starts-with(%s,%s)' % [texpr, val]

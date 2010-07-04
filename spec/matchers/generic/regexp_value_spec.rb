@@ -134,6 +134,45 @@ describe 'XPF::Matchers regexp value matching' do
       expected = [%|contains(#{translate_casing('.')},"^hello$")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /Hello{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">Helloo World</x><x id="i2">World HELLOO</x><x id="i3">Hello</x>',
+      regexp = /Hello{2}/,
+      expected = [%|contains(.,"Hell") and starts-with(substring-after(.,"Hell"),"oo")|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /Hello{2}/i,
+      expected = [%|contains(#{translate_casing('.')},"hell") and starts-with(substring-after(#{translate_casing('.')},"hell"),"oo")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2}ello/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HHELLO World</x><x id="i2">hhello</x><x id="i3">Hello</x>',
+      regexp = /^h{2}ello/,
+      expected = [%|starts-with(.,"hh") and starts-with(substring-after(.,"hh"),"ello")|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2}ello/i,
+      expected = [%|starts-with(#{translate_casing('.')},"hh") and starts-with(substring-after(#{translate_casing('.')},"hh"),"ello")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2}ello$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HHELLO</x><x id="i2">hhello</x><x id="i3">HHELLO World</x>',
+      regexp = /^h{2}ello$/,
+      expected = [%|starts-with(.,"hh") and substring-after(.,"hh")="ello"|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2}ello$/i,
+      expected = [%|starts-with(#{translate_casing('.')},"hh") and substring-after(#{translate_casing('.')},"hh")="ello"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[a-z]/
     # //////////////////////////////////////////////////////////////////////////////////////
       debug = __LINE__,

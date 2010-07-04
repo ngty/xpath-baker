@@ -2,6 +2,8 @@
 
 module Reginald
 
+  class InvalidQuantifier < Exception ; end
+
   class << self
 
     alias_method :orig_parse, :parse
@@ -20,9 +22,9 @@ module Reginald
         @array = @array.inject([]) do |memo, unit|
           if unit.is_a?(Reginald::Anchor)
             anchors << unit.value
-          elsif memo[-1].respond_to?(:<<)
+          elsif unit.is_a?(Character) && unit.quantifier.nil? && memo[-1].respond_to?(:<<)
             memo[-1] << unit
-          elsif unit.is_a?(Character) && !unit.is_a?(CharacterClass)
+          elsif unit.is_a?(Character) && unit.quantifier.nil? && !unit.is_a?(CharacterClass)
             memo << Characters.new(unit)
           else
             memo << unit
@@ -113,6 +115,24 @@ module Reginald
 
     def etype
       :chars_set
+    end
+
+  end
+
+  class Character
+
+    include SupportsFlagging
+
+    def expanded_value
+      case quantifier
+      when /\{(\d+)\}/
+        value * $1.to_i
+      else raise InvalidQuantifier
+      end
+    end
+
+    def etype
+      :char
     end
 
   end
