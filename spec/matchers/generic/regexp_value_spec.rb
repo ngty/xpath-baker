@@ -16,6 +16,30 @@ describe 'XPF::Matchers regexp value matching' do
       map{|node| node.attribute('id').to_s }.should.equal(expected)
   end
 
+  expand_chars_set = lambda do |from|
+    case from
+    when Array
+      from.map{|atom| atom.is_a?(Range) ? atom.to_a.join('') : atom }.join('')
+    when Range
+      from.to_a.join('')
+    else
+      from
+    end
+  end
+
+  itranslate_chars_set = lambda do |expr, from|
+    from = expand_chars_set[from]
+    from = (from.upcase + from.downcase).split('').uniq.sort.join('')
+    to = from[0..0] * from.size
+    %|translate(#{expr},"#{from}","#{to}")|
+  end
+
+  translate_chars_set = lambda do |expr, from|
+    from = expand_chars_set[from].split('').uniq.sort.join('')
+    to = from[0..0] * from.size
+    %|translate(#{expr},"#{from}","#{to}")|
+  end
+
   [
     [
     # //////////////////////////////////////////////////////////////////////////////////////
@@ -115,12 +139,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
       regexp = /[a-z]/,
-      expected = [%|contains(translate(.,"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1}],
+      expected = [%|contains(#{translate_chars_set['.','a'..'z']},"a")|, %w{i1}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /[a-z]/i,
-      expected = [%|contains(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i1 i2}],
+      expected = [%|contains(#{itranslate_chars_set['.','a'..'z']},"A")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /^[a-z]/
@@ -128,12 +152,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
       regexp = /^[a-z]/,
-      expected = [%|starts-with(translate(.,"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa"),"a")|, %w{i1}],
+      expected = [%|starts-with(#{translate_chars_set['.','a'..'z']},"a")|, %w{i1}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /^[a-z]/i,
-      expected = [%|starts-with(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i1 i2}],
+      expected = [%|starts-with(#{itranslate_chars_set['.','a'..'z']},"A")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[a-z]$/
@@ -142,12 +166,12 @@ describe 'XPF::Matchers regexp value matching' do
       xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
       regexp = /[a-z]$/,
       # WIP
-      expected = [%|substring(translate(.,"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa"),string-length(.))="a"|, %w{i1}]
+      expected = [%|substring(#{translate_chars_set['.','a'..'z']},string-length(.))="a"|, %w{i1}]
     ], [
       debug = __LINE__,
       xml,
       regexp = /[a-z]$/i,
-      expected = [%|substring(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),string-length(.))="A"|, %w{i1 i2}],
+      expected = [%|substring(#{itranslate_chars_set['.','a'..'z']},string-length(.))="A"|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /^[a-z]$/
@@ -156,12 +180,12 @@ describe 'XPF::Matchers regexp value matching' do
       xml = '<x id="i1">h</x><x id="i2">H</x><x id="i3">1</x>',
       regexp = /^[a-z]$/,
       # WIP
-      expected = [%|translate(.,"abcdefghijklmnopqrstuvwxyz","aaaaaaaaaaaaaaaaaaaaaaaaaa")="a"|, %w{i1}]
+      expected = [%|#{translate_chars_set['.','a'..'z']}="a"|, %w{i1}]
     ], [
       debug = __LINE__,
       xml,
       regexp = /^[a-z]$/i,
-      expected = [%|translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")="A"|, %w{i1 i2}],
+      expected = [%|#{itranslate_chars_set['.','a'..'z']}="A"|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[A-Z]/
@@ -169,12 +193,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
       regexp = /[A-Z]/,
-      expected = [%|contains(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","AAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i2}],
+      expected = [%|contains(#{translate_chars_set['.','A'..'Z']},"A")|, %w{i2}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /[A-Z]/i,
-      expected = [%|contains(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i1 i2}],
+      expected = [%|contains(#{itranslate_chars_set['.','A'..'Z']},"A")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[^A-Z]/
@@ -182,12 +206,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
       regexp = /^[A-Z]/,
-      expected = [%|starts-with(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","AAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i2}],
+      expected = [%|starts-with(#{translate_chars_set['.','A'..'Z']},"A")|, %w{i2}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /^[A-Z]/i,
-      expected = [%|starts-with(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),"A")|, %w{i1 i2}],
+      expected = [%|starts-with(#{itranslate_chars_set['.','A'..'Z']},"A")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[A-Z]$/
@@ -196,12 +220,12 @@ describe 'XPF::Matchers regexp value matching' do
       xml = '<x id="i1">hello</x><x id="i2">HELLO</x><x id="i3">123</x>',
       regexp = /[A-Z]$/,
       # WIP
-      expected = [%|substring(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","AAAAAAAAAAAAAAAAAAAAAAAAAA"),string-length(.))="A"|, %w{i2}]
+      expected = [%|substring(#{translate_chars_set['.','A'..'Z']},string-length(.))="A"|, %w{i2}]
     ], [
       debug = __LINE__,
       xml,
       regexp = /[A-Z]$/i,
-      expected = [%|substring(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),string-length(.))="A"|, %w{i1 i2}],
+      expected = [%|substring(#{itranslate_chars_set['.','A'..'Z']},string-length(.))="A"|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /^[A-Z]$/
@@ -210,12 +234,12 @@ describe 'XPF::Matchers regexp value matching' do
       xml = '<x id="i1">h</x><x id="i2">H</x><x id="i3">1</x>',
       regexp = /^[A-Z]$/,
       # WIP
-      expected = [%|translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","AAAAAAAAAAAAAAAAAAAAAAAAAA")="A"|, %w{i2}]
+      expected = [%|#{translate_chars_set['.','A'..'Z']}="A"|, %w{i2}]
     ], [
       debug = __LINE__,
       xml,
       regexp = /^[A-Z]$/i,
-      expected = [%|translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")="A"|, %w{i1 i2}],
+      expected = [%|#{itranslate_chars_set['.','A'..'Z']}="A"|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[0-9]/
@@ -223,12 +247,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">123</x><x id="i2">456</x><x id="i3">hello</x>',
       regexp = /[0-9]/,
-      expected = [%|contains(translate(.,"0123456789","0000000000"),"0")|, %w{i1 i2}],
+      expected = [%|contains(#{translate_chars_set['.',0..9]},"0")|, %w{i1 i2}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /[0-9]/i,
-      expected = [%|contains(translate(.,"0123456789","0000000000"),"0")|, %w{i1 i2}],
+      expected = [%|contains(#{translate_chars_set['.',0..9]},"0")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[b-d1-3]/
@@ -236,12 +260,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">100</x><x id="i2">B44</x><x id="i3">ae45</x>',
       regexp = /[b-d1-3]/,
-      expected = [%|contains(translate(.,"123bcd","111111"),"1")|, %w{i1}],
+      expected = [%|contains(#{translate_chars_set['.',[1..3,'b'..'d']]},"1")|, %w{i1}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /[b-d1-3]/i,
-      expected = [%|contains(translate(.,"123BCDbcd","111111111"),"1")|, %w{i1 i2}],
+      expected = [%|contains(#{itranslate_chars_set['.',[1..3,'b'..'d']]},"1")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[b-d1-3c-d]/
@@ -249,12 +273,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">100</x><x id="i2">B44</x><x id="i3">ae45</x>',
       regexp = /[b-d1-3c-d]/,
-      expected = [%|contains(translate(.,"123bcd","111111"),"1")|, %w{i1}],
+      expected = [%|contains(#{translate_chars_set['.',[1..3,'b'..'d']]},"1")|, %w{i1}],
     ], [
       debug = __LINE__,
       xml,
       regexp = /[b-d1-3c-d]/i,
-      expected = [%|contains(translate(.,"123BCDbcd","111111111"),"1")|, %w{i1 i2}],
+      expected = [%|contains(#{itranslate_chars_set['.',[1..3,'b'..'d']]},"1")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[b-d1-3_\-]/
@@ -262,12 +286,15 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">0_00</x><x id="i2">A-44</x><x id="i3">ae45</x>',
       regexp = /[b-d1-3_\-]/,
-      expected = [%|contains(translate(.,"-123_bcd","--------"),"-")|, %w{i1 i2}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /[b-d1-3c-d]/i,
-#      expected = [%|contains(translate(.,"bcdBCD123","bbbbbbbbb"),"b")|, %w{i1 i2}],
+      expected = [%|contains(#{translate_chars_set['.',[1..3,'b'..'d','-_']]},"-")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /[b-d1-3c-d]/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">100</x><x id="i2">B44</x><x id="i3">ae45</x>',
+      regexp = /[b-d1-3c-d]/,
+      expected = [%|contains(#{translate_chars_set['.',[1..3,'b'..'d']]},"1")|, %w{i1}],
     ]
   ].each do |(debug, xml, regexp, (expected_condition, expected_ids))|
     #next unless debug >= 236
