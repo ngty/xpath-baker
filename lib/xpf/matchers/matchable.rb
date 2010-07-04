@@ -144,7 +144,7 @@ module XPF
           end
 
           def for_string(entry)
-            val = qc(entry.value, !entry.casefold?)
+            val = qc(entry.expanded_value, !entry.casefold?)
             expr, texpr = '%s', t('%s', !entry.casefold?)
 
             if entry.start_of_line? && entry.end_of_line?
@@ -159,14 +159,14 @@ module XPF
           end
 
           def for_chars_set(entry)
-            translate_from = entry.value(true)
+            translate_from = entry.expanded_value
             compare_against = translate_from[0..0]
             translate_to = compare_against * translate_from.size
 
             if entry.casefold?
-              translate_from = translate_from.downcase + translate_from.upcase
-              translate_to = translate_to.downcase * 2
-              compare_against.downcase!
+              translate_from = (translate_from.downcase + translate_from.upcase).split('').uniq.sort.join('')
+              compare_against = translate_from[0..0]
+              translate_to = compare_against * translate_from.size
             end
 
             expr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
