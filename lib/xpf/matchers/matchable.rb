@@ -127,7 +127,7 @@ module XPF
         class Regexp < Value(:expr, :regexp) #:nodoc:
 
           def to_condition
-            @previous_match = nil
+            @previous_match_tokens = nil
             insert_expr(
               if (parsed = Reginald.parse(regexp)).literal?
                 'contains(%s,%s)' % [t('%s', !parsed.casefold?), qc(parsed.to_s)]
@@ -145,36 +145,24 @@ module XPF
           end
 
           def for_char(entry)
-            val = qc(entry.expanded_value, !entry.casefold?)
-            expr = t('%s', !entry.casefold?)
-
-            if (tokens = @previous_match.dup rescue nil)
-              @previous_match = [expr, val]
-              'starts-with(substring-after(%s,%s),%s)' % [tokens, val].flatten
-            elsif entry.start_of_line?
-              @previous_match = [expr, val]
-              'starts-with(%s,%s)' % [expr, val]
-            end
+            for_string(entry)
           end
 
           def for_string(entry)
-            val = qc(entry.expanded_value, !entry.casefold?)
-            expr, texpr = '%s', t('%s', !entry.casefold?)
-            previous_tokens = @previous_match.dup rescue nil
-            @previous_match = [texpr, val]
+            expr, texpr, val, qval, prev_tokens, curr_tokens = reset_match_tokens(entry)
 
-            if previous_tokens
+            if prev_tokens
               (entry.end_of_line? ? '%s=%s' : 'starts-with(%s,%s)') % [
-                'substring-after(%s,%s)' % previous_tokens, val
+                'substring-after(%s,%s)' % prev_tokens, qval
               ]
             elsif entry.start_of_line? && entry.end_of_line?
-              '%s=%s' % [texpr, val]
+              '%s=%s' % curr_tokens
             elsif entry.start_of_line?
-              'starts-with(%s,%s)' % [texpr, val]
+              'starts-with(%s,%s)' % curr_tokens
             elsif entry.end_of_line?
-              'substring(%s,string-length(%s)+1-string-length(%s))=%s' % [texpr, expr, val, val]
+              'substring(%s,string-length(%s)%s)=%s' % [texpr, expr, 1 - val.length, qval]
             else
-              'contains(%s,%s)' % [texpr, val]
+              'contains(%s,%s)' % curr_tokens
             end
           end
 
@@ -201,6 +189,14 @@ module XPF
             else
               'contains(%s,%s)' % [expr, val]
             end
+          end
+
+          def reset_match_tokens(entry)
+            val, expr = entry.expanded_value, '%s'
+            qval, texpr = qc(val, !entry.casefold?), t(expr, !entry.casefold?)
+            prev_tokens = @previous_match_tokens.dup rescue nil
+            @previous_match_tokens = curr_tokens = [texpr, qval]
+            [expr, texpr, val, qval, prev_tokens, curr_tokens]
           end
 
           def q(str)

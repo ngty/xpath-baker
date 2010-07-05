@@ -87,12 +87,12 @@ describe 'XPF::Matchers regexp value matching' do
       debug = __LINE__,
       xml = '<x id="i1">Hello World</x><x id="i2">hello world</x><x id="i3">World Hello</x>',
       regexp = /World$/,
-      expected = [%|substring(.,string-length(.)+1-string-length("World"))="World"|, %w{i1}]
+      expected = [%|substring(.,string-length(.)-4)="World"|, %w{i1}]
     ], [
       debug = __LINE__,
       xml,
       regexp = /World$/i,
-      expected = [%|substring(#{translate_casing('.')},string-length(.)+1-string-length("world"))="world"|, %w{i1 i2}]
+      expected = [%|substring(#{translate_casing('.')},string-length(.)-4)="world"|, %w{i1 i2}]
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /World\$/
@@ -134,6 +134,58 @@ describe 'XPF::Matchers regexp value matching' do
       expected = [%|contains(#{translate_casing('.')},"^hello$")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /o{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">Helloo World</x><x id="i2">World HELLOO</x><x id="i3">Hello</x>',
+      regexp = /o{2}/,
+      expected = [%|contains(.,"oo")|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /o{2}/i,
+      expected = [%|contains(#{translate_casing('.')},"oo")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^o{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">oo World</x><x id="i2">OO WORLD</x><x id="i3">Helloo</x>',
+      regexp = /^o{2}/,
+      expected = [%|starts-with(.,"oo")|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^o{2}/i,
+      expected = [%|starts-with(#{translate_casing('.')},"oo")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /o{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">helloo</x><x id="i2">HELLOOO</x><x id="i3">Helloo World</x>',
+      regexp = /o{2}$/,
+      expected = [%|substring(.,string-length(.)-1)="oo"|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /o{2}$/i,
+      expected = [%|substring(#{translate_casing('.')},string-length(.)-1)="oo"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^o{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">oo</x><x id="i2">OO</x><x id="i3">ooo</x>',
+      regexp = /^o{2}$/,
+      expected = [%|.="oo"|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^o{2}$/i,
+      expected = [%|#{translate_casing('.')}="oo"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
     # >> /Hello{2}/
     # //////////////////////////////////////////////////////////////////////////////////////
       debug = __LINE__,
@@ -160,6 +212,19 @@ describe 'XPF::Matchers regexp value matching' do
       expected = [%|starts-with(#{translate_casing('.')},"hh") and starts-with(substring-after(#{translate_casing('.')},"hh"),"ello")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2}ello$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">World HHELLO</x><x id="i2">hhello</x><x id="i3">Hello</x>',
+      regexp = /h{2}ello$/,
+      expected = [%|contains(.,"hh") and substring-after(.,"hh")="ello"|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2}ello$/i,
+      expected = [%|contains(#{translate_casing('.')},"hh") and substring-after(#{translate_casing('.')},"hh")="ello"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
     # >> /^h{2}ello$/
     # //////////////////////////////////////////////////////////////////////////////////////
       debug = __LINE__,
@@ -171,6 +236,19 @@ describe 'XPF::Matchers regexp value matching' do
       xml,
       regexp = /^h{2}ello$/i,
       expected = [%|starts-with(#{translate_casing('.')},"hh") and substring-after(#{translate_casing('.')},"hh")="ello"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /hello{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HELLOO</x><x id="i2">helloo</x><x id="i3">HHELLO</x>',
+      regexp = /hello{2}$/,
+      expected = [%|contains(.,"hell") and substring-after(.,"hell")="oo"|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /hello{2}$/i,
+      expected = [%|contains(#{translate_casing('.')},"hell") and substring-after(#{translate_casing('.')},"hell")="oo"|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
     # >> /[a-z]/
