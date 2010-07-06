@@ -10,6 +10,7 @@ module XPF
   end
 end
 
+require 'xpf/matchers/values/reginald'
 require 'xpf/matchers/values/string'
 require 'xpf/matchers/values/unsorted_array'
 require 'xpf/matchers/values/sorted_array'

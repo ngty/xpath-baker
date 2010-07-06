@@ -13,7 +13,6 @@ module XPF
 
 end
 
-require 'xpf/matchers/reginald'
 require 'xpf/matchers/values'
 require 'xpf/matchers/matchable'
 require 'xpf/matchers/group'
