@@ -764,7 +764,7 @@ describe 'XPF::Matchers regexp value matching' do
 #      expected = [%|contains(#{tt},"hell") and (%s or %s)| % %w{oo ooo}.map{|t| %|substring-after(#{tt},"hell")="#{t}"| }, %w{i1 i2 i3}],
     ]
   ].each do |(debug, xml, regexp, (expected_condition, expected_ids))|
-    #next unless debug >= 479
+    #next unless debug == 514
     should 'return expr reflecting "%s" [#%s]' % [regexp, debug] do
       condition_should_equal[regexp, expected_condition]
       matched_element_ids_should_equal[xml, expected_condition, expected_ids]

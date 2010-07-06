@@ -25,22 +25,28 @@ module XPF
         end
 
         def for_chars_set(entry)
-          translate_from = entry.expanded_value
-          compare_against = translate_from[0..0]
-          translate_to = compare_against * translate_from.size
-          texpr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
-
-          case (quantifier = entry.quantifier)
-          when nil
-            per_tokens_group_condition(texpr, expr, q(compare_against), compare_against, entry.flags)
+          case (count = entry.quantifier)
           when Range
-            '(%s)' % quantifier.to_a.map do |count|
+            # TODO: WIP
+            translate_from = entry.expanded_value
+            compare_against = translate_from[0..0]
+            translate_to = compare_against * translate_from.size
+            texpr = 'translate(%s,%s,%s)' % [expr = '%s', q(translate_from), q(translate_to)]
+            '(%s)' % count.to_a.map do |count|
               _compare_against = compare_against * count
               per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, entry.flags)
             end.join(' or ')
-          when Integer
-            _compare_against = compare_against * 2
-            per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, entry.flags)
+          else
+            expr, texpr, val, qval, prev_tokens, curr_tokens =
+              reset_and_grab_match_tokens(entry) do |prev|
+                translate_from = entry.expanded_value
+                compare_against = translate_from[0..0] * (count || 1)
+                translate_to = translate_from[0..0] * translate_from.size
+                expr = prev ? ('substring-after(%s,%s)' % prev) : '%s'
+                texpr = 'translate(%s,%s,%s)' % [expr, q(translate_from), q(translate_to)]
+                [expr, texpr, compare_against, q(compare_against)]
+              end
+            per_tokens_group_condition(texpr, expr, qval, val, entry.flags)
           end
         end
 
@@ -116,15 +122,20 @@ module XPF
 
         def reset_and_grab_match_tokens(entry)
           prev_tokens = @previous_match_tokens.dup rescue nil
-          expr = prev_tokens ? ('substring-after(%s,%s)' % prev_tokens) : '%s'
-          texpr = t(expr)
-          if entry
-            val = entry.expanded_value
-            qval = qc(val)
+          if block_given?
+            expr, texpr, val, qval = yield(prev_tokens)
             @previous_match_tokens = curr_tokens = [texpr, qval]
             [expr, texpr, val, qval, prev_tokens, curr_tokens]
           else
-            [expr, texpr, nil, nil, prev_tokens, [nil,nil]]
+            expr = prev_tokens ? ('substring-after(%s,%s)' % prev_tokens) : '%s'
+            texpr = t(expr)
+            if entry
+              val, qval = [val = entry.expanded_value, qc(val)]
+              @previous_match_tokens = curr_tokens = [texpr, qval]
+              [expr, texpr, val, qval, prev_tokens, curr_tokens]
+            else
+              [expr, texpr, nil, nil, prev_tokens, [nil,nil]]
+            end
           end
         end
 
