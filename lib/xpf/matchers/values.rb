@@ -2,22 +2,15 @@ module XPF
   module Matchers
     module Values
       class << self
-
-        def regexp_condition(expr, value)
-          condition = parse_regexp(value).to_condition
-          count = (condition.length - condition.gsub('%s','').length) / 2
-          condition % ([expr]*count)
+        def Value(*attrs) #:nodoc:
+          Struct.new(*attrs)
         end
-
-        def parse_regexp(value)
-          (
-            @regexp_parser ||= (
-              require 'xpf/matchers/regexp'
-              RegularExpressionParser.new
-          )).parse(value.to_s)
-        end
-
       end
     end
   end
 end
+
+require 'xpf/matchers/values/string'
+require 'xpf/matchers/values/unsorted_array'
+require 'xpf/matchers/values/sorted_array'
+require 'xpf/matchers/values/regexp'
