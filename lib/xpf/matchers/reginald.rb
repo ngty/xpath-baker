@@ -108,7 +108,8 @@ module Reginald
         expanded_val + (
           token !~ pattern ? token.sub('\\','') : (
             first, last = token.split('-')
-            (first .. last).to_a.join('')
+            tmp = (first .. last).to_a.join('')
+            casefold? ? (tmp.downcase + tmp.upcase) : tmp
         ))
       end.split('').uniq.sort.join('')
     end
@@ -127,6 +128,8 @@ module Reginald
       case quantifier
       when /\{(\d+)\}/
         value * $1.to_i
+      when /\{(\d+),(\d+)\}/
+        ($1.to_i .. $2.to_i).to_a.map{|i| value*i }
       else raise InvalidQuantifier
       end
     end
