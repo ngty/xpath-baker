@@ -152,12 +152,21 @@ module XPF
             translate_from = entry.expanded_value
             compare_against = translate_from[0..0]
             translate_to = compare_against * translate_from.size
+            flags = {:start => entry.start_of_line?, :end => entry.end_of_line?}
+            texpr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
 
-            per_tokens_group_condition(
-              'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)], expr,
-              q(compare_against), compare_against,
-              :start => entry.start_of_line?, :end => entry.end_of_line?
-            )
+            case (quantifier = entry.quantifier)
+            when nil
+              per_tokens_group_condition(texpr, expr, q(compare_against), compare_against, flags)
+            when Range
+              '(%s)' % quantifier.to_a.map do |count|
+                _compare_against = compare_against * count
+                per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, flags)
+              end.join(' or ')
+            when Integer
+              _compare_against = compare_against * 2
+              per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, flags)
+            end
           end
 
           def for_char(entry)

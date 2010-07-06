@@ -114,6 +114,16 @@ module Reginald
       end.split('').uniq.sort.join('')
     end
 
+    def quantifier
+      case (q = super || nil)
+      when nil, '' then nil
+      when Integer, Range then q
+      when /\{(\d+)\}/ then $1.to_i
+      when /\{(\d+)\,(\d+)\}/ then ($1.to_i .. $2.to_i)
+      else raise InvalidQuantifier
+      end
+    end
+
     def etype
       :chars_set
     end

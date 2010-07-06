@@ -467,9 +467,115 @@ describe 'XPF::Matchers regexp value matching' do
       xml = '<x id="i1">100</x><x id="i2">B44</x><x id="i3">ae45</x>',
       regexp = /[b-d1-3c-d]/,
       expected = [%|contains(#{translate_chars_set['.',[1..3,'b'..'d']]},"1")|, %w{i1}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /[a-z]{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">.AB</x><x id="i2">.ab</x><x id="i3">.abc</x><x id="i4">.a</x><x id="i5">.12</x>',
+      regexp = /[a-z]{2}/,
+      expected = [%|contains(#{translate_chars_set['.','a'..'z']},"aa")|, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /[a-z]{2}/i,
+      expected = [%|contains(#{itranslate_chars_set['.','a'..'z']},"AA")|, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /[a-z]{2,3}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">.AB</x><x id="i2">.ab</x><x id="i3">.abc</x><x id="i4">.a</x><x id="i5">.12</x>',
+      regexp = /[a-z]{2,3}/,
+      expected = ['(%s or %s)' % %w{aa aaa}.map{|t| %|contains(#{translate_chars_set['.','a'..'z']},"#{t}")| }, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /[a-z]{2,3}/i,
+      expected = ['(%s or %s)' % %w{AA AAA}.map{|t| %|contains(#{itranslate_chars_set['.','a'..'z']},"#{t}")| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^[a-z]{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">AB.</x><x id="i2">ab.</x><x id="i3">abc.</x><x id="i4">a.</x><x id="i5">12.</x>',
+      regexp = /^[a-z]{2}/,
+      expected = [%|starts-with(#{translate_chars_set['.','a'..'z']},"aa")|, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^[a-z]{2}/i,
+      expected = [%|starts-with(#{itranslate_chars_set['.','a'..'z']},"AA")|, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^[a-z]{2,3}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">AB.</x><x id="i2">ab.</x><x id="i3">abc.</x><x id="i4">a.</x><x id="i5">12.</x>',
+      regexp = /^[a-z]{2,3}/,
+      expected = ['(%s or %s)' % %w{aa aaa}.map{|t| %|starts-with(#{translate_chars_set['.','a'..'z']},"#{t}")| }, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^[a-z]{2,3}/i,
+      expected = ['(%s or %s)' % %w{AA AAA}.map{|t| %|starts-with(#{itranslate_chars_set['.','a'..'z']},"#{t}")| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /[a-z]{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">.AB</x><x id="i2">.ab</x><x id="i3">.abc</x><x id="i4">.a</x><x id="i5">.12</x>',
+      regexp = /[a-z]{2}$/,
+      expected = [%|substring(#{translate_chars_set['.','a'..'z']},string-length(.)-1)="aa"|, %w{i2 i3}]
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /[a-z]{2}$/i,
+      expected = [%|substring(#{itranslate_chars_set['.','a'..'z']},string-length(.)-1)="AA"|, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /[a-z]{2,3}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">.AB</x><x id="i2">.ab</x><x id="i3">.abc</x><x id="i4">.a</x><x id="i5">.12</x>',
+      regexp = /[a-z]{2,3}$/,
+      expected = ['(%s or %s)' % %w{aa aaa}.map{|t| %|substring(#{translate_chars_set['.','a'..'z']},string-length(.)-#{t.size-1})="#{t}"| }, %w{i2 i3}]
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /[a-z]{2,3}$/i,
+      expected = ['(%s or %s)' % %w{AA AAA}.map{|t| %|substring(#{itranslate_chars_set['.','a'..'z']},string-length(.)-#{t.size-1})="#{t}"| }, %w{i1 i2 i3}]
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^[a-z]{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">AA</x><x id="i2">aa</x><x id="i3">aaa</x><x id="i4">a</x><x id="i5">12</x>',
+      regexp = /^[a-z]{2}$/,
+      # WIP
+      expected = [%|#{translate_chars_set['.','a'..'z']}="aa"|, %w{i2}]
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^[a-z]{2}$/i,
+      expected = [%|#{itranslate_chars_set['.','a'..'z']}="AA"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^[a-z]{2,3}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">AA</x><x id="i2">aa</x><x id="i3">aaa</x><x id="i4">a</x><x id="i5">12</x>',
+      regexp = /^[a-z]{2,3}$/,
+      # WIP
+      expected = ['(%s or %s)' % %w{aa aaa}.map{|t| %|#{translate_chars_set['.','a'..'z']}="#{t}"| }, %w{i2 i3}]
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^[a-z]{2,3}$/i,
+      expected = ['(%s or %s)' % %w{AA AAA}.map{|t| %|#{itranslate_chars_set['.','a'..'z']}="#{t}"| }, %w{i1 i2 i3}],
     ]
   ].each do |(debug, xml, regexp, (expected_condition, expected_ids))|
-    #next unless debug == 264
+    #next unless debug >= 479
     should 'return expr reflecting "%s" [#%s]' % [regexp, debug] do
       condition_should_equal[regexp, expected_condition]
       matched_element_ids_should_equal[xml, expected_condition, expected_ids]
