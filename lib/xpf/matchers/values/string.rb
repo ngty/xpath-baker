@@ -3,13 +3,18 @@ module XPF
     module Values
       module String #:nodoc:
 
-        LOWERCASE_CHARS = ('a'..'z').to_a * ''
-        UPPERCASE_CHARS = ('A'..'Z').to_a * ''
+        LC = LOWERCASE_CHARS = ('a'..'z').to_a * ''
+        UC = UPPERCASE_CHARS = ('A'..'Z').to_a * ''
 
         class << self
 
           def translate_casing(str, case_sensitive)
-            case_sensitive ? str : %\translate(#{str},"#{UPPERCASE_CHARS}","#{LOWERCASE_CHARS}")\
+            (case_sensitive or str =~ /translate\((.*?),"#{UC}","#{LC}"\)/) ?
+              str : %|translate(#{str},"#{UC}","#{LC}")|
+          end
+
+          def undo_translate_casing(str)
+            str.sub(/^(.*)translate\((.*?),"#{UC}","#{LC}"\)(.*)$/, '\1\2\3')
           end
 
           def quote(str)

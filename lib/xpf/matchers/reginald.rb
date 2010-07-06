@@ -56,6 +56,10 @@ module Reginald
       !!(@flags ||= {})[:end_of_line]
     end
 
+    def flags
+      @flags ||= {}
+    end
+
   end
 
   class Characters < Collection

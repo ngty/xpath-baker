@@ -28,20 +28,19 @@ module XPF
           translate_from = entry.expanded_value
           compare_against = translate_from[0..0]
           translate_to = compare_against * translate_from.size
-          flags = {:start => entry.start_of_line?, :end => entry.end_of_line?}
           texpr = 'translate(%s,%s,%s)' % ['%s', q(translate_from), q(translate_to)]
 
           case (quantifier = entry.quantifier)
           when nil
-            per_tokens_group_condition(texpr, expr, q(compare_against), compare_against, flags)
+            per_tokens_group_condition(texpr, expr, q(compare_against), compare_against, entry.flags)
           when Range
             '(%s)' % quantifier.to_a.map do |count|
               _compare_against = compare_against * count
-              per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, flags)
+              per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, entry.flags)
             end.join(' or ')
           when Integer
             _compare_against = compare_against * 2
-            per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, flags)
+            per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, entry.flags)
           end
         end
 
@@ -62,36 +61,21 @@ module XPF
 
         def for_any_wo_delayed_entries(entry)
           expr, texpr, val, qval, prev_tokens, curr_tokens = reset_and_grab_match_tokens(entry)
-          if prev_tokens
-            (entry.end_of_line? ? '%s=%s' : 'starts-with(%s,%s)') %
-              ['substring-after(%s,%s)' % prev_tokens, qval]
-          else
-            per_tokens_group_condition(texpr, expr, qval, val, {
-              :start => entry.start_of_line?, :end => entry.end_of_line?
-            })
-          end
+          per_tokens_group_condition(texpr, expr, qval, val, entry.flags)
         end
 
         def for_any_w_delayed_entries(entry)
-          prev_tokens = reset_and_grab_match_tokens(entry)[4]
-          delayed_entries = @delayed_match_entries.dup
-          @delayed_match_entries = []
-          for_any_chained_delayed_entries(
-            prev_tokens ? ('substring-after(%s,%s)' % prev_tokens) : t('%s'),
-            delayed_entries, entry
-          )
+          texpr, _, _, prev_tokens = reset_and_grab_match_tokens(entry)[1..4]
+          delayed_entries, @delayed_match_entries = @delayed_match_entries.dup, []
+          for_any_chained_delayed_entries(texpr, delayed_entries, entry)
         end
 
         def for_any_chained_delayed_entries(expr, entries, last_entry)
           if first_entry = entries[0]
-            flags = {
-              :start => first_entry.start_of_line? || expr.include?('substring-after('),
-              :end => first_entry.end_of_line?
-            }
             join_conditions(
               first_entry.expanded_value.map do |val|
                 qval = qc(val)
-                condition = per_tokens_group_condition(expr, s(expr), qval, val, flags)
+                condition = per_tokens_group_condition(expr, s(expr), qval, val, first_entry.flags)
                 nested = for_any_chained_delayed_entries(
                   'substring-after(%s,%s)' % [expr, qval],
                   entries[1..-1], last_entry
@@ -102,7 +86,7 @@ module XPF
           elsif last_entry
             per_tokens_group_condition(
               expr, s(expr), qc(val = last_entry.expanded_value), val,
-              :end => last_entry.end_of_line?, :start => true
+              last_entry.flags.merge(:start_of_line => true)
             )
           end
         end
@@ -116,11 +100,12 @@ module XPF
         end
 
         def per_tokens_group_condition(texpr, expr, qval, val, flags)
-          if flags[:start] && flags[:end]
+          flags[:start_of_line] = true if expr.include?('substring-after(')
+          if flags[:start_of_line] && flags[:end_of_line]
             '%s=%s' % [texpr, qval]
-          elsif flags[:start]
+          elsif flags[:start_of_line]
             'starts-with(%s,%s)' % [texpr, qval]
-          elsif flags[:end]
+          elsif flags[:end_of_line]
             diff = 1 - val.size
             'substring(%s,string-length(%s)%s)=%s' %
               [texpr, expr, diff.zero? ? nil : diff, qval]
@@ -131,13 +116,15 @@ module XPF
 
         def reset_and_grab_match_tokens(entry)
           prev_tokens = @previous_match_tokens.dup rescue nil
+          expr = prev_tokens ? ('substring-after(%s,%s)' % prev_tokens) : '%s'
+          texpr = t(expr)
           if entry
-            val, expr = entry.expanded_value, '%s'
-            qval, texpr = qc(val), t(expr)
+            val = entry.expanded_value
+            qval = qc(val)
             @previous_match_tokens = curr_tokens = [texpr, qval]
             [expr, texpr, val, qval, prev_tokens, curr_tokens]
           else
-            [nil, nil, nil, nil, prev_tokens, [nil,nil]]
+            [expr, texpr, nil, nil, prev_tokens, [nil,nil]]
           end
         end
 
@@ -154,10 +141,7 @@ module XPF
         end
 
         def s(expr)
-          expr.sub(
-            /^(.*)translate\((.*?),"#{String::UPPERCASE_CHARS}","#{String::LOWERCASE_CHARS}"\)(.*)$/,
-            '\1\2\3'
-          )
+          String.undo_translate_casing(expr)
         end
 
         def qc(str)
