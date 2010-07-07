@@ -40,8 +40,13 @@ describe 'XPF::Matchers regexp value matching' do
     %|translate(#{expr},"#{from}","#{to}")|
   end
 
+  extract_substring = ess = lambda do |expr, texpr, before|
+    %|substring(#{texpr},1+string-length(#{expr})-string-length(substring-after(#{texpr},"#{before}")))|
+  end
+
   # Really hate to repeatedly type this !!
   tt = translate_casing('.')
+  tc = lambda{|expr| translate_casing(expr) }
 
   [
     [
@@ -502,19 +507,32 @@ describe 'XPF::Matchers regexp value matching' do
       xml,
       regexp = /^[a-z]{2,3}$/i,
       expected = ['(%s or %s)' % %w{AA AAA}.map{|t| %|#{itcs['.','a'..'z']}="#{t}"| }, %w{i1 i2 i3}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /Hello{2}/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">Helloo World</x><x id="i2">World HELLOO</x><x id="i3">Hello</x>',
-#      regexp = /Hello{2}/,
-#      expected = [%|contains(.,"Hell") and starts-with(substring-after(.,"Hell"),"oo")|, %w{i1}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /Hello{2}/i,
-#      expected = [%|contains(#{tt},"hell") and starts-with(substring-after(#{tt},"hell"),"oo")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /Hello{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">Helloo World</x><x id="i2">World HELLOO</x><x id="i3">Hello</x>',
+      regexp = /Hello{2}/,
+      expected = [%|contains(.,"Hell") and starts-with(#{ess['.','.','Hell']},"oo")|, %w{i1}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /Hello{2}/i,
+      expected = [%|contains(#{tt},"HELL") and starts-with(#{ess['.',tt,'HELL']},"OO")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /hello{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HELLOO</x><x id="i2">helloo</x><x id="i3">hello</x>',
+      regexp = /hello{2}$/,
+      expected = [%|contains(.,"hell") and #{ess['.','.','hell']}="oo"|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /hello{2}$/i,
+      expected = [%|contains(#{tt},"HELL") and #{ess['.',tt,'HELL']}="OO"|, %w{i1 i2}],
 #    ], [
 #    # //////////////////////////////////////////////////////////////////////////////////////
 #    # >> /^h{2}ello/
@@ -554,19 +572,6 @@ describe 'XPF::Matchers regexp value matching' do
 #      xml,
 #      regexp = /^h{2}ello$/i,
 #      expected = [%|starts-with(#{tt},"hh") and substring-after(#{tt},"hh")="ello"|, %w{i1 i2}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /hello{2}$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">HELLOO</x><x id="i2">helloo</x><x id="i3">hello</x>',
-#      regexp = /hello{2}$/,
-#      expected = [%|contains(.,"hell") and substring-after(.,"hell")="oo"|, %w{i2}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /hello{2}$/i,
-#      expected = [%|contains(#{tt},"hell") and substring-after(#{tt},"hell")="oo"|, %w{i1 i2}],
 #    ], [
 #    # //////////////////////////////////////////////////////////////////////////////////////
 #    # >> /Hello{2,3}/
