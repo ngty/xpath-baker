@@ -1,7 +1,7 @@
 module XPF
   module Matchers
     module Values
-      class SortedArray < Value(:expr, :tokens) #:nodoc:
+      class SortedArray < UnsortedArray #:nodoc:
 
         def to_condition
           conditions = [super]
