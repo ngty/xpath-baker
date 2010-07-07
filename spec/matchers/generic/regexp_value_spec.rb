@@ -533,45 +533,45 @@ describe 'XPF::Matchers regexp value matching' do
       xml,
       regexp = /hello{2}$/i,
       expected = [%|contains(#{tt},"HELL") and #{ess['.',tt,'HELL']}="OO"|, %w{i1 i2}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /^h{2}ello/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">HHELLO World</x><x id="i2">hhello</x><x id="i3">hello</x>',
-#      regexp = /^h{2}ello/,
-#      expected = [%|starts-with(.,"hh") and starts-with(substring-after(.,"hh"),"ello")|, %w{i2}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /^h{2}ello/i,
-#      expected = [%|starts-with(#{tt},"hh") and starts-with(substring-after(#{tt},"hh"),"ello")|, %w{i1 i2}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /h{2}ello$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">WORLD HHELLO</x><x id="i2">world hhello</x><x id="i3">hello</x>',
-#      regexp = /h{2}ello$/,
-#      expected = [%|contains(.,"hh") and substring-after(.,"hh")="ello"|, %w{i2}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /h{2}ello$/i,
-#      expected = [%|contains(#{tt},"hh") and substring-after(#{tt},"hh")="ello"|, %w{i1 i2}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /^h{2}ello$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">HHELLO</x><x id="i2">hhello</x><x id="i3">hello</x>',
-#      regexp = /^h{2}ello$/,
-#      expected = [%|starts-with(.,"hh") and substring-after(.,"hh")="ello"|, %w{i2}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /^h{2}ello$/i,
-#      expected = [%|starts-with(#{tt},"hh") and substring-after(#{tt},"hh")="ello"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2}ello/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HHELLO World</x><x id="i2">hhello</x><x id="i3">hello</x>',
+      regexp = /^h{2}ello/,
+      expected = [%|starts-with(.,"hh") and starts-with(#{ess['.','.','hh']},"ello")|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2}ello/i,
+      expected = [%|starts-with(#{tt},"HH") and starts-with(#{ess['.',tt,'HH']},"ELLO")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2}ello$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">WORLD HHELLO</x><x id="i2">world hhello</x><x id="i3">hello</x>',
+      regexp = /h{2}ello$/,
+      expected = [%|contains(.,"hh") and #{ess['.','.','hh']}="ello"|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2}ello$/i,
+      expected = [%|contains(#{tt},"HH") and #{ess['.',tt,'HH']}="ELLO"|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2}ello$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HHELLO</x><x id="i2">hhello</x><x id="i3">hello</x>',
+      regexp = /^h{2}ello$/,
+      expected = [%|starts-with(.,"hh") and #{ess['.','.','hh']}="ello"|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2}ello$/i,
+      expected = [%|starts-with(#{tt},"HH") and #{ess['.',tt,'HH']}="ELLO"|, %w{i1 i2}],
 #    ], [
 #    # //////////////////////////////////////////////////////////////////////////////////////
 #    # >> /Hello{2,3}/
