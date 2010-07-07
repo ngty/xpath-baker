@@ -132,6 +132,13 @@ module Reginald
       end
     end
 
+    def to_a
+      val = expanded_value
+      quantifier.to_a.map do |q|
+        TmpEntry.new(self, val, q)
+      end
+    end
+
     def etype
       :chars_set
     end
@@ -157,6 +164,12 @@ module Reginald
           ($1.to_i .. $2.to_i).to_a.map{|i| value*i }
         end
       else raise InvalidQuantifier
+      end
+    end
+
+    def to_a
+      expanded_value.map do |val|
+        TmpEntry.new(self, val, 1)
       end
     end
 
