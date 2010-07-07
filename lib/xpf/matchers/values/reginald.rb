@@ -9,14 +9,14 @@ module Reginald
     alias_method :orig_parse, :parse
 
     def parse(regexp)
-      orig_parse(regexp).reconstruct
+      orig_parse(regexp).customize
     end
 
   end
 
   class Expression
 
-    def reconstruct
+    def customize
       anchors = []
       (
         @array = @array.inject([]) do |memo, unit|
@@ -42,7 +42,7 @@ module Reginald
 
   end
 
-  module SupportsFlagging
+  module Extensions
 
     def update_flags(flags)
       (@flags ||= {}).update(flags)
@@ -60,11 +60,15 @@ module Reginald
       @flags ||= {}
     end
 
+    def branchable?
+      expanded_value.is_a?(Array)
+    end
+
   end
 
   class Characters < Collection
 
-    include SupportsFlagging
+    include Extensions
 
     def initialize(entry)
       @array = [entry]
@@ -98,7 +102,7 @@ module Reginald
 
   class CharacterClass
 
-    include SupportsFlagging
+    include Extensions
 
     def expanded_value
       pattern, tokens = /([a-z]\-[a-z]|[A-Z]\-[A-Z]|[0-9]\-[0-9])/, []
@@ -123,7 +127,7 @@ module Reginald
       when nil, '' then nil
       when Integer, Range then q
       when /\{(\d+)\}/ then $1.to_i
-      when /\{(\d+)\,(\d+)\}/ then ($1.to_i .. $2.to_i)
+      when /\{(\d+)\,(\d+)\}/ then $1 == $2 ? $1.to_i : ($1.to_i .. $2.to_i)
       else raise InvalidQuantifier
       end
     end
@@ -132,24 +136,52 @@ module Reginald
       :chars_set
     end
 
+    def branchable?
+      quantifier.is_a?(Range)
+    end
+
   end
 
   class Character
 
-    include SupportsFlagging
+    include Extensions
 
     def expanded_value
       case quantifier
       when /\{(\d+)\}/
         value * $1.to_i
       when /\{(\d+),(\d+)\}/
-        ($1.to_i .. $2.to_i).to_a.map{|i| value*i }
+        if $1 == $2
+          value * $1.to_i
+        else
+          ($1.to_i .. $2.to_i).to_a.map{|i| value*i }
+        end
       else raise InvalidQuantifier
       end
     end
 
     def etype
       :char
+    end
+
+  end
+
+  class TmpEntry
+
+    def initialize(entry, expanded_value, quantifier)
+      @entry, @expanded_value, @quantifier = entry, expanded_value, quantifier
+    end
+
+    def expanded_value
+      @expanded_value
+    end
+
+    def quantifier
+      @quantifier
+    end
+
+    def method_missing(meth, *args)
+      @entry.send(meth, *args)
     end
 
   end

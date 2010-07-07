@@ -4,139 +4,94 @@ module XPF
       class Regexp < Value(:expr, :regexp) #:nodoc:
 
         def to_condition
-          @previous_match_tokens = nil
-          @delayed_match_entries = []
-          expression = Reginald.parse(regexp)
-          @case_sensitive = !expression.casefold?
-          insert_expr(
-            if expression.literal?
-              'contains(%s,%s)' % [t('%s'), qc(expression.to_s)]
-            else
-              conditions = expression.map{|unit| send(:"for_#{unit.etype}", unit) }
-              conditions << for_any_w_delayed_entries(nil) unless @delayed_match_entries.empty?
-              conditions.compact.join(' and ')
-            end
+          @parsed_regexp = Reginald.parse(regexp)
+          @case_sensitive = !@parsed_regexp.casefold?
+          @branching_entries = []
+          @context = Context.new(expr, t(expr))
+
+          if @parsed_regexp.literal?
+            'contains(%s,%s)' % [@context, qc(@parsed_regexp.to_s)]
+          else
+            @parsed_regexp.map do |@entry|
+              if @entry.branchable?
+                @branching_entries << @entry ; nil
+              else
+                @branching_entries.empty? ?
+                  send(:"for_#{@entry.etype}") : for_branching_entries
+              end
+            end.push(for_leftover_entries).compact.join(' and ')
+          end
+        end
+
+        def for_string(entry = nil)
+          texpr = @context.to_s
+          expr = @context.first? ? s(@context.to_s) : texpr
+          for_any(
+            entry ||= @entry, expr, texpr,
+            val = entry.expanded_value, qc(val)
           )
         end
 
-        def insert_expr(conditions)
-          count = (conditions.length - conditions.gsub('%s','').size) / 2
-          conditions % ([expr]*count)
+        alias_method :for_char, :for_string
+
+        def for_chars_set(entry = nil)
+          entry ||= @entry
+          translate_from = entry.expanded_value
+          translate_to = translate_from[0..0] * translate_from.size
+          compare_against = translate_from[0..0] * (entry.quantifier || 1)
+          expr = @context.first? ? s(@context.to_s) : @context.to_s
+
+          for_any(
+            entry, expr,
+            'translate(%s,%s,%s)' % [expr, q(translate_from), q(translate_to)],
+            compare_against, qc(compare_against)
+          )
         end
 
-        def for_chars_set(entry)
-          case (count = entry.quantifier)
-          when Range
-            # TODO: WIP
-            translate_from = entry.expanded_value
-            compare_against = translate_from[0..0]
-            translate_to = compare_against * translate_from.size
-            texpr = 'translate(%s,%s,%s)' % [expr = '%s', q(translate_from), q(translate_to)]
-            '(%s)' % count.to_a.map do |count|
-              _compare_against = compare_against * count
-              per_tokens_group_condition(texpr, expr, q(_compare_against), _compare_against, entry.flags)
-            end.join(' or ')
-          else
-            expr, texpr, val, qval, prev_tokens, curr_tokens =
-              reset_and_grab_match_tokens(entry) do |prev|
-                translate_from = entry.expanded_value
-                compare_against = translate_from[0..0] * (count || 1)
-                translate_to = translate_from[0..0] * translate_from.size
-                expr = prev ? ('substring-after(%s,%s)' % prev) : '%s'
-                texpr = 'translate(%s,%s,%s)' % [expr, q(translate_from), q(translate_to)]
-                [expr, texpr, compare_against, q(compare_against)]
-              end
-            per_tokens_group_condition(texpr, expr, qval, val, entry.flags)
-          end
-        end
+        def for_any(entry, expr, texpr, val, qval)
+          context = @context.dup
+          @context.append(texpr, qval)
 
-        def for_char(entry)
-          for_string(entry)
-        end
-
-        def for_string(entry)
-          if entry.expanded_value.is_a?(Array)
-            @delayed_match_entries << entry
-            nil
-          elsif @delayed_match_entries.empty?
-            for_any_wo_delayed_entries(entry)
-          else
-            for_any_w_delayed_entries(entry)
-          end
-        end
-
-        def for_any_wo_delayed_entries(entry)
-          expr, texpr, val, qval, prev_tokens, curr_tokens = reset_and_grab_match_tokens(entry)
-          per_tokens_group_condition(texpr, expr, qval, val, entry.flags)
-        end
-
-        def for_any_w_delayed_entries(entry)
-          texpr, _, _, prev_tokens = reset_and_grab_match_tokens(entry)[1..4]
-          delayed_entries, @delayed_match_entries = @delayed_match_entries.dup, []
-          for_any_chained_delayed_entries(texpr, delayed_entries, entry)
-        end
-
-        def for_any_chained_delayed_entries(expr, entries, last_entry)
-          if first_entry = entries[0]
-            join_conditions(
-              first_entry.expanded_value.map do |val|
-                qval = qc(val)
-                condition = per_tokens_group_condition(expr, s(expr), qval, val, first_entry.flags)
-                nested = for_any_chained_delayed_entries(
-                  'substring-after(%s,%s)' % [expr, qval],
-                  entries[1..-1], last_entry
-                )
-                nested ? "(#{condition} and #{nested})" : condition
-              end
-            )
-          elsif last_entry
-            per_tokens_group_condition(
-              expr, s(expr), qc(val = last_entry.expanded_value), val,
-              last_entry.flags.merge(:start_of_line => true)
-            )
-          end
-        end
-
-        def join_conditions(conditions, join=' or ')
-          if conditions.size > 1
-            '(%s)' % conditions.join(join)
-          else
-            conditions[0]
-          end
-        end
-
-        def per_tokens_group_condition(texpr, expr, qval, val, flags)
-          flags[:start_of_line] = true if expr.include?('substring-after(')
-          if flags[:start_of_line] && flags[:end_of_line]
+          if (entry.start_of_line? || !context.first?) && entry.end_of_line?
             '%s=%s' % [texpr, qval]
-          elsif flags[:start_of_line]
+          elsif !context.first? or entry.start_of_line?
             'starts-with(%s,%s)' % [texpr, qval]
-          elsif flags[:end_of_line]
-            diff = 1 - val.size
+          elsif entry.end_of_line?
             'substring(%s,string-length(%s)%s)=%s' %
-              [texpr, expr, diff.zero? ? nil : diff, qval]
+              [texpr, expr, (diff = 1 - val.size).zero? ? nil : diff, qval]
           else
             'contains(%s,%s)' % [texpr, qval]
           end
         end
 
-        def reset_and_grab_match_tokens(entry)
-          prev_tokens = @previous_match_tokens.dup rescue nil
-          if block_given?
-            expr, texpr, val, qval = yield(prev_tokens)
-            @previous_match_tokens = curr_tokens = [texpr, qval]
-            [expr, texpr, val, qval, prev_tokens, curr_tokens]
-          else
-            expr = prev_tokens ? ('substring-after(%s,%s)' % prev_tokens) : '%s'
-            texpr = t(expr)
-            if entry
-              val, qval = [val = entry.expanded_value, qc(val)]
-              @previous_match_tokens = curr_tokens = [texpr, qval]
-              [expr, texpr, val, qval, prev_tokens, curr_tokens]
-            else
-              [expr, texpr, nil, nil, prev_tokens, [nil,nil]]
-            end
+        def for_branching_entries(*args)
+          if (entries = args[0]).nil?
+            branching_entries, @branching_entries = @branching_entries.dup, []
+            for_branching_entries(branching_entries)
+          elsif entries[0]
+            for_branching_entry(entries[0], entries[1..-1])
+          elsif @entry
+            send(:"for_#{@entry.etype}")
           end
+        end
+
+        def for_branching_entry(first, others)
+          entries = (expanded_val = first.expanded_value).is_a?(Array) ?
+            expanded_val.map{|val| Reginald::TmpEntry.new(first, val, 1) } :
+            first.quantifier.to_a.map{|q| Reginald::TmpEntry.new(first, expanded_val, q) }
+          conditions = entries.map do |_entry|
+            orig_context = @context.dup
+            condition = send(:"for_#{_entry.etype}", _entry)
+            nested = for_branching_entries(others)
+            @context = orig_context
+            nested ? "(#{condition} and #{nested})" : condition
+          end
+          conditions.size > 1 ? ('(%s)' % conditions.join(' or ')) : conditions[0]
+        end
+
+        def for_leftover_entries
+          @entry = nil
+          for_branching_entries
         end
 
         def q(str)
@@ -157,6 +112,35 @@ module XPF
 
         def qc(str)
           c(q(str))
+        end
+
+        class Context
+
+          def initialize(base, tbase)
+            @first = @tbase = tbase
+            @base = base
+          end
+
+          def first?
+            @first == @tbase
+          end
+
+          def append(expr, token)
+            base, @base = @base && @base.dup, nil
+            @tbase = %W{
+              substring(
+                #{@tbase},
+                1 + string-length(#{base || @tbase}) - string-length(
+                  substring-after(#{expr},#{token})
+                )
+              )
+            }.join('')
+          end
+
+          def to_s
+            @tbase
+          end
+
         end
 
       end
