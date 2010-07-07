@@ -42,7 +42,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
     should 'return expr reflecting specified config[:case_sensitive]' do
       {
         false => './td[%s]/../td[%s]' %
-          @values.map{|val| string_comparison(translated_content_exprs, val.downcase) },
+          @values.map{|val| string_comparison(translated_content_exprs, val.upcase) },
         true => @default
       }.each do |val, expected|
         @condition_should_equal[{:case_sensitive => val}, expected]
@@ -125,7 +125,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
     should 'return expr reflecting specified config[:case_sensitive]' do
       {
         false => './td[%s]/../td[%s]' %
-          @values.map{|val| unsorted_token_comparison(translated_content_exprs, val.map(&:downcase)) },
+          @values.map{|val| unsorted_token_comparison(translated_content_exprs, val.map(&:upcase)) },
         true => @default
       }.each do |val, expected|
         @condition_should_equal[{:case_sensitive => val}, expected]

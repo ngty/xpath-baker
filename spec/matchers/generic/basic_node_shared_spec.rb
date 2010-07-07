@@ -24,7 +24,7 @@ shared 'basic node matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = [translate_casing("normalize-space(#{@name})"), %|"#{@val.downcase}"|].join('=')
+      expected = [translate_casing("normalize-space(#{@name})"), %|"#{@val.upcase}"|].join('=')
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -88,7 +88,7 @@ shared 'basic node matcher' do
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
       node_expr = translate_casing("normalize-space(#{@name})")
-      expected = check_tokens(translate_casing("normalize-space(#{@name})"), [%|"#{@val}"|])
+      expected = check_tokens(translate_casing("normalize-space(#{@name})"), [%|"#{@val[0].upcase}"|])
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -140,7 +140,7 @@ shared 'basic node matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = check_tokens(translate_casing("normalize-space(#{@name})"), @vals.map{|v| %|"#{v}"| })
+      expected = check_tokens(translate_casing("normalize-space(#{@name})"), @vals.map{|v| %|"#{v.upcase}"| })
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 

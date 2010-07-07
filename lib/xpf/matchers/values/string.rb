@@ -9,12 +9,12 @@ module XPF
         class << self
 
           def translate_casing(str, case_sensitive)
-            (case_sensitive or str =~ /translate\((.*?),"#{UC}","#{LC}"\)/) ?
-              str : %|translate(#{str},"#{UC}","#{LC}")|
+            (case_sensitive or str =~ /translate\((.*?),"#{LC}","#{UC}"\)/) ?
+              str : %|translate(#{str},"#{LC}","#{UC}")|
           end
 
           def undo_translate_casing(str)
-            str.sub(/^(.*)translate\((.*?),"#{UC}","#{LC}"\)(.*)$/, '\1\2\3')
+            str.sub(/^(.*)translate\((.*?),"#{LC}","#{UC}"\)(.*)$/, '\1\2\3')
           end
 
           def quote(str)

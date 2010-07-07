@@ -63,7 +63,7 @@ def translate_casing(expr)
   if expr.is_a?(Array)
     expr.map{|e| translate_casing(e) }
   else
-    %|translate(#{expr},"#{uc}","#{lc}")|
+    %|translate(#{expr},"#{lc}","#{uc}")|
   end
 end
 

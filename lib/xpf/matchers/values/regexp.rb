@@ -144,7 +144,7 @@ module XPF
         end
 
         def c(str)
-          @case_sensitive ? str : str.downcase
+          @case_sensitive ? str : str.upcase
         end
 
         def t(expr)

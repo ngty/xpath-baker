@@ -52,8 +52,8 @@ describe "XPF::HTML::Matchers::TD::Hash" do
         true => @default,
         false => './td[%s]/../td[%s]' % @values.map do |field, val|
           comparison = lambda{|v| string_comparison(translated_content_exprs, v) }
-          th = %|ancestor::table[1]//th[%s][1]| % comparison[field.downcase]
-          'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val.downcase]]
+          th = %|ancestor::table[1]//th[%s][1]| % comparison[field.upcase]
+          'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val.upcase]]
         end,
       }.each do |val, expected|
         @condition_should_equal[{:case_sensitive => val}, expected]
@@ -141,7 +141,7 @@ describe "XPF::HTML::Matchers::TD::Hash" do
       {
         true => @default,
         false => './td[%s]/../td[%s]' % @values.map do |field, val|
-          comparison = lambda{|v| unsorted_token_comparison(translated_content_exprs, v.map(&:downcase)) }
+          comparison = lambda{|v| unsorted_token_comparison(translated_content_exprs, v.map(&:upcase)) }
           th = %|ancestor::table[1]//th[%s][1]| % comparison[field]
           'count(%s/preceding-sibling::th)+1][%s][%s' % [th, th, comparison[val]]
         end

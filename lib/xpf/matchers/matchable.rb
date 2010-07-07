@@ -19,7 +19,7 @@ module XPF
         end
 
         def mv(val)
-          q(config.case_sensitive? ? val : val.to_s.downcase)
+          q(config.case_sensitive? ? val : val.to_s.upcase)
         end
 
         def mt(val = nil)

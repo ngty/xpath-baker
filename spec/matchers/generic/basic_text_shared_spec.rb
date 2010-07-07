@@ -23,7 +23,7 @@ shared 'a basic text matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = [translate_casing('normalize-space(.)'), %|"#{@val.downcase}"|].join('=')
+      expected = [translate_casing('normalize-space(.)'), %|"#{@val.upcase}"|].join('=')
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -93,7 +93,7 @@ shared 'a basic text matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = check_tokens(translate_casing("normalize-space(.)"), [%|"#{@val}"|])
+      expected = check_tokens(translate_casing("normalize-space(.)"), [%|"#{@val.upcase}"|])
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 
@@ -144,7 +144,7 @@ shared 'a basic text matcher' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      expected = check_tokens(translate_casing("normalize-space(.)"), @vals.map{|v| %|"#{v}"| })
+      expected = check_tokens(translate_casing("normalize-space(.)"), @vals.map{|v| %|"#{v.upcase}"| })
       @condition_should_equal[{:case_sensitive => false}, expected]
     end
 

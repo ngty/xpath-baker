@@ -28,7 +28,7 @@ describe 'XPF::Matchers::AnyText' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      tokens = %w{text() .}.map{|s| translate_casing("normalize-space(#{s})") + %|="#{@val.downcase}"| }
+      tokens = %w{text() .}.map{|s| translate_casing("normalize-space(#{s})") + %|="#{@val.upcase}"| }
       @condition_should_equal[{:case_sensitive => false}, '(%s) or (%s)' % tokens]
     end
 
@@ -94,7 +94,7 @@ describe 'XPF::Matchers::AnyText' do
     end
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
-      tokens = %w{text() .}.map{|s| check_tokens(translate_casing("normalize-space(#{s})"), [%|"#{@val}"|]) }
+      tokens = %w{text() .}.map{|s| check_tokens(translate_casing("normalize-space(#{s})"), [%|"#{@val.upcase}"|]) }
       @condition_should_equal[{:case_sensitive => false}, '(%s) or (%s)' % tokens]
     end
 
@@ -147,7 +147,7 @@ describe 'XPF::Matchers::AnyText' do
 
     should 'not be case-sensitive when config[:case_sensitive] is false' do
       tokens = %w{text() .}.map do |s|
-        check_tokens(translate_casing("normalize-space(#{s})"), @vals.map{|v| %|"#{v}"| })
+        check_tokens(translate_casing("normalize-space(#{s})"), @vals.map{|v| %|"#{v.upcase}"| })
       end
       @condition_should_equal[{:case_sensitive => false}, '(%s) or (%s)' % tokens]
     end
