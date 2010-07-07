@@ -522,6 +522,19 @@ describe 'XPF::Matchers regexp value matching' do
       expected = [%|contains(#{tt},"HELL") and starts-with(#{ess['.',tt,'HELL']},"OO")|, %w{i1 i2}],
     ], [
     # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^hello{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HELLOO WORLD</x><x id="i2">helloo world</x><x id="i3">hello world</x>',
+      regexp = /^hello{2}/,
+      expected = [%|starts-with(.,"hell") and starts-with(#{ess['.','.','hell']},"oo")|, %w{i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^hello{2}/i,
+      expected = [%|starts-with(#{tt},"HELL") and starts-with(#{ess['.',tt,'HELL']},"OO")|, %w{i1 i2}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
     # >> /hello{2}$/
     # //////////////////////////////////////////////////////////////////////////////////////
       debug = __LINE__,
@@ -572,71 +585,71 @@ describe 'XPF::Matchers regexp value matching' do
       xml,
       regexp = /^h{2}ello$/i,
       expected = [%|starts-with(#{tt},"HH") and #{ess['.',tt,'HH']}="ELLO"|, %w{i1 i2}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /Hello{2,3}/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">Helloo World</x><x id="i2">Hellooo World</x><x id="i3">World HELLOO</x><x id="i4">Hello</x>',
-#      regexp = /Hello{2,3}/,
-#      expected = ['contains(.,"Hell") and (%s or %s)' % %w{oo ooo}.map{|t| %|starts-with(substring-after(.,"Hell"),"#{t}")| }, %w{i1 i2}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /Hello{2,3}/i,
-#      expected = [%|contains(#{tt},"hell") and (%s or %s)| % %w{oo ooo}.map{|t| %|starts-with(substring-after(#{tt},"hell"),"#{t}")| }, %w{i1 i2 i3}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /^h{2,3}ello/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">HHELLO World</x><x id="i2">hhhello</x><x id="i3">hhello</x><x id="i4">hello</x>',
-#      regexp = /^h{2,3}ello/,
-#      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(starts-with(.,"#{t}") and starts-with(substring-after(.,"#{t}"),"ello"))| }, %w{i2 i3}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /^h{2,3}ello/i,
-#      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(starts-with(#{tt},"#{t}") and starts-with(substring-after(#{tt},"#{t}"),"ello"))| }, %w{i1 i2 i3}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /h{2,3}ello$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">WORLD HHHELLO</x><x id="i2">world hhhello</x><x id="i3">world hhello</x><x id="i4">hello</x>',
-#      regexp = /h{2,3}ello$/,
-#      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(contains(.,"#{t}") and substring-after(.,"#{t}")="ello")| }, %w{i2 i3}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /h{2,3}ello$/i,
-#      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(contains(#{tt},"#{t}") and substring-after(#{tt},"#{t}")="ello")| }, %w{i1 i2 i3}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /^h{2,3}ello$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">HHHELLO</x><x id="i2">hhhello</x><x id="i3">hhello</x><x id="i4">hello</x>',
-#      regexp = /^h{2,3}ello$/,
-#      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(starts-with(.,"#{t}") and substring-after(.,"#{t}")="ello")| }, %w{i2 i3}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /^h{2,3}ello$/i,
-#      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(starts-with(#{tt},"#{t}") and substring-after(#{tt},"#{t}")="ello")| }, %w{i1 i2 i3}],
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /hello{2,3}$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">HELLOO</x><x id="i2">helloo</x><x id="i3">hellooo</x><x id="i4">hello</x>',
-#      regexp = /hello{2,3}$/,
-#      expected = [%|contains(.,"hell") and (%s or %s)| % %w{oo ooo}.map{|t| %|substring-after(.,"hell")="#{t}"| }, %w{i2 i3}],
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /hello{2,3}$/i,
-#      expected = [%|contains(#{tt},"hell") and (%s or %s)| % %w{oo ooo}.map{|t| %|substring-after(#{tt},"hell")="#{t}"| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /Hello{2,3}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">Helloo World</x><x id="i2">Hellooo World</x><x id="i3">World HELLOO</x><x id="i4">Hello</x>',
+      regexp = /Hello{2,3}/,
+      expected = ['contains(.,"Hell") and (%s or %s)' % %w{oo ooo}.map{|t| %|starts-with(#{ess['.','.','Hell']},"#{t}")| }, %w{i1 i2}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /Hello{2,3}/i,
+      expected = [%|contains(#{tt},"HELL") and (%s or %s)| % %w{OO OOO}.map{|t| %|starts-with(#{ess['.',tt,'HELL']},"#{t}")| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2,3}ello/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HHELLO World</x><x id="i2">hhhello</x><x id="i3">hhello</x><x id="i4">hello</x>',
+      regexp = /^h{2,3}ello/,
+      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(starts-with(.,"#{t}") and starts-with(#{ess['.','.',t]},"ello"))| }, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2,3}ello/i,
+      expected = ['(%s or %s)' % %w{HH HHH}.map{|t| %|(starts-with(#{tt},"#{t}") and starts-with(#{ess['.',tt,t]},"ELLO"))| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2,3}ello$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">WORLD HHHELLO</x><x id="i2">world hhhello</x><x id="i3">world hhello</x><x id="i4">hello</x>',
+      regexp = /h{2,3}ello$/,
+      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(contains(.,"#{t}") and #{ess['.','.',t]}="ello")| }, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2,3}ello$/i,
+      expected = ['(%s or %s)' % %w{HH HHH}.map{|t| %|(contains(#{tt},"#{t}") and #{ess['.',tt,t]}="ELLO")| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2,3}ello$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HHHELLO</x><x id="i2">hhhello</x><x id="i3">hhello</x><x id="i4">hello</x>',
+      regexp = /^h{2,3}ello$/,
+      expected = ['(%s or %s)' % %w{hh hhh}.map{|t| %|(starts-with(.,"#{t}") and #{ess['.','.',t]}="ello")| }, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2,3}ello$/i,
+      expected = ['(%s or %s)' % %w{HH HHH}.map{|t| %|(starts-with(#{tt},"#{t}") and #{ess['.',tt,t]}="ELLO")| }, %w{i1 i2 i3}],
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /hello{2,3}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">HELLOO</x><x id="i2">helloo</x><x id="i3">hellooo</x><x id="i4">hello</x>',
+      regexp = /hello{2,3}$/,
+      expected = [%|contains(.,"hell") and (%s or %s)| % %w{oo ooo}.map{|t| %|#{ess['.','.','hell']}="#{t}"| }, %w{i2 i3}],
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /hello{2,3}$/i,
+      expected = [%|contains(#{tt},"HELL") and (%s or %s)| % %w{OO OOO}.map{|t| %|#{ess['.',tt,'HELL']}="#{t}"| }, %w{i1 i2 i3}],
 #    ], [
 #    # //////////////////////////////////////////////////////////////////////////////////////
 #    # >> /Hell[o-s]{2}/
