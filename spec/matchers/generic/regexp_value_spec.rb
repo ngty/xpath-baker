@@ -48,6 +48,10 @@ describe 'XPF::Matchers regexp value matching' do
     %|substring(#{texpr1},1+string-length(#{expr})-string-length(substring-after(#{texpr2},"#{token}")))|
   end
 
+  extract_substring_2 = ess2 = lambda do |expr, token|
+    %|substring(#{expr},#{token.length.succ})|
+  end
+
   # Really hate to repeatedly type this !!
   tt = translate_casing('.')
   tc = lambda{|expr| translate_casing(expr) }
@@ -1108,6 +1112,165 @@ describe 'XPF::Matchers regexp value matching' do
       expected_cond = '((%s) or (%s))' % %w{HH HHH}.
         map{|t| %|starts-with(#{itcs['.','h'..'j']},"#{t}") and #{ess['.',tt,itcs['.','h'..'j'],t]}="ELLO"| },
       expected_ids = %w{i1 i2 i3 i4},
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2}ello{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hhelloo</x><x id="i2">-hhelloo</x><x id="i3">hhelloo-</x><x id="i4">HHELLOO</x>' +
+        '<x id="i5">helloo</x><x id="i6">hhello</x>',
+      regexp = /h{2}ello{2}/,
+      expected_cond = 'contains(.,"hh") and starts-with(%s,"ell") and starts-with(%s,"oo")' %
+        [e = ess['.','hh'], ess2[e,'ell']],
+      expected_ids = %w{i1 i2 i3},
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2}ello{2}/i,
+      expected_cond = 'contains(%s,"HH") and starts-with(%s,"ELL") and starts-with(%s,"OO")' %
+        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
+      expected_ids = %w{i1 i2 i3 i4},
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /^h{2}ello{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hhelloo</x><x id="i2">hhelloo-</x><x id="i3">HHELLOO</x>' +
+        '<x id="i4">helloo</x><x id="i5">hhello</x><x id="i7">-hhelloo</x>',
+      regexp = /^h{2}ello{2}/,
+      expected_cond = 'starts-with(.,"hh") and starts-with(%s,"ell") and starts-with(%s,"oo")' %
+        [e = ess['.','hh'], ess2[e,'ell']],
+      expected_ids = %w{i1 i2},
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /^h{2}ello{2}/i,
+      expected_cond = 'starts-with(%s,"HH") and starts-with(%s,"ELL") and starts-with(%s,"OO")' %
+        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
+      expected_ids = %w{i1 i2 i3},
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2}ello{2}$/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">-hhelloo</x><x id="i2">hhelloo</x><x id="i3">HHELLOO</x>' +
+        '<x id="i4">hhelloo-</x><x id="i5">helloo</x>',
+      regexp = /h{2}ello{2}$/,
+      expected_cond = 'contains(.,"hh") and starts-with(%s,"ell") and %s="oo"' %
+        [e = ess['.','hh'], ess2[e,'ell']],
+      expected_ids = %w{i1 i2},
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2}ello{2}$/i,
+      expected_cond = 'contains(%s,"HH") and starts-with(%s,"ELL") and %s="OO"' %
+        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
+      expected_ids = %w{i1 i2 i3},
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2,3}ello{2}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hhelloo</x><x id="i2">-hhelloo</x>' +
+        '<x id="i3">hhhelloo</x><x id="i4">-hhhelloo</x>' +
+        '<x id="i5">hhelloo</x><x id="i6">hhelloo-</x>' +
+        '<x id="i7">HHELLOO</x><x id="i8">hello</x>',
+      regexp = /h{2,3}ello{2}/,
+      expected_cond = '((%s) or (%s))' % %w{hh hhh}.map do |t|
+        'contains(.,"%s") and (starts-with(%s,"ell") and starts-with(%s,"oo"))' %
+          [t, e = ess['.',t], ess2[e,'ell']]
+      end,
+      expected_ids = %w{i1 i2 i3 i4 i5 i6},
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2,3}ello{2}/i,
+      expected_cond = '((%s) or (%s))' % %w{HH HHH}.map do |t|
+        'contains(%s,"%s") and (starts-with(%s,"ELL") and starts-with(%s,"OO"))' %
+          [tt, t, e = ess['.',tt,t], ess2[e,'ELL']]
+      end,
+      expected_ids = %w{i1 i2 i3 i4 i5 i6 i7},
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2}ello{2,3}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hhelloo</x><x id="i2">-hhelloo</x>' +
+        '<x id="i3">hhelloo</x><x id="i4">hhellooo</x>' +
+        '<x id="i5">hhelloo-</x><x id="i6">hhellooo-</x>' +
+        '<x id="i7">HHELLOO</x><x id="i8">hello</x>',
+      regexp = /h{2}ello{2,3}/,
+      expected_cond = %|contains(.,"hh") and starts-with(#{e = ess['.','hh']},"ell") and (%s or %s)| %
+        %w{oo ooo}.map{|t| %|starts-with(#{ess2[e,'ell']},"#{t}")| },
+      expected_ids = %w{i1 i2 i3 i4 i5 i6},
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2}ello{2,3}/i,
+      expected_cond = %|contains(#{tt},"HH") and starts-with(#{e = ess['.',tt,'HH']},"ELL") and (%s or %s)| %
+        %w{OO OOO}.map{|t| %|starts-with(#{ess2[e,'ELL']},"#{t}")| },
+      expected_ids = %w{i1 i2 i3 i4 i5 i6 i7},
+    ], [
+    # //////////////////////////////////////////////////////////////////////////////////////
+    # >> /h{2,3}ello{2,3}/
+    # //////////////////////////////////////////////////////////////////////////////////////
+      debug = __LINE__,
+      xml = '<x id="i1">hhelloo</x><x id="i2">-hhelloo</x>' +
+        '<x id="i3">hhhelloo</x><x id="i4">-hhhelloo</x>' +
+        '<x id="i5">hhelloo</x><x id="i6">hhellooo</x>' +
+        '<x id="i7">hhelloo-</x><x id="i8">hhellooo-</x>' +
+        '<x id="i9">HHELLOO</x><x id="i10">hello</x>',
+      regexp = /h{2,3}ello{2,3}/,
+      expected_cond = '((%s) or (%s))' % %w{hh hhh}.map do |t|
+        'contains(.,"%s") and (starts-with(%s,"ell") and (starts-with(%s,"oo") or starts-with(%s,"ooo")))' %
+          [t, e = ess['.',t], ess2[e,'ell'], ess2[e,'ell']]
+      end,
+      expected_ids = %w{i1 i2 i3 i4 i5 i6 i7 i8},
+    ], [
+      debug = __LINE__,
+      xml,
+      regexp = /h{2,3}ello{2,3}/i,
+      expected_cond = '((%s) or (%s))' % %w{HH HHH}.map do |t|
+        'contains(%s,"%s") and (starts-with(%s,"ELL") and (starts-with(%s,"OO") or starts-with(%s,"OOO")))' %
+          [tt, t, e = ess['.',tt,t], ess2[e,'ELL'], ess2[e,'ELL']]
+      end,
+      expected_ids = %w{i1 i2 i3 i4 i5 i6 i7 i8 i9},
+#    ], [
+#    # //////////////////////////////////////////////////////////////////////////////////////
+#    # >> /^h{2}ello{2}/
+#    # //////////////////////////////////////////////////////////////////////////////////////
+#      debug = __LINE__,
+#      xml = '<x id="i1">hhelloo</x><x id="i2">hhelloo-</x><x id="i3">HHELLOO</x>' +
+#        '<x id="i4">helloo</x><x id="i5">hhello</x><x id="i7">-hhelloo</x>',
+#      regexp = /^h{2}ello{2}/,
+#      expected_cond = 'starts-with(.,"hh") and starts-with(%s,"ell") and starts-with(%s,"oo")' %
+#        [e = ess['.','hh'], ess2[e,'ell']],
+#      expected_ids = %w{i1 i2},
+#    ], [
+#      debug = __LINE__,
+#      xml,
+#      regexp = /^h{2}ello{2}/i,
+#      expected_cond = 'starts-with(%s,"HH") and starts-with(%s,"ELL") and starts-with(%s,"OO")' %
+#        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
+#      expected_ids = %w{i1 i2 i3},
+#    ], [
+#    # //////////////////////////////////////////////////////////////////////////////////////
+#    # >> /h{2}ello{2}$/
+#    # //////////////////////////////////////////////////////////////////////////////////////
+#      debug = __LINE__,
+#      xml = '<x id="i1">-hhelloo</x><x id="i2">hhelloo</x><x id="i3">HHELLOO</x>' +
+#        '<x id="i4">hhelloo-</x><x id="i5">helloo</x>',
+#      regexp = /h{2}ello{2}$/,
+#      expected_cond = 'contains(.,"hh") and starts-with(%s,"ell") and %s="oo"' %
+#        [e = ess['.','hh'], ess2[e,'ell']],
+#      expected_ids = %w{i1 i2},
+#    ], [
+#      debug = __LINE__,
+#      xml,
+#      regexp = /h{2}ello{2}$/i,
+#      expected_cond = 'contains(%s,"HH") and starts-with(%s,"ELL") and %s="OO"' %
+#        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
+#      expected_ids = %w{i1 i2 i3},
     ]
   ].each do |(debug, xml, regexp, expected_cond, expected_ids)|
     #next unless debug == 773
