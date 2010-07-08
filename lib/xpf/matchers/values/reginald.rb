@@ -78,6 +78,10 @@ module Reginald
       @array << entry
     end
 
+    def to_a
+      [TmpEntry.new(self, expanded_value, 1)]
+    end
+
     def etype
       :string
     end

@@ -13,11 +13,10 @@ module XPF
             'contains(%s,%s)' % [@context, qc(@parsed_regexp.to_s)]
           else
             @parsed_regexp.map do |@entry|
-              if @entry.branchable?
+              if @entry.branchable? or !@branching_entries.empty?
                 @branching_entries << @entry ; nil
-              else
-                @branching_entries.empty? ?
-                  send(:"for_#{@entry.etype}") : for_branching_entries
+              elsif @branching_entries.empty?
+                send(:"for_#{@entry.etype}")
               end
             end.push(for_leftover_entries).compact.join(' and ')
           end
@@ -45,7 +44,7 @@ module XPF
 
         def for_any(entry, expr, texpr, val, qval)
           context = @context.dup
-          @context.append(texpr, qval)
+          @context.append(texpr, val, qval)
           (
             if (entry.start_of_line? || !context.first?) && entry.end_of_line?
               '%s=%s' % [texpr, qval]
@@ -64,27 +63,20 @@ module XPF
           )
         end
 
-        def for_branching_entries(*args)
+        def for_leftover_entries(*args)
           if first = (entries = args[0] and entries[0])
             conditions = first.to_a.map do |entry|
               orig_context = @context.dup
               condition = send(:"for_#{entry.etype}", entry)
-              nested = for_branching_entries(entries[1..-1])
+              nested = for_leftover_entries(entries[1..-1])
               @context = orig_context
               nested ? "(#{condition} and #{nested})" : condition
             end
             conditions.size > 1 ? ('(%s)' % conditions.join(' or ')) : conditions[0]
           elsif args.empty?
             branching_entries, @branching_entries = @branching_entries.dup, []
-            for_branching_entries(branching_entries)
-          elsif @entry
-            send(:"for_#{@entry.etype}")
+            for_leftover_entries(branching_entries)
           end
-        end
-
-        def for_leftover_entries
-          @entry = nil
-          for_branching_entries
         end
 
         def q(str)
@@ -117,8 +109,16 @@ module XPF
             @first == @context
           end
 
-          def append(expr, token)
-            context = first? ? String.undo_translate_casing(@context) : @context
+          def to_s
+            @context
+          end
+
+          def append(expr, token, qtoken)
+            first? ? append_as_first(expr, qtoken) : append_as_other(token)
+          end
+
+          def append_as_first(expr, token)
+            context = String.undo_translate_casing(@context)
             @context = %W{
               substring(
                 #{@context},
@@ -129,8 +129,8 @@ module XPF
             }.join('')
           end
 
-          def to_s
-            @context
+          def append_as_other(token)
+            @context = %|substring(#{@context},#{token.length.succ})|
           end
 
         end
