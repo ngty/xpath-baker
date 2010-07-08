@@ -114,12 +114,20 @@ module Reginald
       tokens << value unless value.empty?
       tokens.inject('') do |expanded_val, token|
         expanded_val + (
-          token !~ pattern ? token.sub('\\','') : (
+          token !~ pattern ? stringify(token) : (
             first, last = token.split('-')
             tmp = (first .. last).to_a.join('')
             casefold? ? (tmp.downcase + tmp.upcase) : tmp
         ))
       end.split('').uniq.sort.join('')
+    end
+
+    def stringify(token)
+      case token
+      when '\d' then (0..9).to_a.join('')
+      when '\w' then [0..9, 'a'..'z', 'A'..'Z'].map{|r| r.to_a }.flatten.join('') + '_'
+      else token.sub('\\','')
+      end
     end
 
     def quantifier
