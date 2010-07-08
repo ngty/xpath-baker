@@ -126,6 +126,7 @@ module Reginald
       case token
       when '\d' then (0..9).to_a.join('')
       when '\w' then [0..9, 'a'..'z', 'A'..'Z'].map{|r| r.to_a }.flatten.join('') + '_'
+      when '\s' then ' '
       else token.sub('\\','')
       end
     end
