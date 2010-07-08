@@ -1235,42 +1235,6 @@ describe 'XPF::Matchers regexp value matching' do
           [tt, t, e = ess['.',tt,t], ess2[e,'ELL'], ess2[e,'ELL']]
       end,
       expected_ids = %w{i1 i2 i3 i4 i5 i6 i7 i8 i9},
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /^h{2}ello{2}/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">hhelloo</x><x id="i2">hhelloo-</x><x id="i3">HHELLOO</x>' +
-#        '<x id="i4">helloo</x><x id="i5">hhello</x><x id="i7">-hhelloo</x>',
-#      regexp = /^h{2}ello{2}/,
-#      expected_cond = 'starts-with(.,"hh") and starts-with(%s,"ell") and starts-with(%s,"oo")' %
-#        [e = ess['.','hh'], ess2[e,'ell']],
-#      expected_ids = %w{i1 i2},
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /^h{2}ello{2}/i,
-#      expected_cond = 'starts-with(%s,"HH") and starts-with(%s,"ELL") and starts-with(%s,"OO")' %
-#        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
-#      expected_ids = %w{i1 i2 i3},
-#    ], [
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#    # >> /h{2}ello{2}$/
-#    # //////////////////////////////////////////////////////////////////////////////////////
-#      debug = __LINE__,
-#      xml = '<x id="i1">-hhelloo</x><x id="i2">hhelloo</x><x id="i3">HHELLOO</x>' +
-#        '<x id="i4">hhelloo-</x><x id="i5">helloo</x>',
-#      regexp = /h{2}ello{2}$/,
-#      expected_cond = 'contains(.,"hh") and starts-with(%s,"ell") and %s="oo"' %
-#        [e = ess['.','hh'], ess2[e,'ell']],
-#      expected_ids = %w{i1 i2},
-#    ], [
-#      debug = __LINE__,
-#      xml,
-#      regexp = /h{2}ello{2}$/i,
-#      expected_cond = 'contains(%s,"HH") and starts-with(%s,"ELL") and %s="OO"' %
-#        [tt, e = ess['.',tt,'HH'], ess2[e,'ELL']],
-#      expected_ids = %w{i1 i2 i3},
     ]
   ].each do |(debug, xml, regexp, expected_cond, expected_ids)|
     #next unless debug == 773
