@@ -7,7 +7,7 @@ module XPF
           @parsed_regexp = Reginald.parse(regexp)
           @case_sensitive = !@parsed_regexp.casefold?
           @branching_entries = []
-          @context = Context.new(expr, t(expr))
+          @context = Context.new(t(expr))
 
           if @parsed_regexp.literal?
             'contains(%s,%s)' % [@context, qc(@parsed_regexp.to_s)]
@@ -46,17 +46,22 @@ module XPF
         def for_any(entry, expr, texpr, val, qval)
           context = @context.dup
           @context.append(texpr, qval)
-
-          if (entry.start_of_line? || !context.first?) && entry.end_of_line?
-            '%s=%s' % [texpr, qval]
-          elsif !context.first? or entry.start_of_line?
-            'starts-with(%s,%s)' % [texpr, qval]
-          elsif entry.end_of_line?
-            'substring(%s,string-length(%s)%s)=%s' %
-              [texpr, expr, (diff = 1 - val.size).zero? ? nil : diff, qval]
-          else
-            'contains(%s,%s)' % [texpr, qval]
-          end
+          (
+            if (entry.start_of_line? || !context.first?) && entry.end_of_line?
+              '%s=%s' % [texpr, qval]
+            elsif !context.first? or entry.start_of_line?
+              'starts-with(%s,%s)' % [texpr, qval]
+            elsif entry.end_of_line?
+              'substring(%s,string-length(%s)%s)=%s' %
+                [texpr, expr, (diff = 1 - val.size).zero? ? nil : diff, qval]
+            else
+              'contains(%s,%s)' % [texpr, qval]
+            end
+          ).sub(
+            # NOTE: Trimming off extra processing that serves no purpose !!
+            /^(.*?translate\(substring\()translate\((.*?),"#{String::LC}","#{String::UC}"\)(.*)$/,
+            '\1\2\3'
+          )
         end
 
         def for_branching_entries(*args)
@@ -104,21 +109,20 @@ module XPF
 
         class Context
 
-          def initialize(base, tbase)
-            @first = @tbase = tbase
-            @base = base
+          def initialize(context)
+            @first = @context = context
           end
 
           def first?
-            @first == @tbase
+            @first == @context
           end
 
           def append(expr, token)
-            base, @base = @base && @base.dup, nil
-            @tbase = %W{
+            context = first? ? String.undo_translate_casing(@context) : @context
+            @context = %W{
               substring(
-                #{@tbase},
-                1 + string-length(#{base || @tbase}) - string-length(
+                #{@context},
+                1 + string-length(#{context}) - string-length(
                   substring-after(#{expr},#{token})
                 )
               )
@@ -126,7 +130,7 @@ module XPF
           end
 
           def to_s
-            @tbase
+            @context
           end
 
         end
