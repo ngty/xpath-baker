@@ -1,13 +1,13 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
-describe "XPF::Matchers::Literal" do
+describe "XPB::Matchers::Literal" do
 
   describe '> generating condition' do
 
     before do
       @val, @default = ['wonder-fu']*2
       @condition_should_equal = lambda do |config, expected|
-        XPF::Matchers::Literal.new(@val, XPF::Configuration.new(config)).condition.should.equal(expected)
+        XPB::Matchers::Literal.new(@val, XPB::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 

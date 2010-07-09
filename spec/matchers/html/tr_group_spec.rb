@@ -1,14 +1,14 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 require File.join(File.dirname(__FILE__), '..', 'generic', 'basic_group_shared_spec')
-require 'xpf/html'
+require 'xpb/html'
 
-describe "XPF::HTML::Matchers::TR::Group" do
+describe "XPB::HTML::Matchers::TR::Group" do
 
   before do
-    XPF.configure(:reset){|config| config.axial_node = 'self::*' }
-    @matcher_klass = XPF::HTML::Matchers::TR::Group
+    XPB.configure(:reset){|config| config.axial_node = 'self::*' }
+    @matcher_klass = XPB::HTML::Matchers::TR::Group
     @new_matcher = lambda do |match_attrs, config|
-      @matcher_klass.new(match_attrs, XPF::Configuration.new(config))
+      @matcher_klass.new(match_attrs, XPB::Configuration.new(config))
     end
     @condition_should_equal = lambda do |match_attrs, config, expected|
       @new_matcher[match_attrs, config].condition.should.equal(expected)
@@ -16,14 +16,14 @@ describe "XPF::HTML::Matchers::TR::Group" do
   end
 
   after do
-    XPF.configure(:reset)
+    XPB.configure(:reset)
   end
 
   shared 'stubbing in action' do
 
     before do
       # NOTE: In short, stubbing in action ..
-      XPF::HTML::Matchers::TR::Group.class_eval do
+      XPB::HTML::Matchers::TR::Group.class_eval do
         alias_method :orig_new_typed_matcher, :new_typed_matcher
         def new_typed_matcher(val, config)
           (matcher = orig_new_typed_matcher(val, config)).instance_eval do
@@ -40,7 +40,7 @@ describe "XPF::HTML::Matchers::TR::Group" do
     end
 
     after do
-      XPF::HTML::Matchers::TR::Group.class_eval do
+      XPB::HTML::Matchers::TR::Group.class_eval do
         alias_method :new_typed_matcher, :orig_new_typed_matcher
       end
     end
@@ -110,7 +110,7 @@ describe "XPF::HTML::Matchers::TR::Group" do
     behaves_like 'stubbing in action'
 
     should 'return expr reflecting presence of child <td/>' do
-      @condition_should_equal[[:tds], {}, '((matcher:nil:XPF_NIL_VALUE,))']
+      @condition_should_equal[[:tds], {}, '((matcher:nil:XPB_NIL_VALUE,))']
     end
 
     valid_config_settings_args(
@@ -121,7 +121,7 @@ describe "XPF::HTML::Matchers::TR::Group" do
       should "ignore config[:#{setting}]" do
         configs.each do |config|
           next unless config.is_a?(Hash)
-          expected = '((matcher:nil:XPF_NIL_VALUE,%s))' % [dump_config(config)]
+          expected = '((matcher:nil:XPB_NIL_VALUE,%s))' % [dump_config(config)]
           @condition_should_equal[[:tds], config, expected]
         end
       end
@@ -131,17 +131,17 @@ describe "XPF::HTML::Matchers::TR::Group" do
 
   describe '> generating condition (w invalid {:tds => ...})' do
 
-    should 'raise XPF::InvalidMatchAttrError when value is not a supported type' do
+    should 'raise XPB::InvalidMatchAttrError when value is not a supported type' do
       ['aa', nil, 1, Object.new].each do |val|
         lambda{ @new_matcher[{:tds => val}, {}] }.
-          should.raise(XPF::InvalidMatchAttrError).
+          should.raise(XPB::InvalidMatchAttrError).
           message.should.equal('Match attribute :tds must be a Hash or Array !!')
       end
     end
 
   end
 
-  before { @matcher_klass = XPF::HTML::Matchers::TR::Group }
+  before { @matcher_klass = XPB::HTML::Matchers::TR::Group }
   behaves_like 'basic group matcher'
 
 end

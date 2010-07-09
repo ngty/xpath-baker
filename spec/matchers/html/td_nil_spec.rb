@@ -1,23 +1,23 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 require File.join(File.dirname(__FILE__), 'spec_helpers')
-require 'xpf/html'
+require 'xpb/html'
 
-describe "XPF::HTML::Matchers::TD::Nil" do
+describe "XPB::HTML::Matchers::TD::Nil" do
 
   before do
-    XPF.configure(:reset) do |config|
+    XPB.configure(:reset) do |config|
       config.normalize_space = false
       config.case_sensitive = true
       config.axial_node = :self
     end
     @condition_should_equal = lambda do |config, expected|
-      XPF::HTML::Matchers::TD::Nil.new('dummy', XPF::Configuration.new(config)).
+      XPB::HTML::Matchers::TD::Nil.new('dummy', XPB::Configuration.new(config)).
         condition.should.equal(expected)
     end
   end
 
   after do
-    XPF.configure(:reset)
+    XPB.configure(:reset)
   end
 
   describe '> generating condition' do

@@ -1,4 +1,4 @@
-def xpf_invalid_permutated_arguments
+def xpb_invalid_permutated_arguments
 [
   ['attr1'],
   [:attr1],
@@ -42,7 +42,7 @@ def xpf_invalid_permutated_arguments
 ]
 end
 
-def xpf_valid_permutated_arguments
+def xpb_valid_permutated_arguments
 {
   [[m1 = {:attr1 => 1}, c1 = {:position => 1}]]                                              => [[m1], [c1]],
   [[m1 = {:attr1 => 1}, c1 = c1.values]]                                                     => [[m1], [c1]],

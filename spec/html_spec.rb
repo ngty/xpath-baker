@@ -1,23 +1,23 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe 'XPF::HTML' do
+describe 'XPB::HTML' do
 
-  describe "> requiring 'xpf/html'" do
+  describe "> requiring 'xpb/html'" do
 
 #    before do
-#      XPF.send(:remove_const, :MODE) if XPF.const_defined?(:MODE)
+#      XPB.send(:remove_const, :MODE) if XPB.const_defined?(:MODE)
 #    end
 #
-#    should 'raise XPF::ModeAlreadySpecifiedError when XPF::MODE is already declared' do
-#      XPF.const_set(:MODE, :another)
-#      lambda { require 'xpf/html' }.
-#        should.raise(XPF::ModeAlreadyDeclaredError).
+#    should 'raise XPB::ModeAlreadySpecifiedError when XPB::MODE is already declared' do
+#      XPB.const_set(:MODE, :another)
+#      lambda { require 'xpb/html' }.
+#        should.raise(XPB::ModeAlreadyDeclaredError).
 #        message.should.equal('Mode has already been declared as :another !!')
 #    end
 #
-    should 'set XPF::MODE as :html' do
-      require 'xpf/html'
-      XPF::MODE.should.equal :html
+    should 'set XPB::MODE as :html' do
+      require 'xpb/html'
+      XPB::MODE.should.equal :html
     end
 
   end

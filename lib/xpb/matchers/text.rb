@@ -1,4 +1,4 @@
-module XPF
+module XPB
   module Matchers
     class Text < Matcher(:value, :config)
       def condition

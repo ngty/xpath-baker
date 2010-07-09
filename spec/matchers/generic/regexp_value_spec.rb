@@ -1,9 +1,9 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
-describe 'XPF::Matchers regexp value matching' do
+describe 'XPB::Matchers regexp value matching' do
 
   convertor = Class.new do
-    include XPF::Matchers::Matchable
+    include XPB::Matchers::Matchable
     public :r
   end
 

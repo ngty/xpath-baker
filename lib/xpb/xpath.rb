@@ -1,4 +1,4 @@
-module XPF
+module XPB
   class XPath
 
     def initialize(name, config = {})

@@ -1,12 +1,12 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'reginald'
-require 'xpf/matchers'
-require 'xpf/configuration'
-require 'xpf/arguments'
-require 'xpf/xpath'
+require 'xpb/matchers'
+require 'xpb/configuration'
+require 'xpb/arguments'
+require 'xpb/xpath'
 
-module XPF
+module XPB
 
   class ModeAlreadyDeclaredError < Exception ; end
   class InvalidConfigModeError   < Exception ; end
@@ -18,7 +18,7 @@ module XPF
     #
     # 1). Customize global configuration (see Configuration for all configurable settings):
     #
-    #   XPF.configure do |config|
+    #   XPB.configure do |config|
     #     # This will turn off case senstive matching, all xpath generated will
     #     # ignore chars casing
     #     config.case_sensitive = false
@@ -26,7 +26,7 @@ module XPF
     #
     # 2). Reset configuration to default:
     #
-    #   XPF.configure(:reset)
+    #   XPB.configure(:reset)
     #
     def configure(mode = :update, &blk)
       case mode
@@ -37,28 +37,28 @@ module XPF
     end
 
     ###
-    # Befriending simply means introducing the easier to type +someone.xpf+. If +someone+
+    # Befriending simply means introducing the easier to type +someone.xpb+. If +someone+
     # already has that method, a warning will be issued & no addition is done.
     #
-    # Currently, the only use case is to add xpf() to Object, thus usage becomes:
+    # Currently, the only use case is to add xpb() to Object, thus usage becomes:
     #
-    #   xpf.tr(...)
+    #   xpb.tr(...)
     #
     # Which has exactly the same effect as:
     #
-    #   XPF.tr(...)
+    #   XPB.tr(...)
     #
     def befriends(someone)
       unless (@friends ||= []).include?(someone)
-        if someone.method_defined?(:xpf)
+        if someone.method_defined?(:xpb)
           $stdout.puts %w{
-            WARNING: XPF wants to befriend %s by giving it a shortcut method xpf(), but
-            %s#xpf has already been defined. Neverthless, the rejected XPF stays friendly
-            & XPF's goodies can still be accessed via the less easy to type XPF.*.
+            WARNING: XPB wants to befriend %s by giving it a shortcut method xpb(), but
+            %s#xpb has already been defined. Neverthless, the rejected XPB stays friendly
+            & XPB's goodies can still be accessed via the less easy to type XPB.*.
           }.join(' ') % ([someone]*2)
         else
           @friends << someone
-          someone.send(:define_method, :xpf, lambda { XPF })
+          someone.send(:define_method, :xpb, lambda { XPB })
         end
       end
     end
@@ -81,8 +81,8 @@ module XPF
       attr_reader :supported_elements
 
       ###
-      # This is to avoid XPF from running in multiple modes. Once mode has been declared
-      # redeclaring will raise XPF::ModeAlreadyDeclaredError.
+      # This is to avoid XPB from running in multiple modes. Once mode has been declared
+      # redeclaring will raise XPB::ModeAlreadyDeclaredError.
       #
       def declare_mode_as(mode) #:nodoc:
         if const_defined?(:MODE)
@@ -105,7 +105,7 @@ module XPF
   end
 
   # NOTE: This is not tested !!
-  XPF.befriends(Object)
+  XPB.befriends(Object)
 
 end
 

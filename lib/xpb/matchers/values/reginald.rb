@@ -1,6 +1,6 @@
 # Hacked version of the http://rubygems.org/gems/reginald
 
-class XPF::InvalidRegexpQuantifier < Exception ; end
+class XPB::InvalidRegexpQuantifier < Exception ; end
 
 module Reginald
 
@@ -141,7 +141,7 @@ module Reginald
       when Integer, Range then q
       when /\{(\d+)\}/ then $1.to_i
       when /\{(\d+)\,(\d+)\}/ then $1 == $2 ? $1.to_i : ($1.to_i .. $2.to_i)
-      else raise XPF::InvalidRegexpQuantifier
+      else raise XPB::InvalidRegexpQuantifier
       end
     end
 
@@ -176,7 +176,7 @@ module Reginald
         else
           ($1.to_i .. $2.to_i).to_a.map{|i| value*i }
         end
-      else raise XPF::InvalidRegexpQuantifier
+      else raise XPB::InvalidRegexpQuantifier
       end
     end
 

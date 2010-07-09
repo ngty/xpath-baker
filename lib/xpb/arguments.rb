@@ -1,4 +1,4 @@
-module XPF
+module XPB
 
   class InvalidArgumentError < Exception ; end
 

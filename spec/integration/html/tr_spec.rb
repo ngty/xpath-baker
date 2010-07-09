@@ -1,14 +1,14 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 require File.join(File.dirname(__FILE__), '..', '..', 'matchers', 'html', 'spec_helpers')
 require File.join(File.dirname(__FILE__), '..', 'generic', 'basic_element_shared_spec')
-require 'xpf/html'
+require 'xpb/html'
 
 describe "Generating xpath for html <tr/>" do
 
-  extend XPF::Spec::Helpers::TD
+  extend XPB::Spec::Helpers::TD
 
   before do
-    XPF.configure(:reset) do |config|
+    XPB.configure(:reset) do |config|
       config.scope = '//'
       config.normalize_space = false
       config.case_sensitive = true
@@ -18,7 +18,7 @@ describe "Generating xpath for html <tr/>" do
   end
 
   after do
-    XPF.configure(:reset)
+    XPB.configure(:reset)
   end
 
   [
@@ -153,11 +153,11 @@ describe "Generating xpath for html <tr/>" do
       end
 
       should 'return xpath as described' do
-        each_xpf {|xpf| xpf.send(:tr, match_attrs, config).should.equal(expected_path) }
+        each_xpb {|xpb| xpb.send(:tr, match_attrs, config).should.equal(expected_path) }
       end
 
       should "return xpath that match intended node(s)" do
-        each_xpf {|xpf| get_ids[xpf.send(:tr, match_attrs, config)].should.equal(expected_ids) }
+        each_xpb {|xpb| get_ids[xpb.send(:tr, match_attrs, config)].should.equal(expected_ids) }
       end
 
     end

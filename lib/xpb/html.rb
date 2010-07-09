@@ -1,7 +1,7 @@
-require File.join(File.expand_path(File.dirname(__FILE__)), '..', 'xpf')
-require 'xpf/html/matchers'
+require File.join(File.expand_path(File.dirname(__FILE__)), '..', 'xpb')
+require 'xpb/html/matchers'
 
-module XPF
+module XPB
 
   declare_mode_as :html
 

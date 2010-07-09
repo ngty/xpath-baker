@@ -1,4 +1,4 @@
-module XPF
+module XPB
   module Spec
     module Helpers
 

@@ -1,4 +1,4 @@
-module XPF
+module XPB
   module Matchers
     class Node < Matcher(:name, :value, :config)
       def condition

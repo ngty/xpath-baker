@@ -1,4 +1,4 @@
-module XPF
+module XPB
 
   class ConfigSettingNotSupportedError < Exception ; end
   class InvalidConfigSettingValueError < Exception ; end
@@ -173,12 +173,12 @@ module XPF
   # to ensure TR contains TDs with cell2 appearing only after cell1, & cell3
   # appearing only after cell2.
   #
-  #   xpf.tr({:cells => %w{cell1 cell2 cell3}, :match_ordering => true)
+  #   xpb.tr({:cells => %w{cell1 cell2 cell3}, :match_ordering => true)
   #
   # Example 2: The following will build an xpath that only ensures TR has TDs
   # that contain cell1, cell2 & cell3, ignoring the order of appearance.
   #
-  #   xpf.tr({:cells => %w{cell1 cell2 cell3}, :match_ordering => false)
+  #   xpb.tr({:cells => %w{cell1 cell2 cell3}, :match_ordering => false)
   #
   # Note: The default value if true.
   #
@@ -187,7 +187,7 @@ module XPF
     # %w{!g !c !o !n !i s
     #'ng,nc,no,nn,ni,>1^,1~7$,<=8^,
     # %w{ng nc no nn ni 1~7$}
-    # %w{g c o n i 1~7$ descendant-or-self::a //body/watever XPF::Matchers::Attribute XPF::Matchers::Text}
+    # %w{g c o n i 1~7$ descendant-or-self::a //body/watever XPB::Matchers::Attribute XPB::Matchers::Text}
     DEFAULT_SETTINGS = {
       :greedy             => true,       # g, !g
       :case_sensitive     => true,       # c, !c
@@ -198,12 +198,12 @@ module XPF
       :scope              => '//',       # //some/thing
       :position           => nil,        # 1~7$, 1~8^, 1^, 7$, >=9$, <=9^
       :axial_node         => 'self::*',  # descendant-or-self::a, descendant_or_self::a
-      :element_matcher    => XPF::Matchers::Element,
-      :attribute_matcher  => XPF::Matchers::Attribute,
-      :text_matcher       => XPF::Matchers::Text,
-      :any_text_matcher   => XPF::Matchers::AnyText,
-      :literal_matcher    => XPF::Matchers::Literal,
-      :group_matcher      => XPF::Matchers::Group,
+      :element_matcher    => XPB::Matchers::Element,
+      :attribute_matcher  => XPB::Matchers::Attribute,
+      :text_matcher       => XPB::Matchers::Text,
+      :any_text_matcher   => XPB::Matchers::AnyText,
+      :literal_matcher    => XPB::Matchers::Literal,
+      :group_matcher      => XPB::Matchers::Group,
     }
 
     SETTING_MAPPERS = { #:nodoc:

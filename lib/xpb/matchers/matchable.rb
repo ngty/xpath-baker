@@ -1,9 +1,9 @@
-module XPF
+module XPB
   module Matchers
     module Matchable
 
       class << (NIL_VALUE = Struct.new('NIL_VALUE'))
-        def to_s ; 'XPF_NIL_VALUE' ; end
+        def to_s ; 'XPB_NIL_VALUE' ; end
       end
 
       protected

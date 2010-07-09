@@ -1,4 +1,4 @@
-module XPF
+module XPB
   module Matchers
     module Values
       module String #:nodoc:

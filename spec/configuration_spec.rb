@@ -1,9 +1,9 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "XPF::Configuration" do
+describe "XPB::Configuration" do
 
   before do
-    XPF.configure(:reset)
+    XPB.configure(:reset)
   end
 
   valid_axial_node_args = {
@@ -119,15 +119,15 @@ describe "XPF::Configuration" do
       :scope              => ['//', '//'],
       :position           => [nil, nil],
       :axial_node         => ['self::*', 'self::*'],
-      :element_matcher    => [XPF::Matchers::Element, 'XPF::Matchers::Element'],
-      :attribute_matcher  => [XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'],
-      :text_matcher       => [XPF::Matchers::Text, 'XPF::Matchers::Text'],
-      :any_text_matcher   => [XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'],
-      :literal_matcher    => [XPF::Matchers::Literal, 'XPF::Matchers::Literal'],
-      :group_matcher      => [XPF::Matchers::Group, 'XPF::Matchers::Group'],
+      :element_matcher    => [XPB::Matchers::Element, 'XPB::Matchers::Element'],
+      :attribute_matcher  => [XPB::Matchers::Attribute, 'XPB::Matchers::Attribute'],
+      :text_matcher       => [XPB::Matchers::Text, 'XPB::Matchers::Text'],
+      :any_text_matcher   => [XPB::Matchers::AnyText, 'XPB::Matchers::AnyText'],
+      :literal_matcher    => [XPB::Matchers::Literal, 'XPB::Matchers::Literal'],
+      :group_matcher      => [XPB::Matchers::Group, 'XPB::Matchers::Group'],
     }.each do |setting, (val, display_val)|
       should "have :#{setting} as #{display_val}" do
-        XPF.configure {|config| config.send(setting).should.equal val }
+        XPB.configure {|config| config.send(setting).should.equal val }
       end
     end
   end
@@ -142,7 +142,7 @@ describe "XPF::Configuration" do
       :scope              => valid_scope_args,
     }.each do |setting, vals|
       should "be able to change :#{setting}" do
-        XPF.configure do |config|
+        XPB.configure do |config|
           vals.each do |val|
             config.send(:"#{setting}=", val)
             config.send(:"#{setting}").should.equal val
@@ -152,7 +152,7 @@ describe "XPF::Configuration" do
     end
 
     should 'be able to change :position' do
-      XPF.configure do |config|
+      XPB.configure do |config|
         valid_position_args.merge(nil => [nil, {}]).each do |val, (expected, test_meths)|
           config.position = val
           config.position.should.equal(expected)
@@ -162,7 +162,7 @@ describe "XPF::Configuration" do
     end
 
     should 'be able to change :comparison' do
-      XPF.configure do |config|
+      XPB.configure do |config|
         valid_comparison_args.each do |val, (expected, test_meths)|
           config.comparison = val
         puts "before #{val} / #{expected} / #{config.comparison}"
@@ -173,7 +173,7 @@ describe "XPF::Configuration" do
     end
 
     should 'be able to change :axial_node' do
-      XPF.configure do |config|
+      XPB.configure do |config|
         valid_axial_node_args.each do |val, expected|
           config.axial_node = val
           config.axial_node.should.equal expected
@@ -225,12 +225,12 @@ describe "XPF::Configuration" do
       ]
     }.each do |setting, args|
       vals, msg = args[0..-2], args[-1]
-      should "raise XPF::InvalidConfigSettingValueError when :#{setting} is assigned invalid value" do
-        XPF.configure do |config|
+      should "raise XPB::InvalidConfigSettingValueError when :#{setting} is assigned invalid value" do
+        XPB.configure do |config|
           full_msg = "Config setting :#{setting} must %s !!" % msg
           vals.each do |val|
             lambda { config.send(:"#{setting}=", val) }.
-              should.raise(XPF::InvalidConfigSettingValueError).
+              should.raise(XPB::InvalidConfigSettingValueError).
               message.should.equal(full_msg)
           end
         end
@@ -249,39 +249,39 @@ describe "XPF::Configuration" do
       :comparison         => ['=', val = '=', val],
       :position           => [nil, 10, '[10]'],
       :axial_node         => ['self::*', val = 'following::*', val],
-      :attribute_matcher  => [XPF::Matchers::Attribute, val = Class.new{ A = 1 }, val],
-      :text_matcher       => [XPF::Matchers::Text, val = Class.new{ B = 1 }, val],
-      :literal_matcher    => [XPF::Matchers::Literal, val = Class.new{ C = 1 }, val],
-      :group_matcher      => [XPF::Matchers::Group, val = Class.new{ D = 1 }, val],
-      :any_text_matcher   => [XPF::Matchers::AnyText, val = Class.new{ E = 1 }, val],
-      :element_matcher    => [XPF::Matchers::Element, val = Class.new{ F = 1 }, val],
+      :attribute_matcher  => [XPB::Matchers::Attribute, val = Class.new{ A = 1 }, val],
+      :text_matcher       => [XPB::Matchers::Text, val = Class.new{ B = 1 }, val],
+      :literal_matcher    => [XPB::Matchers::Literal, val = Class.new{ C = 1 }, val],
+      :group_matcher      => [XPB::Matchers::Group, val = Class.new{ D = 1 }, val],
+      :any_text_matcher   => [XPB::Matchers::AnyText, val = Class.new{ E = 1 }, val],
+      :element_matcher    => [XPB::Matchers::Element, val = Class.new{ F = 1 }, val],
     }.each do |setting, (default_val, assigned_custom_val, expected_custom_val)|
 
       should "revert customized :#{setting} to default (when no block is given)" do
-        XPF.configure {|config| config.send(:"#{setting}=", assigned_custom_val) }
-        XPF.configure(:reset)
-        XPF.configure {|config| config.send(:"#{setting}").should.equal default_val }
+        XPB.configure {|config| config.send(:"#{setting}=", assigned_custom_val) }
+        XPB.configure(:reset)
+        XPB.configure {|config| config.send(:"#{setting}").should.equal default_val }
       end
 
       should "set customized :#{setting} to specified value (when block is given)" do
-        XPF.configure(:reset) {|config| config.send(:"#{setting}=", assigned_custom_val) }
-        XPF.configure {|config| config.send(:"#{setting}").should.equal expected_custom_val }
+        XPB.configure(:reset) {|config| config.send(:"#{setting}=", assigned_custom_val) }
+        XPB.configure {|config| config.send(:"#{setting}").should.equal expected_custom_val }
       end
 
     end
   end
 
   describe '> configuring (with invalid mode)' do
-    should 'raise XPF::InvalidConfigModeError' do
-      lambda { XPF.configure(:watever) }.
-        should.raise(XPF::InvalidConfigModeError).
+    should 'raise XPB::InvalidConfigModeError' do
+      lambda { XPB.configure(:watever) }.
+        should.raise(XPB::InvalidConfigModeError).
         message.should.equal('Config mode :watever is not supported !!')
     end
   end
 
   describe '> converting to hash' do
     should 'return configured settings as a hash' do
-      XPF::Configuration.to_hash.should.equal XPF::Configuration::DEFAULT_SETTINGS
+      XPB::Configuration.to_hash.should.equal XPB::Configuration::DEFAULT_SETTINGS
     end
   end
 
@@ -289,7 +289,7 @@ describe "XPF::Configuration" do
 
     should 'return false if something is not neither a Hash nor an Array' do
       [:something, 'something', /something/, Object.new].each do |something|
-        XPF::Configuration.describes_config?(something).should.be.false
+        XPB::Configuration.describes_config?(something).should.be.false
       end
     end
 
@@ -299,15 +299,15 @@ describe "XPF::Configuration" do
     }.each do |type, (invalid, valid, empty)|
 
       should "return false if something is #{type} but not all contents are config settings" do
-        XPF::Configuration.describes_config?(invalid).should.be.false
+        XPB::Configuration.describes_config?(invalid).should.be.false
       end
 
       should "return true if something is #{type} and all contents are config settings" do
-        XPF::Configuration.describes_config?(valid).should.be.true
+        XPB::Configuration.describes_config?(valid).should.be.true
       end
 
       should "return true if something is an empty #{type}" do
-        XPF::Configuration.describes_config?(empty).should.be.true
+        XPB::Configuration.describes_config?(empty).should.be.true
       end
 
     end
@@ -325,7 +325,7 @@ describe "XPF::Configuration" do
     }.each do |setting, val_vs_expected|
       should "be able to normalize :#{setting} setting" do
         val_vs_expected.each do |val, expected|
-          XPF::Configuration.normalize([val]).should.equal({setting => expected})
+          XPB::Configuration.normalize([val]).should.equal({setting => expected})
         end
       end
     end
@@ -335,43 +335,43 @@ describe "XPF::Configuration" do
       :scope => valid_scope_args
     }.each do |setting, vals|
       should "be able to normalize :#{setting} setting" do
-        vals.each{|val| XPF::Configuration.normalize([val]).should.equal({setting => val}) }
+        vals.each{|val| XPB::Configuration.normalize([val]).should.equal({setting => val}) }
       end
     end
 
     {
-      :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
-      :any_text_matcher => [[XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'], XPF::Matchers::AnyText],
-      :element_matcher => [[XPF::Matchers::Element, 'XPF::Matchers::Element'], XPF::Matchers::Element],
-      :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
-      :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
-      :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
+      :group_matcher => [[XPB::Matchers::Group, 'XPB::Matchers::Group'], XPB::Matchers::Group],
+      :any_text_matcher => [[XPB::Matchers::AnyText, 'XPB::Matchers::AnyText'], XPB::Matchers::AnyText],
+      :element_matcher => [[XPB::Matchers::Element, 'XPB::Matchers::Element'], XPB::Matchers::Element],
+      :attribute_matcher => [[XPB::Matchers::Attribute, 'XPB::Matchers::Attribute'], XPB::Matchers::Attribute],
+      :literal_matcher => [[XPB::Matchers::Literal, 'XPB::Matchers::Literal'], XPB::Matchers::Literal],
+      :text_matcher => [[XPB::Matchers::Text, 'XPB::Matchers::Text'], XPB::Matchers::Text],
     }.each do |setting, (vals, expected)|
       should "be able to normalize :#{setting} setting" do
-        vals.each{|val| XPF::Configuration.normalize([val]).should.equal({setting => expected}) }
+        vals.each{|val| XPB::Configuration.normalize([val]).should.equal({setting => expected}) }
       end
     end
 
     should 'be able to normalize :position setting' do
       valid_position_args.keys.each do |val|
-        XPF::Configuration.normalize([val]).should.equal({:position => val.to_s})
+        XPB::Configuration.normalize([val]).should.equal({:position => val.to_s})
       end
     end
 
     should 'be able to normalize :comparison setting' do
       valid_comparison_args.keys.reject{|key| key.is_a?(Symbol) }.each do |val|
-        XPF::Configuration.normalize([val]).should.equal({:comparison => val})
+        XPB::Configuration.normalize([val]).should.equal({:comparison => val})
       end
     end
 
-    should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be normalized' do
+    should 'raise XPB::ConfigSettingNotSupportedError if setting cannot be normalized' do
       [
         '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
         'awe/some', '//awe/some', 'awe/some', 'x', '!x'
       ].each do |val|
-        lambda { XPF::Configuration.normalize([val]) }.
-          should.raise(XPF::InvalidConfigSettingValueError).
+        lambda { XPB::Configuration.normalize([val]) }.
+          should.raise(XPB::InvalidConfigSettingValueError).
           message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
       end
     end
@@ -380,15 +380,15 @@ describe "XPF::Configuration" do
 
   describe '> normalizing non-default format configuration (w hash)' do
     should 'return arg as it is' do
-      XPF::Configuration.normalize(arg = {:aa => 1}).should.equal(arg)
+      XPB::Configuration.normalize(arg = {:aa => 1}).should.equal(arg)
     end
   end
 
   describe '> normalizing non-default format configuration (w non array/hash)' do
-    should 'raise XPF::InvalidArgumentError' do
+    should 'raise XPB::InvalidArgumentError' do
       [nil, Object.new, 1, '1'].each do |arg|
-        lambda { XPF::Configuration.normalize(arg) }.
-          should.raise(XPF::InvalidArgumentError).
+        lambda { XPB::Configuration.normalize(arg) }.
+          should.raise(XPB::InvalidArgumentError).
           message.should.equal('Config normalizing can ONLY be done for Array/Hash !!')
       end
     end
@@ -397,27 +397,27 @@ describe "XPF::Configuration" do
   describe '> getting a new configuration (w hash)' do
 
     should 'duplicate a copy of itself' do
-      configuration = XPF::Configuration.new({})
-      configuration.to_hash.should.equal XPF::Configuration.to_hash
-      configuration.object_id.should.not.equal XPF::Configuration
+      configuration = XPB::Configuration.new({})
+      configuration.to_hash.should.equal XPB::Configuration.to_hash
+      configuration.object_id.should.not.equal XPB::Configuration
     end
 
     should 'have hash overrides its settings' do
-      orig_settings = XPF::Configuration.to_hash
+      orig_settings = XPB::Configuration.to_hash
       normalize_space_val = {true => false, false => true}[orig_settings[:normalize_space]]
-      configuration = XPF::Configuration.new(:normalize_space => normalize_space_val)
+      configuration = XPB::Configuration.new(:normalize_space => normalize_space_val)
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
 
-    should 'raise XPF::ConfigSettingNotSupportedError if unsupported setting is specified' do
-      lambda { XPF::Configuration.new(:hello => 'ee') }.
-        should.raise(XPF::ConfigSettingNotSupportedError).
+    should 'raise XPB::ConfigSettingNotSupportedError if unsupported setting is specified' do
+      lambda { XPB::Configuration.new(:hello => 'ee') }.
+        should.raise(XPB::ConfigSettingNotSupportedError).
         message.should.equal('Config setting :hello is not supported !!')
     end
 
-    should 'raise XPF::InvalidConfigSettingValueError if setting is assigned invalid value' do
-      lambda { XPF::Configuration.new(:case_sensitive => 'ee') }.
-        should.raise(XPF::InvalidConfigSettingValueError).
+    should 'raise XPB::InvalidConfigSettingValueError if setting is assigned invalid value' do
+      lambda { XPB::Configuration.new(:case_sensitive => 'ee') }.
+        should.raise(XPB::InvalidConfigSettingValueError).
         message.should.equal('Config setting :case_sensitive must be boolean true/false !!')
     end
 
@@ -426,15 +426,15 @@ describe "XPF::Configuration" do
   describe '> getting a new configuration (w array)' do
 
     should 'duplicate a copy of itself' do
-      configuration = XPF::Configuration.new([])
-      configuration.to_hash.should.equal XPF::Configuration.to_hash
-      configuration.object_id.should.not.equal XPF::Configuration
+      configuration = XPB::Configuration.new([])
+      configuration.to_hash.should.equal XPB::Configuration.to_hash
+      configuration.object_id.should.not.equal XPB::Configuration
     end
 
     should 'have array overrides its settings' do
-      orig_settings = XPF::Configuration.to_hash
+      orig_settings = XPB::Configuration.to_hash
       normalize_space_val = !orig_settings[:normalize_space]
-      configuration = XPF::Configuration.new([{:true => 'n', false => '!n'}[normalize_space_val]])
+      configuration = XPB::Configuration.new([{:true => 'n', false => '!n'}[normalize_space_val]])
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
 
@@ -454,7 +454,7 @@ describe "XPF::Configuration" do
          'i' => [:include_inner_text, true],
         '!i' => [:include_inner_text, false],
       }.each do |shorthand, (setting, expected)|
-        XPF::Configuration.new([shorthand]).to_hash[setting].should.equal(expected)
+        XPB::Configuration.new([shorthand]).to_hash[setting].should.equal(expected)
       end
     end
 
@@ -463,26 +463,26 @@ describe "XPF::Configuration" do
       :scope => valid_scope_args
     }.each do |setting, vals|
       should "be able to extract & assign :#{setting} setting" do
-        vals.each{|val| XPF::Configuration.new([val]).to_hash[setting].should.equal(val) }
+        vals.each{|val| XPB::Configuration.new([val]).to_hash[setting].should.equal(val) }
       end
     end
 
     {
-      :group_matcher => [[XPF::Matchers::Group, 'XPF::Matchers::Group'], XPF::Matchers::Group],
-      :any_text_matcher => [[XPF::Matchers::AnyText, 'XPF::Matchers::AnyText'], XPF::Matchers::AnyText],
-      :element_matcher => [[XPF::Matchers::Element, 'XPF::Matchers::Element'], XPF::Matchers::Element],
-      :attribute_matcher => [[XPF::Matchers::Attribute, 'XPF::Matchers::Attribute'], XPF::Matchers::Attribute],
-      :literal_matcher => [[XPF::Matchers::Literal, 'XPF::Matchers::Literal'], XPF::Matchers::Literal],
-      :text_matcher => [[XPF::Matchers::Text, 'XPF::Matchers::Text'], XPF::Matchers::Text],
+      :group_matcher => [[XPB::Matchers::Group, 'XPB::Matchers::Group'], XPB::Matchers::Group],
+      :any_text_matcher => [[XPB::Matchers::AnyText, 'XPB::Matchers::AnyText'], XPB::Matchers::AnyText],
+      :element_matcher => [[XPB::Matchers::Element, 'XPB::Matchers::Element'], XPB::Matchers::Element],
+      :attribute_matcher => [[XPB::Matchers::Attribute, 'XPB::Matchers::Attribute'], XPB::Matchers::Attribute],
+      :literal_matcher => [[XPB::Matchers::Literal, 'XPB::Matchers::Literal'], XPB::Matchers::Literal],
+      :text_matcher => [[XPB::Matchers::Text, 'XPB::Matchers::Text'], XPB::Matchers::Text],
     }.each do |setting, (vals, expected)|
       should "be able to extract & assign :#{setting} setting" do
-        vals.each{|val| XPF::Configuration.new([val]).to_hash[setting].should.equal(expected) }
+        vals.each{|val| XPB::Configuration.new([val]).to_hash[setting].should.equal(expected) }
       end
     end
 
     should 'be able to extract & assign :position setting' do
       valid_position_args.each do |val, expected|
-        position = XPF::Configuration.new([val]).to_hash[:position]
+        position = XPB::Configuration.new([val]).to_hash[:position]
         position.should.equal(expected[0])
         expected[1].each{|meth, _val| position.send(meth).should.equal(_val) }
       end
@@ -490,20 +490,20 @@ describe "XPF::Configuration" do
 
     should 'be able to extract & assign :comparison setting' do
       valid_comparison_args.reject{|key,val| key.is_a?(Symbol) }.each do |val, expected|
-        comparison = XPF::Configuration.new([val]).to_hash[:comparison]
+        comparison = XPB::Configuration.new([val]).to_hash[:comparison]
         comparison.should.equal(expected[0])
         expected[1].each{|meth, _val| comparison.send(meth).should.equal(_val) }
       end
     end
 
-    should 'raise XPF::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
+    should 'raise XPB::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
       [
         '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
         'awe/some', '//awe/some', 'awe/some', 'x', '!x'
       ].each do |val|
-        lambda { XPF::Configuration.new([val]) }.
-          should.raise(XPF::InvalidConfigSettingValueError).
+        lambda { XPB::Configuration.new([val]) }.
+          should.raise(XPB::InvalidConfigSettingValueError).
           message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
       end
     end

@@ -1,4 +1,4 @@
-module XPF
+module XPB
   module Matchers
     module Values
       class Regexp < Value(:expr, :regexp) #:nodoc:

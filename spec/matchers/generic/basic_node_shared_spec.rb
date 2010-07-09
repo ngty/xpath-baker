@@ -6,7 +6,7 @@ shared 'basic node matcher' do
       @name, @val = @name || :something, 'val1'
       @default = %|normalize-space(#{@name})="#{@val}"|
       @condition_should_equal = lambda do |config, expected|
-        @node_matcher.new(@name, @val, XPF::Configuration.new(config)).
+        @node_matcher.new(@name, @val, XPB::Configuration.new(config)).
           condition.should.equal(expected)
       end
     end
@@ -68,7 +68,7 @@ shared 'basic node matcher' do
       @name, @val = @name || :something, %w{val11}
       @default = check_tokens("normalize-space(#{@name})", [%|"#{@val}"|])
       @condition_should_equal = lambda do |config, expected|
-        @node_matcher.new(@name, @val, XPF::Configuration.new(config)).
+        @node_matcher.new(@name, @val, XPB::Configuration.new(config)).
           condition.should.equal(expected)
       end
     end
@@ -121,7 +121,7 @@ shared 'basic node matcher' do
       @name, @vals = @name || :something, %w{val11 val12 val13}
       @default = check_tokens("normalize-space(#{@name})", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal = lambda do |config, expected|
-        @node_matcher.new(@name, @vals, XPF::Configuration.new(config)).
+        @node_matcher.new(@name, @vals, XPB::Configuration.new(config)).
           condition.should.equal(expected)
       end
     end
@@ -179,10 +179,10 @@ shared 'basic node matcher' do
   describe '> generating condition (with value NIL_VALUE)' do
 
     before do
-      @name, @val = @name || :something, XPF::Matchers::Matchable::NIL_VALUE
+      @name, @val = @name || :something, XPB::Matchers::Matchable::NIL_VALUE
       @default = %|normalize-space(#{@name})|
       @condition_should_equal = lambda do |config, expected|
-        @node_matcher.new(@name, @val, XPF::Configuration.new(config)).
+        @node_matcher.new(@name, @val, XPB::Configuration.new(config)).
           condition.should.equal(expected)
       end
     end

@@ -1,29 +1,29 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 require File.join(File.dirname(__FILE__), 'spec_helpers')
-require 'xpf/html'
+require 'xpb/html'
 
-describe "XPF::HTML::Matchers::TD::Array" do
+describe "XPB::HTML::Matchers::TD::Array" do
 
   before do
-    XPF.configure(:reset) do |config|
+    XPB.configure(:reset) do |config|
       config.normalize_space = false
       config.case_sensitive = true
       config.axial_node = :self
       config.match_ordering = false
     end
     @condition_should_equal = lambda do |config, expected|
-      XPF::HTML::Matchers::TD::Array.new(@values, XPF::Configuration.new(config)).
+      XPB::HTML::Matchers::TD::Array.new(@values, XPB::Configuration.new(config)).
         condition.should.equal(expected)
     end
   end
 
   after do
-    XPF.configure(:reset)
+    XPB.configure(:reset)
   end
 
   describe '> generating condition (for string values)' do
 
-    extend XPF::Spec::Helpers::TD
+    extend XPB::Spec::Helpers::TD
 
     before do
       @values = %w{AWE SOME}
@@ -105,7 +105,7 @@ describe "XPF::HTML::Matchers::TD::Array" do
 
   describe '> generating condition (for array values)' do
 
-    extend XPF::Spec::Helpers::TD
+    extend XPB::Spec::Helpers::TD
 
     before do
       @values = [%w{AWE SOME}, %w{WONDER}]

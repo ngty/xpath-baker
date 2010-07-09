@@ -3,18 +3,18 @@ require File.join(File.dirname(__FILE__), 'basic_element_shared_data')
 shared 'a basic element' do
 
   before do
-    @xpf_global_configure = lambda do |settings|
-      XPF.configure do |config|
-        xpf_default_config.merge(settings).each {|k,v| config.send(:"#{k}=",v) }
+    @xpb_global_configure = lambda do |settings|
+      XPB.configure do |config|
+        xpb_default_config.merge(settings).each {|k,v| config.send(:"#{k}=",v) }
       end
     end
   end
 
   after do
-    XPF.configure(:reset)
+    XPB.configure(:reset)
   end
 
-  [xpf_single_match_attrs_args, xpf_multiple_match_attrs_args].flatten(1).
+  [xpb_single_match_attrs_args, xpb_multiple_match_attrs_args].flatten(1).
     each do |(debug, get_ids, match_attrs, config, expected)|
 
       args = config.empty? ? match_attrs : (match_attrs + [config])
@@ -26,17 +26,17 @@ shared 'a basic element' do
         ] do
 
         before do
-          @xpf_global_configure[{}]
+          @xpb_global_configure[{}]
         end
 
         should "return xpath as described" do
-          each_xpf do |x|
+          each_xpb do |x|
             x.send(@element, *args).should.equal(expected[@element,0])
           end
         end
 
         should "return xpath that match intended node(s)" do
-          each_xpf do |x|
+          each_xpb do |x|
             get_ids[@element, x.send(@element, *args)].should.equal(expected[@element,1])
           end
         end
@@ -44,19 +44,19 @@ shared 'a basic element' do
       end
     end
 
-  xpf_no_match_attrs_args.each do |debug, get_ids, config, expected|
+  xpb_no_match_attrs_args.each do |debug, get_ids, config, expected|
 
     if config.is_a?(Hash)
       describe "> no match attrs nor config specified (w global config as #{config.inspect}) (##{debug})" do
 
         should "return xpath as described" do
-          @xpf_global_configure[config]
-          each_xpf {|x| x.send(@element).should.equal(expected[@element,0]) }
+          @xpb_global_configure[config]
+          each_xpb {|x| x.send(@element).should.equal(expected[@element,0]) }
         end
 
         should "return xpath that match intended node(s)" do
-          @xpf_global_configure[config]
-          each_xpf{|x| get_ids[@element, x.send(@element)].should.equal(expected[@element,1]) }
+          @xpb_global_configure[config]
+          each_xpb{|x| get_ids[@element, x.send(@element)].should.equal(expected[@element,1]) }
         end
 
       end
@@ -65,7 +65,7 @@ shared 'a basic element' do
     describe "> only common config specified as #{config.inspect} (##{debug})" do
 
       before do
-        @xpf_global_configure[{
+        @xpb_global_configure[{
           :greedy => !(config.is_a?(Hash) ? config[:greedy] : config.include?('g')),
           :scope => '//awe/some/',
           :position => 9,
@@ -73,11 +73,11 @@ shared 'a basic element' do
       end
 
       should "return xpath as described" do
-        each_xpf {|x| x.send(@element, config).should.equal(expected[@element,0]) }
+        each_xpb {|x| x.send(@element, config).should.equal(expected[@element,0]) }
       end
 
       should "return xpath that match intended node(s)" do
-        each_xpf do |x|
+        each_xpb do |x|
           get_ids[@element, x.send(@element, config)].should.equal(expected[@element,1])
         end
       end

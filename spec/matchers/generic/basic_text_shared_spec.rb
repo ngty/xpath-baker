@@ -6,7 +6,7 @@ shared 'a basic text matcher' do
       @val = 'text-x'
       @default = %|normalize-space(.)="#{@val}"|
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new(@val, XPF::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new(@val, XPB::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
@@ -75,7 +75,7 @@ shared 'a basic text matcher' do
       @val = 'text-x'
       @default = check_tokens("normalize-space(.)", [%|"#{@val}"|])
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new([@val], XPF::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new([@val], XPB::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
@@ -126,7 +126,7 @@ shared 'a basic text matcher' do
       @vals = %w{val-x1 val-x2 val-x3}
       @default = check_tokens("normalize-space(.)", @vals.map{|v| %|"#{v}"| })
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new(@vals, XPF::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new(@vals, XPB::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
@@ -183,10 +183,10 @@ shared 'a basic text matcher' do
   describe '> generating condition (with value NIL_VALUE)' do
 
     before do
-      @val = XPF::Matchers::Matchable::NIL_VALUE
+      @val = XPB::Matchers::Matchable::NIL_VALUE
       @default = %|normalize-space(.)|
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new(@val, XPF::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new(@val, XPB::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
