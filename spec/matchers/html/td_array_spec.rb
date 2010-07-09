@@ -1,29 +1,29 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 require File.join(File.dirname(__FILE__), 'spec_helpers')
-require 'xpb/html'
+require 'xpath-baker/html'
 
-describe "XPB::HTML::Matchers::TD::Array" do
+describe "XPathBaker::HTML::Matchers::TD::Array" do
 
   before do
-    XPB.configure(:reset) do |config|
+    XPathBaker.configure(:reset) do |config|
       config.normalize_space = false
       config.case_sensitive = true
       config.axial_node = :self
       config.match_ordering = false
     end
     @condition_should_equal = lambda do |config, expected|
-      XPB::HTML::Matchers::TD::Array.new(@values, XPB::Configuration.new(config)).
+      XPathBaker::HTML::Matchers::TD::Array.new(@values, XPathBaker::Configuration.new(config)).
         condition.should.equal(expected)
     end
   end
 
   after do
-    XPB.configure(:reset)
+    XPathBaker.configure(:reset)
   end
 
   describe '> generating condition (for string values)' do
 
-    extend XPB::Spec::Helpers::TD
+    extend XPathBaker::Spec::Helpers::TD
 
     before do
       @values = %w{AWE SOME}
@@ -105,7 +105,7 @@ describe "XPB::HTML::Matchers::TD::Array" do
 
   describe '> generating condition (for array values)' do
 
-    extend XPB::Spec::Helpers::TD
+    extend XPathBaker::Spec::Helpers::TD
 
     before do
       @values = [%w{AWE SOME}, %w{WONDER}]

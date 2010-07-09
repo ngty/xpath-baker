@@ -1,9 +1,9 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "XPB::Configuration" do
+describe "XPathBaker::Configuration" do
 
   before do
-    XPB.configure(:reset)
+    XPathBaker.configure(:reset)
   end
 
   valid_axial_node_args = {
@@ -119,15 +119,15 @@ describe "XPB::Configuration" do
       :scope              => ['//', '//'],
       :position           => [nil, nil],
       :axial_node         => ['self::*', 'self::*'],
-      :element_matcher    => [XPB::Matchers::Element, 'XPB::Matchers::Element'],
-      :attribute_matcher  => [XPB::Matchers::Attribute, 'XPB::Matchers::Attribute'],
-      :text_matcher       => [XPB::Matchers::Text, 'XPB::Matchers::Text'],
-      :any_text_matcher   => [XPB::Matchers::AnyText, 'XPB::Matchers::AnyText'],
-      :literal_matcher    => [XPB::Matchers::Literal, 'XPB::Matchers::Literal'],
-      :group_matcher      => [XPB::Matchers::Group, 'XPB::Matchers::Group'],
+      :element_matcher    => [XPathBaker::Matchers::Element, 'XPathBaker::Matchers::Element'],
+      :attribute_matcher  => [XPathBaker::Matchers::Attribute, 'XPathBaker::Matchers::Attribute'],
+      :text_matcher       => [XPathBaker::Matchers::Text, 'XPathBaker::Matchers::Text'],
+      :any_text_matcher   => [XPathBaker::Matchers::AnyText, 'XPathBaker::Matchers::AnyText'],
+      :literal_matcher    => [XPathBaker::Matchers::Literal, 'XPathBaker::Matchers::Literal'],
+      :group_matcher      => [XPathBaker::Matchers::Group, 'XPathBaker::Matchers::Group'],
     }.each do |setting, (val, display_val)|
       should "have :#{setting} as #{display_val}" do
-        XPB.configure {|config| config.send(setting).should.equal val }
+        XPathBaker.configure {|config| config.send(setting).should.equal val }
       end
     end
   end
@@ -142,7 +142,7 @@ describe "XPB::Configuration" do
       :scope              => valid_scope_args,
     }.each do |setting, vals|
       should "be able to change :#{setting}" do
-        XPB.configure do |config|
+        XPathBaker.configure do |config|
           vals.each do |val|
             config.send(:"#{setting}=", val)
             config.send(:"#{setting}").should.equal val
@@ -152,7 +152,7 @@ describe "XPB::Configuration" do
     end
 
     should 'be able to change :position' do
-      XPB.configure do |config|
+      XPathBaker.configure do |config|
         valid_position_args.merge(nil => [nil, {}]).each do |val, (expected, test_meths)|
           config.position = val
           config.position.should.equal(expected)
@@ -162,7 +162,7 @@ describe "XPB::Configuration" do
     end
 
     should 'be able to change :comparison' do
-      XPB.configure do |config|
+      XPathBaker.configure do |config|
         valid_comparison_args.each do |val, (expected, test_meths)|
           config.comparison = val
         puts "before #{val} / #{expected} / #{config.comparison}"
@@ -173,7 +173,7 @@ describe "XPB::Configuration" do
     end
 
     should 'be able to change :axial_node' do
-      XPB.configure do |config|
+      XPathBaker.configure do |config|
         valid_axial_node_args.each do |val, expected|
           config.axial_node = val
           config.axial_node.should.equal expected
@@ -225,12 +225,12 @@ describe "XPB::Configuration" do
       ]
     }.each do |setting, args|
       vals, msg = args[0..-2], args[-1]
-      should "raise XPB::InvalidConfigSettingValueError when :#{setting} is assigned invalid value" do
-        XPB.configure do |config|
+      should "raise XPathBaker::InvalidConfigSettingValueError when :#{setting} is assigned invalid value" do
+        XPathBaker.configure do |config|
           full_msg = "Config setting :#{setting} must %s !!" % msg
           vals.each do |val|
             lambda { config.send(:"#{setting}=", val) }.
-              should.raise(XPB::InvalidConfigSettingValueError).
+              should.raise(XPathBaker::InvalidConfigSettingValueError).
               message.should.equal(full_msg)
           end
         end
@@ -249,39 +249,39 @@ describe "XPB::Configuration" do
       :comparison         => ['=', val = '=', val],
       :position           => [nil, 10, '[10]'],
       :axial_node         => ['self::*', val = 'following::*', val],
-      :attribute_matcher  => [XPB::Matchers::Attribute, val = Class.new{ A = 1 }, val],
-      :text_matcher       => [XPB::Matchers::Text, val = Class.new{ B = 1 }, val],
-      :literal_matcher    => [XPB::Matchers::Literal, val = Class.new{ C = 1 }, val],
-      :group_matcher      => [XPB::Matchers::Group, val = Class.new{ D = 1 }, val],
-      :any_text_matcher   => [XPB::Matchers::AnyText, val = Class.new{ E = 1 }, val],
-      :element_matcher    => [XPB::Matchers::Element, val = Class.new{ F = 1 }, val],
+      :attribute_matcher  => [XPathBaker::Matchers::Attribute, val = Class.new{ A = 1 }, val],
+      :text_matcher       => [XPathBaker::Matchers::Text, val = Class.new{ B = 1 }, val],
+      :literal_matcher    => [XPathBaker::Matchers::Literal, val = Class.new{ C = 1 }, val],
+      :group_matcher      => [XPathBaker::Matchers::Group, val = Class.new{ D = 1 }, val],
+      :any_text_matcher   => [XPathBaker::Matchers::AnyText, val = Class.new{ E = 1 }, val],
+      :element_matcher    => [XPathBaker::Matchers::Element, val = Class.new{ F = 1 }, val],
     }.each do |setting, (default_val, assigned_custom_val, expected_custom_val)|
 
       should "revert customized :#{setting} to default (when no block is given)" do
-        XPB.configure {|config| config.send(:"#{setting}=", assigned_custom_val) }
-        XPB.configure(:reset)
-        XPB.configure {|config| config.send(:"#{setting}").should.equal default_val }
+        XPathBaker.configure {|config| config.send(:"#{setting}=", assigned_custom_val) }
+        XPathBaker.configure(:reset)
+        XPathBaker.configure {|config| config.send(:"#{setting}").should.equal default_val }
       end
 
       should "set customized :#{setting} to specified value (when block is given)" do
-        XPB.configure(:reset) {|config| config.send(:"#{setting}=", assigned_custom_val) }
-        XPB.configure {|config| config.send(:"#{setting}").should.equal expected_custom_val }
+        XPathBaker.configure(:reset) {|config| config.send(:"#{setting}=", assigned_custom_val) }
+        XPathBaker.configure {|config| config.send(:"#{setting}").should.equal expected_custom_val }
       end
 
     end
   end
 
   describe '> configuring (with invalid mode)' do
-    should 'raise XPB::InvalidConfigModeError' do
-      lambda { XPB.configure(:watever) }.
-        should.raise(XPB::InvalidConfigModeError).
+    should 'raise XPathBaker::InvalidConfigModeError' do
+      lambda { XPathBaker.configure(:watever) }.
+        should.raise(XPathBaker::InvalidConfigModeError).
         message.should.equal('Config mode :watever is not supported !!')
     end
   end
 
   describe '> converting to hash' do
     should 'return configured settings as a hash' do
-      XPB::Configuration.to_hash.should.equal XPB::Configuration::DEFAULT_SETTINGS
+      XPathBaker::Configuration.to_hash.should.equal XPathBaker::Configuration::DEFAULT_SETTINGS
     end
   end
 
@@ -289,7 +289,7 @@ describe "XPB::Configuration" do
 
     should 'return false if something is not neither a Hash nor an Array' do
       [:something, 'something', /something/, Object.new].each do |something|
-        XPB::Configuration.describes_config?(something).should.be.false
+        XPathBaker::Configuration.describes_config?(something).should.be.false
       end
     end
 
@@ -299,15 +299,15 @@ describe "XPB::Configuration" do
     }.each do |type, (invalid, valid, empty)|
 
       should "return false if something is #{type} but not all contents are config settings" do
-        XPB::Configuration.describes_config?(invalid).should.be.false
+        XPathBaker::Configuration.describes_config?(invalid).should.be.false
       end
 
       should "return true if something is #{type} and all contents are config settings" do
-        XPB::Configuration.describes_config?(valid).should.be.true
+        XPathBaker::Configuration.describes_config?(valid).should.be.true
       end
 
       should "return true if something is an empty #{type}" do
-        XPB::Configuration.describes_config?(empty).should.be.true
+        XPathBaker::Configuration.describes_config?(empty).should.be.true
       end
 
     end
@@ -325,7 +325,7 @@ describe "XPB::Configuration" do
     }.each do |setting, val_vs_expected|
       should "be able to normalize :#{setting} setting" do
         val_vs_expected.each do |val, expected|
-          XPB::Configuration.normalize([val]).should.equal({setting => expected})
+          XPathBaker::Configuration.normalize([val]).should.equal({setting => expected})
         end
       end
     end
@@ -335,43 +335,43 @@ describe "XPB::Configuration" do
       :scope => valid_scope_args
     }.each do |setting, vals|
       should "be able to normalize :#{setting} setting" do
-        vals.each{|val| XPB::Configuration.normalize([val]).should.equal({setting => val}) }
+        vals.each{|val| XPathBaker::Configuration.normalize([val]).should.equal({setting => val}) }
       end
     end
 
     {
-      :group_matcher => [[XPB::Matchers::Group, 'XPB::Matchers::Group'], XPB::Matchers::Group],
-      :any_text_matcher => [[XPB::Matchers::AnyText, 'XPB::Matchers::AnyText'], XPB::Matchers::AnyText],
-      :element_matcher => [[XPB::Matchers::Element, 'XPB::Matchers::Element'], XPB::Matchers::Element],
-      :attribute_matcher => [[XPB::Matchers::Attribute, 'XPB::Matchers::Attribute'], XPB::Matchers::Attribute],
-      :literal_matcher => [[XPB::Matchers::Literal, 'XPB::Matchers::Literal'], XPB::Matchers::Literal],
-      :text_matcher => [[XPB::Matchers::Text, 'XPB::Matchers::Text'], XPB::Matchers::Text],
+      :group_matcher => [[XPathBaker::Matchers::Group, 'XPathBaker::Matchers::Group'], XPathBaker::Matchers::Group],
+      :any_text_matcher => [[XPathBaker::Matchers::AnyText, 'XPathBaker::Matchers::AnyText'], XPathBaker::Matchers::AnyText],
+      :element_matcher => [[XPathBaker::Matchers::Element, 'XPathBaker::Matchers::Element'], XPathBaker::Matchers::Element],
+      :attribute_matcher => [[XPathBaker::Matchers::Attribute, 'XPathBaker::Matchers::Attribute'], XPathBaker::Matchers::Attribute],
+      :literal_matcher => [[XPathBaker::Matchers::Literal, 'XPathBaker::Matchers::Literal'], XPathBaker::Matchers::Literal],
+      :text_matcher => [[XPathBaker::Matchers::Text, 'XPathBaker::Matchers::Text'], XPathBaker::Matchers::Text],
     }.each do |setting, (vals, expected)|
       should "be able to normalize :#{setting} setting" do
-        vals.each{|val| XPB::Configuration.normalize([val]).should.equal({setting => expected}) }
+        vals.each{|val| XPathBaker::Configuration.normalize([val]).should.equal({setting => expected}) }
       end
     end
 
     should 'be able to normalize :position setting' do
       valid_position_args.keys.each do |val|
-        XPB::Configuration.normalize([val]).should.equal({:position => val.to_s})
+        XPathBaker::Configuration.normalize([val]).should.equal({:position => val.to_s})
       end
     end
 
     should 'be able to normalize :comparison setting' do
       valid_comparison_args.keys.reject{|key| key.is_a?(Symbol) }.each do |val|
-        XPB::Configuration.normalize([val]).should.equal({:comparison => val})
+        XPathBaker::Configuration.normalize([val]).should.equal({:comparison => val})
       end
     end
 
-    should 'raise XPB::ConfigSettingNotSupportedError if setting cannot be normalized' do
+    should 'raise XPathBaker::ConfigSettingNotSupportedError if setting cannot be normalized' do
       [
         '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
         'awe/some', '//awe/some', 'awe/some', 'x', '!x'
       ].each do |val|
-        lambda { XPB::Configuration.normalize([val]) }.
-          should.raise(XPB::InvalidConfigSettingValueError).
+        lambda { XPathBaker::Configuration.normalize([val]) }.
+          should.raise(XPathBaker::InvalidConfigSettingValueError).
           message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
       end
     end
@@ -380,15 +380,15 @@ describe "XPB::Configuration" do
 
   describe '> normalizing non-default format configuration (w hash)' do
     should 'return arg as it is' do
-      XPB::Configuration.normalize(arg = {:aa => 1}).should.equal(arg)
+      XPathBaker::Configuration.normalize(arg = {:aa => 1}).should.equal(arg)
     end
   end
 
   describe '> normalizing non-default format configuration (w non array/hash)' do
-    should 'raise XPB::InvalidArgumentError' do
+    should 'raise XPathBaker::InvalidArgumentError' do
       [nil, Object.new, 1, '1'].each do |arg|
-        lambda { XPB::Configuration.normalize(arg) }.
-          should.raise(XPB::InvalidArgumentError).
+        lambda { XPathBaker::Configuration.normalize(arg) }.
+          should.raise(XPathBaker::InvalidArgumentError).
           message.should.equal('Config normalizing can ONLY be done for Array/Hash !!')
       end
     end
@@ -397,27 +397,27 @@ describe "XPB::Configuration" do
   describe '> getting a new configuration (w hash)' do
 
     should 'duplicate a copy of itself' do
-      configuration = XPB::Configuration.new({})
-      configuration.to_hash.should.equal XPB::Configuration.to_hash
-      configuration.object_id.should.not.equal XPB::Configuration
+      configuration = XPathBaker::Configuration.new({})
+      configuration.to_hash.should.equal XPathBaker::Configuration.to_hash
+      configuration.object_id.should.not.equal XPathBaker::Configuration
     end
 
     should 'have hash overrides its settings' do
-      orig_settings = XPB::Configuration.to_hash
+      orig_settings = XPathBaker::Configuration.to_hash
       normalize_space_val = {true => false, false => true}[orig_settings[:normalize_space]]
-      configuration = XPB::Configuration.new(:normalize_space => normalize_space_val)
+      configuration = XPathBaker::Configuration.new(:normalize_space => normalize_space_val)
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
 
-    should 'raise XPB::ConfigSettingNotSupportedError if unsupported setting is specified' do
-      lambda { XPB::Configuration.new(:hello => 'ee') }.
-        should.raise(XPB::ConfigSettingNotSupportedError).
+    should 'raise XPathBaker::ConfigSettingNotSupportedError if unsupported setting is specified' do
+      lambda { XPathBaker::Configuration.new(:hello => 'ee') }.
+        should.raise(XPathBaker::ConfigSettingNotSupportedError).
         message.should.equal('Config setting :hello is not supported !!')
     end
 
-    should 'raise XPB::InvalidConfigSettingValueError if setting is assigned invalid value' do
-      lambda { XPB::Configuration.new(:case_sensitive => 'ee') }.
-        should.raise(XPB::InvalidConfigSettingValueError).
+    should 'raise XPathBaker::InvalidConfigSettingValueError if setting is assigned invalid value' do
+      lambda { XPathBaker::Configuration.new(:case_sensitive => 'ee') }.
+        should.raise(XPathBaker::InvalidConfigSettingValueError).
         message.should.equal('Config setting :case_sensitive must be boolean true/false !!')
     end
 
@@ -426,15 +426,15 @@ describe "XPB::Configuration" do
   describe '> getting a new configuration (w array)' do
 
     should 'duplicate a copy of itself' do
-      configuration = XPB::Configuration.new([])
-      configuration.to_hash.should.equal XPB::Configuration.to_hash
-      configuration.object_id.should.not.equal XPB::Configuration
+      configuration = XPathBaker::Configuration.new([])
+      configuration.to_hash.should.equal XPathBaker::Configuration.to_hash
+      configuration.object_id.should.not.equal XPathBaker::Configuration
     end
 
     should 'have array overrides its settings' do
-      orig_settings = XPB::Configuration.to_hash
+      orig_settings = XPathBaker::Configuration.to_hash
       normalize_space_val = !orig_settings[:normalize_space]
-      configuration = XPB::Configuration.new([{:true => 'n', false => '!n'}[normalize_space_val]])
+      configuration = XPathBaker::Configuration.new([{:true => 'n', false => '!n'}[normalize_space_val]])
       configuration.to_hash.should.equal orig_settings.merge(:normalize_space => normalize_space_val)
     end
 
@@ -454,7 +454,7 @@ describe "XPB::Configuration" do
          'i' => [:include_inner_text, true],
         '!i' => [:include_inner_text, false],
       }.each do |shorthand, (setting, expected)|
-        XPB::Configuration.new([shorthand]).to_hash[setting].should.equal(expected)
+        XPathBaker::Configuration.new([shorthand]).to_hash[setting].should.equal(expected)
       end
     end
 
@@ -463,26 +463,26 @@ describe "XPB::Configuration" do
       :scope => valid_scope_args
     }.each do |setting, vals|
       should "be able to extract & assign :#{setting} setting" do
-        vals.each{|val| XPB::Configuration.new([val]).to_hash[setting].should.equal(val) }
+        vals.each{|val| XPathBaker::Configuration.new([val]).to_hash[setting].should.equal(val) }
       end
     end
 
     {
-      :group_matcher => [[XPB::Matchers::Group, 'XPB::Matchers::Group'], XPB::Matchers::Group],
-      :any_text_matcher => [[XPB::Matchers::AnyText, 'XPB::Matchers::AnyText'], XPB::Matchers::AnyText],
-      :element_matcher => [[XPB::Matchers::Element, 'XPB::Matchers::Element'], XPB::Matchers::Element],
-      :attribute_matcher => [[XPB::Matchers::Attribute, 'XPB::Matchers::Attribute'], XPB::Matchers::Attribute],
-      :literal_matcher => [[XPB::Matchers::Literal, 'XPB::Matchers::Literal'], XPB::Matchers::Literal],
-      :text_matcher => [[XPB::Matchers::Text, 'XPB::Matchers::Text'], XPB::Matchers::Text],
+      :group_matcher => [[XPathBaker::Matchers::Group, 'XPathBaker::Matchers::Group'], XPathBaker::Matchers::Group],
+      :any_text_matcher => [[XPathBaker::Matchers::AnyText, 'XPathBaker::Matchers::AnyText'], XPathBaker::Matchers::AnyText],
+      :element_matcher => [[XPathBaker::Matchers::Element, 'XPathBaker::Matchers::Element'], XPathBaker::Matchers::Element],
+      :attribute_matcher => [[XPathBaker::Matchers::Attribute, 'XPathBaker::Matchers::Attribute'], XPathBaker::Matchers::Attribute],
+      :literal_matcher => [[XPathBaker::Matchers::Literal, 'XPathBaker::Matchers::Literal'], XPathBaker::Matchers::Literal],
+      :text_matcher => [[XPathBaker::Matchers::Text, 'XPathBaker::Matchers::Text'], XPathBaker::Matchers::Text],
     }.each do |setting, (vals, expected)|
       should "be able to extract & assign :#{setting} setting" do
-        vals.each{|val| XPB::Configuration.new([val]).to_hash[setting].should.equal(expected) }
+        vals.each{|val| XPathBaker::Configuration.new([val]).to_hash[setting].should.equal(expected) }
       end
     end
 
     should 'be able to extract & assign :position setting' do
       valid_position_args.each do |val, expected|
-        position = XPB::Configuration.new([val]).to_hash[:position]
+        position = XPathBaker::Configuration.new([val]).to_hash[:position]
         position.should.equal(expected[0])
         expected[1].each{|meth, _val| position.send(meth).should.equal(_val) }
       end
@@ -490,20 +490,20 @@ describe "XPB::Configuration" do
 
     should 'be able to extract & assign :comparison setting' do
       valid_comparison_args.reject{|key,val| key.is_a?(Symbol) }.each do |val, expected|
-        comparison = XPB::Configuration.new([val]).to_hash[:comparison]
+        comparison = XPathBaker::Configuration.new([val]).to_hash[:comparison]
         comparison.should.equal(expected[0])
         expected[1].each{|meth, _val| comparison.send(meth).should.equal(_val) }
       end
     end
 
-    should 'raise XPB::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
+    should 'raise XPathBaker::ConfigSettingNotSupportedError if setting cannot be identified & assigned' do
       [
         '$', '!$', '^', '!^', '0^', '!0^', '0$', '!0$', 'aa', '02', '!=2',
         '!>=02', '!-2', '!2^$', '2$^', '!!2', 'aa', 'self::watever:', 'aa::',
         'awe/some', '//awe/some', 'awe/some', 'x', '!x'
       ].each do |val|
-        lambda { XPB::Configuration.new([val]) }.
-          should.raise(XPB::InvalidConfigSettingValueError).
+        lambda { XPathBaker::Configuration.new([val]) }.
+          should.raise(XPathBaker::InvalidConfigSettingValueError).
           message.should.equal("Config setting value '#{val}' cannot be mapped to any supported settings !!")
       end
     end

@@ -4,11 +4,11 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "xpb"
-    gem.summary = %Q{Like it or not, xpb builds xpath for you}
-    gem.description = %Q{Writing xpath can be painful at times, XPB builds xpath for you}
+    gem.name = "xpath-baker"
+    gem.summary = %Q{Like it or not, xpath-baker builds xpath for you}
+    gem.description = %Q{Writing xpath can be painful at times, XPathBaker builds xpath for you}
     gem.email = "ngty77@gmail.com"
-    gem.homepage = "http://github.com/ngty/xpb"
+    gem.homepage = "http://github.com/ngty/xpath-baker"
     gem.authors = ["NgTzeYang"]
     gem.add_dependency 'reginald', '>= 0.2.2'
     gem.add_development_dependency "nokogiri", ">= 1.4.1"
@@ -74,7 +74,7 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "xpb #{version}"
+  rdoc.title = "xpath-baker #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

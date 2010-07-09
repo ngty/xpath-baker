@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
   module HTML
     module Matchers
       module TR

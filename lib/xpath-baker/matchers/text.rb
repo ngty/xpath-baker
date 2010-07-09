@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
   module Matchers
     class Text < Matcher(:value, :config)
       def condition

@@ -1,14 +1,14 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 require File.join(File.dirname(__FILE__), '..', '..', 'matchers', 'html', 'spec_helpers')
 require File.join(File.dirname(__FILE__), '..', 'generic', 'basic_element_shared_spec')
-require 'xpb/html'
+require 'xpath-baker/html'
 
 describe "Generating xpath for html <tr/>" do
 
-  extend XPB::Spec::Helpers::TD
+  extend XPathBaker::Spec::Helpers::TD
 
   before do
-    XPB.configure(:reset) do |config|
+    XPathBaker.configure(:reset) do |config|
       config.scope = '//'
       config.normalize_space = false
       config.case_sensitive = true
@@ -18,7 +18,7 @@ describe "Generating xpath for html <tr/>" do
   end
 
   after do
-    XPB.configure(:reset)
+    XPathBaker.configure(:reset)
   end
 
   [
@@ -153,11 +153,11 @@ describe "Generating xpath for html <tr/>" do
       end
 
       should 'return xpath as described' do
-        each_xpb {|xpb| xpb.send(:tr, match_attrs, config).should.equal(expected_path) }
+        each_baker {|baker| baker.send(:tr, match_attrs, config).should.equal(expected_path) }
       end
 
       should "return xpath that match intended node(s)" do
-        each_xpb {|xpb| get_ids[xpb.send(:tr, match_attrs, config)].should.equal(expected_ids) }
+        each_baker {|baker| get_ids[baker.send(:tr, match_attrs, config)].should.equal(expected_ids) }
       end
 
     end

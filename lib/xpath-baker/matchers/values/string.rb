@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
   module Matchers
     module Values
       module String #:nodoc:

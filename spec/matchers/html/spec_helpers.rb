@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
   module Spec
     module Helpers
 

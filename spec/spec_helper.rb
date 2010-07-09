@@ -6,14 +6,14 @@ Bacon.summary_on_exit
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'xpb'
+require 'xpath-baker'
 
-module XPB
+module XPathBaker
   module Spec
     module Matchers
 
       def self.new_klass(*attrs)
-        (klass = Class.new(XPB::Matchers::Matcher(*attrs))).send(:define_method, :condition) do
+        (klass = Class.new(XPathBaker::Matchers::Matcher(*attrs))).send(:define_method, :condition) do
           '((%s:%s:%s))' % [
             self.class.to_s.downcase.split('::')[-2..-1],
             respond_to?(:matchers) && matchers.empty? ? nil :
@@ -40,18 +40,18 @@ module XPB
 end
 
 def merge_config(config1, config2)
-  XPB::Configuration.new(
-    XPB::Configuration.new(config1).to_hash.merge(config2)
+  XPathBaker::Configuration.new(
+    XPathBaker::Configuration.new(config1).to_hash.merge(config2)
   )
 end
 
 def diff_config(config1, config2=nil)
-  config2 ||= XPB::Configuration.new({})
+  config2 ||= XPathBaker::Configuration.new({})
   (config1.to_hash.to_a - config2.to_hash.to_a).map(&:inspect) # .inject({}){|h,(k,v)| h.merge(k => v) }
 end
 
 def dump_config(config)
-  diff_config(config.is_a?(Hash) ? XPB::Configuration.new(config) : config)
+  diff_config(config.is_a?(Hash) ? XPathBaker::Configuration.new(config) : config)
 end
 
 def diffentiable_val(val)
@@ -67,8 +67,8 @@ def translate_casing(expr)
   end
 end
 
-def each_xpb(&blk)
-  [XPB, send(:xpb)].each {|r| yield(r) }
+def each_baker(&blk)
+  [XPathBaker].each {|r| yield(r) }
 end
 
 def check_tokens(expr, tokens, enforce_ordering=true)
@@ -89,8 +89,8 @@ def check_tokens(expr, tokens, enforce_ordering=true)
 end
 
 def valid_config_settings_args(*args)
-  mx = lambda{|name| XPB::Spec::Matchers::X.const_get(name) }
-  my = lambda{|name| XPB::Spec::Matchers::Y.const_get(name) }
+  mx = lambda{|name| XPathBaker::Spec::Matchers::X.const_get(name) }
+  my = lambda{|name| XPathBaker::Spec::Matchers::Y.const_get(name) }
   {
     :greedy             => [{:greedy => true}, {:greedy => false}, %w{g}, %w{!g}],
     :match_ordering     => [{:match_ordering => true}, {:match_ordering => false}, %w{o}, %w{!o}],

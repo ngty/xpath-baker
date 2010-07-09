@@ -1,8 +1,8 @@
 require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
-describe 'XPB::Matchers::AnyText' do
+describe 'XPathBaker::Matchers::AnyText' do
 
-  before { @text_matcher = XPB::Matchers::AnyText }
+  before { @text_matcher = XPathBaker::Matchers::AnyText }
 
   describe '> generating condition (with string value)' do
 
@@ -10,7 +10,7 @@ describe 'XPB::Matchers::AnyText' do
       @val = 'text-x'
       @default = %|(normalize-space(text())="#{@val}") or (normalize-space(.)="#{@val}")|
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new(@val, XPB::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new(@val, XPathBaker::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
@@ -81,7 +81,7 @@ describe 'XPB::Matchers::AnyText' do
       tokens = %w{text() .}.map{|s| check_tokens("normalize-space(#{s})", [%|"#{@val}"|]) }
       @default = '(%s) or (%s)' % tokens
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new([@val], XPB::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new([@val], XPathBaker::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
@@ -128,7 +128,7 @@ describe 'XPB::Matchers::AnyText' do
       tokens = %w{text() .}.map{|s| check_tokens("normalize-space(#{s})", @vals.map{|v| %|"#{v}"| }) }
       @default = '(%s) or (%s)' % tokens
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new(@vals, XPB::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new(@vals, XPathBaker::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 
@@ -187,10 +187,10 @@ describe 'XPB::Matchers::AnyText' do
   describe '> generating condition (with value NIL_VALUE)' do
 
     before do
-      @val = XPB::Matchers::Matchable::NIL_VALUE
+      @val = XPathBaker::Matchers::Matchable::NIL_VALUE
       @default = '(%s) or (%s)' % %w{text() .}.map{|s| %|normalize-space(#{s})| }
       @condition_should_equal = lambda do |config, expected|
-        @text_matcher.new(@val, XPB::Configuration.new(config)).condition.should.equal(expected)
+        @text_matcher.new(@val, XPathBaker::Configuration.new(config)).condition.should.equal(expected)
       end
     end
 

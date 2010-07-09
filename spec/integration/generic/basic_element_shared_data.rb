@@ -1,4 +1,4 @@
-def xpb_multiple_match_attrs_args
+def multiple_match_attrs_args
   [
   # /////////////////////////////////////////////////////////////////////////////
   # >> [match_attrs], [match_attrs], {config}|[config]
@@ -90,12 +90,12 @@ def xpb_multiple_match_attrs_args
     ],
   ].map do |debug, content, match_attrs, configs, expected|
     configs.map do |config|
-      [debug, xpb_ids_proc(content), match_attrs, config, xpb_expected_proc(expected)]
+      [debug, ids_proc(content), match_attrs, config, expected_proc(expected)]
     end
   end.flatten(1)
 end
 
-def xpb_single_match_attrs_args
+def single_match_attrs_args
   [
   # /////////////////////////////////////////////////////////////////////////////
   # >> [match_attrs], {config}|[config]
@@ -197,12 +197,12 @@ def xpb_single_match_attrs_args
     ],
   ].map do |debug, content, match_attrs, configs, expected|
     configs.map do |config|
-      [debug, xpb_ids_proc(content), match_attrs, config, xpb_expected_proc(expected)]
+      [debug, ids_proc(content), match_attrs, config, expected_proc(expected)]
     end
   end.flatten(1)
 end
 
-def xpb_no_match_attrs_args
+def no_match_attrs_args
   [
   # ///////////////////////////////////////////////////////////////////////////////////////
   # {:greedy => ...}
@@ -263,12 +263,12 @@ def xpb_no_match_attrs_args
     ],
   ].map do |debug, content, configs, expected|
     configs.map do |config|
-      [debug, xpb_ids_proc(content), config, xpb_expected_proc(expected)]
+      [debug, ids_proc(content), config, expected_proc(expected)]
     end
   end.flatten(1)
 end
 
-def xpb_default_config
+def default_config
   {
     :greedy             => true,
     :case_sensitive     => true,
@@ -279,23 +279,23 @@ def xpb_default_config
     :position           => nil,
     :axial_node         => 'self::*',
     # NOTE: The followings are working, but not covered yet !!
-    :element_matcher    => XPB::Matchers::Element,
-    :attribute_matcher  => XPB::Matchers::Attribute,
-    :text_matcher       => XPB::Matchers::Text,
-    :any_text_matcher   => XPB::Matchers::AnyText,
-    :literal_matcher    => XPB::Matchers::Literal,
-    :group_matcher      => XPB::Matchers::Group,
+    :element_matcher    => XPathBaker::Matchers::Element,
+    :attribute_matcher  => XPathBaker::Matchers::Attribute,
+    :text_matcher       => XPathBaker::Matchers::Text,
+    :any_text_matcher   => XPathBaker::Matchers::AnyText,
+    :literal_matcher    => XPathBaker::Matchers::Literal,
+    :group_matcher      => XPathBaker::Matchers::Group,
   }
 end
 
-def xpb_ids_proc(content)
+def ids_proc(content)
   lambda do |element, path|
     Nokogiri::XML("<root>%s</root>" % content % ([element]*50)).xpath(path).
       map{|node| node.attribute('id') }.map(&:to_s).sort
   end
 end
 
-def xpb_expected_proc(expected)
+def expected_proc(expected)
   lambda do |element, i|
     i.zero? ? (expected[i] % ([element]*50)) : expected[i]
   end

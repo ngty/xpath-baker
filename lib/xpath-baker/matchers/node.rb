@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
   module Matchers
     class Node < Matcher(:name, :value, :config)
       def condition

@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
   module HTML
     module Table
 

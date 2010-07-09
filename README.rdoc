@@ -1,4 +1,4 @@
-= xpb
+= xpath-baker
 
 Description goes here.
 

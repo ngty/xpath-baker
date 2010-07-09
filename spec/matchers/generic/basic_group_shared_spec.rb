@@ -1,24 +1,24 @@
 shared "basic group matcher" do
 
   before do
-    XPB.configure(:reset) do |config|
-      config.element_matcher = XPB::Spec::Matchers::X::Element
-      config.attribute_matcher = XPB::Spec::Matchers::X::Attribute
-      config.text_matcher = XPB::Spec::Matchers::X::Text
-      config.any_text_matcher = XPB::Spec::Matchers::X::AnyText
-      config.literal_matcher = XPB::Spec::Matchers::X::Literal
+    XPathBaker.configure(:reset) do |config|
+      config.element_matcher = XPathBaker::Spec::Matchers::X::Element
+      config.attribute_matcher = XPathBaker::Spec::Matchers::X::Attribute
+      config.text_matcher = XPathBaker::Spec::Matchers::X::Text
+      config.any_text_matcher = XPathBaker::Spec::Matchers::X::AnyText
+      config.literal_matcher = XPathBaker::Spec::Matchers::X::Literal
     end
   end
 
   after do
-    XPB.configure(:reset)
+    XPathBaker.configure(:reset)
   end
 
   describe '> generating condition' do
 
     before do
       @condition = lambda do |match_attrs, config|
-        @matcher_klass.new(match_attrs, XPB::Configuration.new(config)).condition
+        @matcher_klass.new(match_attrs, XPathBaker::Configuration.new(config)).condition
       end
       @condition_should_equal = lambda do |match_attrs, config, expected|
         @condition[match_attrs, config].should.equal(expected)
@@ -54,11 +54,11 @@ shared "basic group matcher" do
     hash_match_attrs = {:e1 => 've1', :@a1 => 'va1', :* => 'v:*', :+ => 'v:+', :- => 'v:-', :~ => 'v:~'}
 
     {
-      :text_matcher => [XPB::Spec::Matchers::Y::Text, %w{y:text:XPB_NIL_VALUE}, %w{y:text:v:+ y:text:v:- y:text:v:~}],
-      :any_text_matcher => [XPB::Spec::Matchers::Y::AnyText, %w{y:anytext:XPB_NIL_VALUE}, %w{y:anytext:v:*}],
-      :element_matcher => [XPB::Spec::Matchers::Y::Element, %w{y:element:e1,XPB_NIL_VALUE}, %w{y:element:e1,ve1}],
-      :attribute_matcher => [XPB::Spec::Matchers::Y::Attribute, %w{y:attribute:@a1,XPB_NIL_VALUE}, %w{y:attribute:@a1,va1}],
-      :literal_matcher => [XPB::Spec::Matchers::Y::Literal, %w{y:literal:l1}, %w{}]
+      :text_matcher => [XPathBaker::Spec::Matchers::Y::Text, %w{y:text:XPathBaker_NIL_VALUE}, %w{y:text:v:+ y:text:v:- y:text:v:~}],
+      :any_text_matcher => [XPathBaker::Spec::Matchers::Y::AnyText, %w{y:anytext:XPathBaker_NIL_VALUE}, %w{y:anytext:v:*}],
+      :element_matcher => [XPathBaker::Spec::Matchers::Y::Element, %w{y:element:e1,XPathBaker_NIL_VALUE}, %w{y:element:e1,ve1}],
+      :attribute_matcher => [XPathBaker::Spec::Matchers::Y::Attribute, %w{y:attribute:@a1,XPathBaker_NIL_VALUE}, %w{y:attribute:@a1,va1}],
+      :literal_matcher => [XPathBaker::Spec::Matchers::Y::Literal, %w{y:literal:l1}, %w{}]
     }.each do |setting, (klass, expected_array_conds, expected_hash_conds)|
       should "return expr that reflect specified :#{setting}" do
         [{setting => klass}, [klass.to_s], [klass]].each do |config|
@@ -75,7 +75,7 @@ shared "basic group matcher" do
 
     replacement_args = lambda do |val, config1, config2|
       [
-        val || XPB::Matchers::Matchable::NIL_VALUE.to_s,
+        val || XPathBaker::Matchers::Matchable::NIL_VALUE.to_s,
         diff_config(merge_config(config1, config2)).to_s
       ]
     end

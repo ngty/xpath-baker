@@ -1,23 +1,23 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe 'XPB::HTML' do
+describe 'XPathBaker::HTML' do
 
-  describe "> requiring 'xpb/html'" do
+  describe "> requiring 'xpath-baker/html'" do
 
 #    before do
-#      XPB.send(:remove_const, :MODE) if XPB.const_defined?(:MODE)
+#      XPathBaker.send(:remove_const, :MODE) if XPathBaker.const_defined?(:MODE)
 #    end
 #
-#    should 'raise XPB::ModeAlreadySpecifiedError when XPB::MODE is already declared' do
-#      XPB.const_set(:MODE, :another)
-#      lambda { require 'xpb/html' }.
-#        should.raise(XPB::ModeAlreadyDeclaredError).
+#    should 'raise XPathBaker::ModeAlreadySpecifiedError when XPathBaker::MODE is already declared' do
+#      XPathBaker.const_set(:MODE, :another)
+#      lambda { require 'xpath-baker/html' }.
+#        should.raise(XPathBaker::ModeAlreadyDeclaredError).
 #        message.should.equal('Mode has already been declared as :another !!')
 #    end
 #
-    should 'set XPB::MODE as :html' do
-      require 'xpb/html'
-      XPB::MODE.should.equal :html
+    should 'set XPathBaker::MODE as :html' do
+      require 'xpath-baker/html'
+      XPathBaker::MODE.should.equal :html
     end
 
   end

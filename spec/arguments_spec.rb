@@ -1,10 +1,10 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 require File.join(File.dirname(__FILE__), 'arguments_data')
 
-describe 'XPB::Arguments' do
+describe 'XPathBaker::Arguments' do
 
   before do
-    class << XPB::Arguments
+    class << XPathBaker::Arguments
       alias_method :orig_new_config, :new_config
       alias_method :orig_new_matcher, :new_matcher
       def new_config(config) ; config ; end
@@ -15,18 +15,18 @@ describe 'XPB::Arguments' do
         matcher
       end
     end
-    @parse = lambda {|args| XPB::Arguments.parse(*args) }
-    @parse_w_config = lambda {|args, config| XPB::Arguments.parse_with_config(args, config) }
+    @parse = lambda {|args| XPathBaker::Arguments.parse(*args) }
+    @parse_w_config = lambda {|args, config| XPathBaker::Arguments.parse_with_config(args, config) }
   end
 
   after do
-    class << XPB::Arguments
+    class << XPathBaker::Arguments
       alias_method :new_matcher, :orig_new_matcher
       alias_method :new_config, :orig_new_config
     end
   end
 
-  normalize_config = lambda{|arg| XPB::Configuration.normalize(arg) }
+  normalize_config = lambda{|arg| XPathBaker::Configuration.normalize(arg) }
 
   describe '> parsing (w zero args)' do
 
@@ -62,7 +62,7 @@ describe 'XPB::Arguments' do
   end
 
   [{:position => 9, :scope => '//awe/some/'}, %w{9 //awe/some/}, [], {}].each do |common_config|
-    xpb_valid_permutated_arguments.each do |args, expected|
+    valid_permutated_arguments.each do |args, expected|
 
       describe "> parsing valid args %s" % (
         common_config.empty? ? args.map(&:inspect).join(', ') :
@@ -93,11 +93,11 @@ describe 'XPB::Arguments' do
 
   {'w'  => {:position => 9}, 'wo' => {}}.each do |mode, default_config|
     describe "> parsing invalid args (#{mode} custom default config)" do
-      xpb_invalid_permutated_arguments.each do |args|
+      invalid_permutated_arguments.each do |args|
 
-        should "raise XPB::InvalidArgumentError w #{args.inspect}" do
+        should "raise XPathBaker::InvalidArgumentError w #{args.inspect}" do
           lambda { @parse[args + (default_config.empty? ? [] : [default_config])] }.
-            should.raise(XPB::InvalidArgumentError).
+            should.raise(XPathBaker::InvalidArgumentError).
             message.should.equal([
               'Expecting arguments to contain any permutations of the following fragments: ',
               ' (1) [{:attr1 => ..., ...}, {CONFIG}] and/or ',

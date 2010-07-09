@@ -1,4 +1,4 @@
-module XPB
+module XPathBaker
 
   class InvalidArgumentError < Exception ; end
 
